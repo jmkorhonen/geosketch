@@ -1,0 +1,229 @@
+# GeoSketch
+
+GeoSketch is a single-file browser tool for quick OSINT map sketching, simple GIS-style visualisation, and lightweight map annotation. It is built around `osint_map_tool.html` and is intended to run without installing a desktop GIS package or setting up a project server.
+
+Open the HTML file in a modern browser, choose a background map, add objects, save the project as GeoJSON, and reload it later from the same file format.
+
+## Current Status
+
+GeoSketch is currently an active pre-release tool. It is useful for field-style sketching and visual analysis, but it should be treated as a planning and OSINT visualisation aid rather than a survey-grade GIS package.
+
+Current version: `v0.6.16`
+
+## Requirements
+
+- A modern desktop browser, preferably current Firefox, Chromium, Chrome, or Edge.
+- Internet access for map tiles, geocoding search, and the CDN-hosted JavaScript libraries used by the standalone HTML file.
+- No local install step is required.
+
+The app stores autosave data in browser `localStorage`, so autosaves are local to the browser and profile where the file is opened.
+
+## Quick Start
+
+1. Open `osint_map_tool.html` in your browser.
+2. Set a map title at the top-left. The title is also used as the default export filename.
+3. Use **Map Search** to find a place, address, or coordinate.
+4. Use **Add Object** to create points, units, lines, polygons, circles, or text boxes.
+5. Select an object on the map or in the Layers list to edit its details in the right pane.
+6. Save the project with **Save project as GeoJSON**.
+7. Use **Load project from GeoJSON** to continue later.
+
+The **Load Sample** button creates a small example map that demonstrates common object types.
+
+## Main Concepts
+
+### Background Map
+
+GeoSketch supports selectable background layers with opacity controls:
+
+- OpenStreetMap/CARTO raster tiles
+- OpenTopoMap
+- Esri satellite imagery
+
+Tile availability depends on the provider, network conditions, browser restrictions, and the provider's access policies.
+
+### Layers
+
+Objects live inside drawing layers. Layers can be:
+
+- selected as the active drawing layer
+- renamed directly from the layer name field
+- shown or hidden
+- collapsed
+- reordered
+- deleted with confirmation
+
+Use layers to separate hypotheses, source types, time periods, units, or alternative interpretations.
+
+### Objects
+
+GeoSketch supports:
+
+- **Point**: simple point markers with configurable marker shape, colour, opacity, and size.
+- **Unit**: APP-6 style military symbols generated from SIDC fields using `milsymbol`.
+- **Line**: routes, axes, boundaries, and other linear features.
+- **Polygon**: areas of interest, zones, and bounded regions.
+- **Circle**: range circles and circular areas.
+- **Text box**: free map annotations.
+
+Objects can have labels, notes, measurements, styles, buffers, visibility toggles, and layer assignment. Locked objects can still be copied or duplicated, but are protected from accidental editing.
+
+## Coordinates
+
+GeoSketch accepts and displays multiple coordinate styles:
+
+- decimal degrees
+- DMS-style latitude/longitude
+- MGRS
+
+Coordinate handling is controlled in the Settings panel. Search, Create from coordinates, and Edit coordinates are designed to accept any recognised coordinate format.
+
+The bottom status bar shows live cursor coordinates. `Shift+C` copies the cursor position in the currently selected coordinate format.
+
+## Drawing and Editing
+
+Use the Add Object buttons or keyboard shortcuts:
+
+- `1`: point
+- `2`: line
+- `3`: polygon
+- `4`: circle
+- `5`: text box
+- `6`: unit
+- `/`: focus search
+- `E`: edit points on selected line/polygon/circle
+- `M`: move selected object
+- `Enter`: finish the current drawing
+- `Delete`: delete selected object, with confirmation
+- `Ctrl+Z`: undo
+- `Ctrl+S`: save project as GeoJSON
+- `Ctrl+C`: copy selected object
+- `Ctrl+V`: paste object at cursor
+- `C`: copy selected object coordinates
+- `Shift+C`: copy cursor coordinates
+
+When drawing lines and polygons, dynamic measurements are shown while drawing. Polygon measurements include area, perimeter, and individual segment lengths.
+
+## Buffers and Measurements
+
+Objects can show measurements on the map and in the object pane. Lines and polygons can have buffers; point and circle-style range objects can be used for distance visualisation.
+
+Buffers are attached to the object that created them. If the object is edited or moved, the buffer updates with it. Buffer style can be edited separately from the source object.
+
+GeoSketch uses WGS84 coordinates and geodesic calculations from Leaflet and Turf.js where practical. Range circles and buffers are generated as geographic shapes rather than simple screen-pixel overlays. This is suitable for OSINT sketching and planning, not legal boundary work, engineering survey, fire-control computation, or navigation safety.
+
+## Units and APP-6 Symbols
+
+Unit objects use APP-6 style symbols generated by `milsymbol`. The unit picker builds numeric SIDCs from fields such as:
+
+- identity
+- symbol set
+- main icon
+- echelon/amplifier
+- entity type and subtype
+- headquarters/task force/feint modifiers
+- reinforced/reduced modifier
+- additional mobility and capability modifiers
+
+GeoSketch stores the generated SIDC in the saved project data so exported and reloaded units retain their symbol configuration.
+
+Unit fields include:
+
+- Unique designation
+- Name
+- Higher formation
+- Notes
+
+The Layers view displays units as `unique designation (name)` when a name is available.
+
+## Import and Export
+
+### Save Project as GeoJSON
+
+Use this for normal project save/load. GeoSketch stores object geometry plus app-specific styling and metadata inside GeoJSON feature properties.
+
+### Save Selected Layers as GeoJSON
+
+Exports visible layers separately, using safe filenames derived from layer names.
+
+### Load Project from GeoJSON
+
+Loads a saved GeoSketch project.
+
+### Load GeoJSON as Layer/Template
+
+Loads external GeoJSON data as map layers/templates. This is useful for background overlays, reusable object sets, or prebuilt working maps.
+
+### Export Excel
+
+Exports an object table for review and reporting.
+
+### Screenshot
+
+Exports the visible map as an image. Browser security rules and tile provider CORS settings can affect screenshot output.
+
+### HTML Map
+
+Exports an interactive HTML map containing the current project state. The exported map still depends on external libraries and map tile providers unless those resources are separately mirrored or bundled.
+
+## Autosave and Recovery
+
+GeoSketch autosaves to browser `localStorage`. Use **Restore Autosave** to recover the current browser's saved work.
+
+Autosave is not a substitute for saving project GeoJSON files. Save important work explicitly.
+
+## Built-In Checks
+
+The **Run Checks** button performs lightweight browser-side diagnostics:
+
+- GeoJSON export parse check
+- project save-state round-trip check
+- per-layer GeoJSON export check
+- geometry export check
+- measurement and buffer generation checks
+
+This is a smoke test, not a full QA suite.
+
+## Privacy and Operational Notes
+
+GeoSketch runs locally in the browser, but some features contact external services:
+
+- background maps request tiles from the selected tile provider
+- map search uses OpenStreetMap/Nominatim-style search
+- JavaScript libraries are loaded from public CDNs
+
+Avoid entering sensitive operational information into external search services or tile requests if that would create risk. For sensitive use, consider hosting libraries, geocoding, and map tiles in a controlled environment.
+
+## Known Limitations
+
+- The app is a single HTML file, so very large projects may become slow.
+- Browser screenshot export can be affected by CORS restrictions on map tiles.
+- GeoJSON exports include GeoSketch-specific styling metadata that other GIS tools may ignore.
+- APP-6 symbol support is intentionally practical and UI-driven, not a full doctrinal validation engine.
+- Measurements are appropriate for sketching and planning, not survey-grade work.
+- Interactive HTML exports are portable as files, but still need internet access for external dependencies and tiles.
+
+## Acknowledgements
+
+GeoSketch is possible because of excellent open-source mapping and web tooling:
+
+- [Leaflet](https://leafletjs.com/) for browser map rendering.
+- [Leaflet-Geoman](https://geoman.io/leaflet-geoman) for geometry editing interactions.
+- [Turf.js](https://turfjs.org/) for geospatial calculations, buffers, distances, areas, and GeoJSON helpers.
+- [milsymbol](https://github.com/spatialillusions/milsymbol), created by Måns Beckman / Spatial Illusions, for generating APP-6 / MIL-STD-2525 style unit symbols in the browser.
+- [SheetJS](https://sheetjs.com/) for Excel export.
+- [html2canvas](https://html2canvas.hertzen.com/) and [dom-to-image-more](https://github.com/1904labs/dom-to-image-more) for browser-side image export support.
+- [OpenStreetMap](https://www.openstreetmap.org/) contributors for map data and the wider open mapping ecosystem.
+- [OpenTopoMap](https://opentopomap.org/) and SRTM contributors for topographic map context.
+- [Esri World Imagery](https://www.esri.com/) for satellite imagery tiles where available.
+- [CARTO](https://carto.com/) for raster tile styling used by the OpenStreetMap background option.
+
+Please respect the licenses, attribution requirements, tile usage policies, and rate limits of all upstream data and library providers.
+
+## File Layout
+
+- `osint_map_tool.html`: the GeoSketch application.
+- `README.md`: this guide.
+
+Other files in this workspace may belong to earlier experiments or adjacent tooling and are not required for basic GeoSketch use.
+
