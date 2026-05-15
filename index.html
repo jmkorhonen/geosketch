@@ -568,6 +568,30 @@
       gap: 6px;
     }
 
+    .button-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 28px;
+      padding: 3px 7px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: var(--panel-2);
+      color: var(--text);
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .button-link:hover {
+      border-color: var(--accent);
+    }
+
+    .side.left .button-link {
+      min-height: 24px;
+      padding: 2px 6px;
+      font-size: 12px;
+    }
+
     .text-style-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -695,13 +719,19 @@
     }
 
     .text-annotation {
+      display: block;
+      width: max-content;
       min-width: 40px;
+      max-width: min(320px, calc(100vw - 40px));
       padding: 4px 6px;
       background: rgba(255, 250, 230, 0.92);
       color: #161616;
       border: 1px solid rgba(0,0,0,0.28);
       border-radius: 4px;
       font-size: 12px;
+      line-height: 1.25;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
       box-shadow: 0 2px 8px rgba(0,0,0,0.24);
     }
 
@@ -791,7 +821,7 @@
     <button id="rightTab" class="collapse-tab" title="Collapse right panel"></button>
     <aside class="side left">
       <div class="brand">
-        <h1>GeoSketch <span class="version">v0.6.16</span></h1>
+        <h1>GeoSketch <span class="version">v1.0</span></h1>
         <button id="resetViewBtn" title="Zoom to all objects">⌖</button>
       </div>
       <label class="map-title-field">Map title
@@ -894,8 +924,7 @@
           <button id="restoreAutosave" class="wide" title="Restore the browser autosave for this tool">Restore Autosave</button>
         </div>
         <div class="grid-2">
-          <button id="loadSampleProject" title="Load a small sample map showing common GeoSketch object types">Load Sample</button>
-          <button id="runProjectChecks" title="Run basic project export and geometry checks">Run Checks</button>
+          <button id="runProjectChecks" class="wide" title="Run basic project export and geometry checks">Run Checks</button>
         </div>
         <label>Load project from GeoJSON
           <input id="loadFile" type="file" accept=".geojson,.json,application/geo+json,application/json">
@@ -927,6 +956,13 @@
           </div>
         </summary>
         <div class="tiny help-copy">
+          <div class="grid-2">
+            <button id="loadSampleProject" title="Load a small sample map showing common GeoSketch object types">Load Sample</button>
+            <a class="button-link" href="https://github.com/jmkorhonen/geosketch" target="_blank" rel="noopener">Repository</a>
+            <a class="button-link" href="https://github.com/jmkorhonen/geosketch#readme" target="_blank" rel="noopener">README</a>
+            <a class="button-link" href="https://raw.githubusercontent.com/jmkorhonen/geosketch/main/index.html" target="_blank" rel="noopener" download="index.html">Download HTML</a>
+          </div>
+          <br>
           <strong>Quick start.</strong> Choose a background map, add objects from the Add Object tools, then select any object to edit its coordinates, style, buffers, notes, and layer. Use the Layers section to reorder, hide, lock, or select the active drawing layer.
           <br><br>
           <strong>Coordinates.</strong> Search, coordinate input, and coordinate editing accept decimal degrees, DMS, and MGRS. The Settings panel controls how coordinates are displayed and copied.
@@ -935,7 +971,7 @@
           <br><br>
           <strong>Attribution.</strong> Background maps retain their source attribution in the map and exported interactive HTML. Respect OpenStreetMap, OpenTopoMap, Esri, CARTO, and any loaded data licenses.
           <br><br>
-          <strong>Shortcuts.</strong> Draw with 1 point, 2 line, 3 polygon, 4 circle, 5 text box, 6 unit. Use / for search, E edit points, M move, Enter finish drawing, Delete remove, Ctrl+Z undo, Ctrl+S save GeoJSON, Ctrl+C copy object, Ctrl+V paste object at cursor, C copy object coordinates, Shift+C copy cursor coordinates.
+          <strong>Shortcuts.</strong> Draw with 1 point, 2 line, 3 polygon, 4 circle, 5 text box, 6 unit. Use S for search, E edit points, M move, Enter finish drawing, Delete remove, Ctrl+Z undo, Ctrl+S save GeoJSON, Ctrl+C copy object, Ctrl+V paste object at cursor, C copy object coordinates, Shift+C copy cursor coordinates.
         </div>
       </details>
     </aside>
@@ -1221,7 +1257,7 @@
   <script src="https://cdn.jsdelivr.net/npm/milsymbol@3/dist/milsymbol.js"></script>
   <script>
     const APP_NAME = "GeoSketch";
-    const APP_VERSION = "v0.6.16";
+    const APP_VERSION = "v1.0";
     const ATTRIBUTION_NOTE = "Background map attribution: OpenStreetMap contributors, CARTO, OpenTopoMap, SRTM, and Esri as applicable to visible layers. User-loaded data may have separate licenses.";
     const PROJECTION_NOTE = "GeoSketch uses WGS84 coordinates and geodesic Turf/Leaflet calculations for sketching, measurement, buffers, and range circles. Outputs are planning/OSINT visualisations, not survey-grade products.";
     const AUTOSAVE_KEY = "geosketch-autosave-v1";
@@ -2707,7 +2743,7 @@
       const border = style.weight > 0 ? `${style.weight}px ${borderStyle} ${style.lineColor}` : "0";
       const shadow = style.shadow ? "box-shadow:0 2px 8px rgba(0,0,0,.24);" : "box-shadow:none;";
       const html = `<div class="text-annotation" style="font-size:${style.size}px;font-weight:${style.bold ? 700 : 400};font-style:${style.italic ? "italic" : "normal"};color:${style.color};background:${hexToRgba(style.fillColor, style.fillOpacity)};border:${border};${shadow}">${renderInlineMarkdown(obj.label || obj.text || "Text")}</div>`;
-      obj.layer.setIcon(L.divIcon({ html, className: "leaflet-div-icon", iconAnchor: [0, 0] }));
+      obj.layer.setIcon(L.divIcon({ html, className: "leaflet-div-icon", iconSize: null, iconAnchor: [0, 0] }));
     }
 
     function normalizeTextStyle(style = {}) {
@@ -4900,7 +4936,7 @@
     label { display: grid; grid-template-columns: auto 1fr; gap: 6px; align-items: center; font-size: 12px; margin: 5px 0; color: #d9e1ea; }
     input[type="range"] { grid-column: 1 / -1; width: 100%; }
     .object-label, .measurement-label { background: rgba(12,16,20,.82); color: #f2f6fb; border: 1px solid rgba(255,255,255,.22); border-radius: 4px; padding: 2px 5px; font-size: 11px; white-space: nowrap; }
-    .text-annotation { min-width: 40px; padding: 4px 6px; background: rgba(255,250,230,.92); color: #161616; border: 1px solid rgba(0,0,0,.28); border-radius: 4px; font-size: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.24); }
+    .text-annotation { display: block; width: max-content; min-width: 40px; max-width: min(320px, calc(100vw - 40px)); padding: 4px 6px; background: rgba(255,250,230,.92); color: #161616; border: 1px solid rgba(0,0,0,.28); border-radius: 4px; font-size: 12px; line-height: 1.25; white-space: pre-wrap; overflow-wrap: break-word; box-shadow: 0 2px 8px rgba(0,0,0,.24); }
     .leaflet-div-icon { background: transparent; border: 0; }
     .center-dot { width: 9px; height: 9px; border-radius: 50%; background: #fff; border: 2px solid #111820; box-shadow: 0 0 0 2px rgba(126,208,166,.7); }
     .endpoint-marker { filter: drop-shadow(0 1px 2px #000); width: 24px; height: 24px; display: grid; place-items: center; }
@@ -5169,7 +5205,7 @@
       const border = s.weight > 0 ? s.weight + "px " + borderStyle + " " + s.lineColor : "0";
       const shadow = s.shadow ? "box-shadow:0 2px 8px rgba(0,0,0,.24);" : "box-shadow:none;";
       const html = '<div class="text-annotation" style="font-size:' + s.size + 'px;font-weight:' + (s.bold ? 700 : 400) + ';font-style:' + (s.italic ? "italic" : "normal") + ';color:' + s.color + ';background:' + hexToRgba(s.fillColor, s.fillOpacity) + ';border:' + border + ';' + shadow + '">' + renderInlineMarkdown(obj.label || obj.text || "Text") + '</div>';
-      return L.divIcon({ html, className: "leaflet-div-icon", iconAnchor: [0, 0] });
+      return L.divIcon({ html, className: "leaflet-div-icon", iconSize: null, iconAnchor: [0, 0] });
     }
 
     function normalizeTextStyle(style) {
@@ -5998,7 +6034,7 @@
         return;
       }
       if (typing) return;
-      if (key === "/") {
+      if (key === "s") {
         event.preventDefault();
         el("mapSearchInput").focus();
         return;

@@ -1,0 +1,693 @@
+{
+  "type": "FeatureCollection",
+  "properties": {
+    "app": "GeoSketch",
+    "appVersion": "v1.0",
+    "title": "GeoSketch Sample Map",
+    "showMapTitle": true,
+    "mapTitleStyle": {
+      "size": 18,
+      "bold": true,
+      "italic": false,
+      "color": "#000000",
+      "fillColor": "#ffffff",
+      "fillOpacity": 0,
+      "lineColor": "#ff0000",
+      "weight": 0,
+      "dashArray": "",
+      "shadow": false,
+      "outline": true
+    },
+    "coordinateSystem": "dd",
+    "unitIconScale": 1,
+    "pointIconScale": 1,
+    "attribution": "Background map attribution: OpenStreetMap contributors, CARTO, OpenTopoMap, SRTM, and Esri as applicable to visible layers. User-loaded data may have separate licenses.",
+    "projectionNote": "GeoSketch uses WGS84 coordinates and geodesic Turf/Leaflet calculations for sketching, measurement, buffers, and range circles. Outputs are planning/OSINT visualisations, not survey-grade products.",
+    "drawLayers": [
+      {
+        "id": "sample-observations",
+        "name": "Observation sketch",
+        "visible": true,
+        "objectsCollapsed": false
+      },
+      {
+        "id": "sample-units",
+        "name": "Units",
+        "visible": true,
+        "objectsCollapsed": false
+      }
+    ]
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "app": "GeoSketch",
+        "appVersion": "v1.0",
+        "kind": "marker",
+        "label": "OP",
+        "unitName": "",
+        "higherFormation": "",
+        "showLabel": true,
+        "text": "",
+        "notes": "Sample observation point.",
+        "style": {
+          "color": "#e8c65a",
+          "fillColor": "#e8c65a",
+          "opacity": 1,
+          "fillOpacity": 0.25,
+          "weight": 3,
+          "dashArray": "",
+          "pattern": "",
+          "showMeasurements": false
+        },
+        "textStyle": {
+          "size": 13,
+          "bold": false,
+          "italic": false,
+          "color": "#161616",
+          "fillColor": "#fff7d8",
+          "fillOpacity": 0.92,
+          "lineColor": "#161616",
+          "weight": 1,
+          "dashArray": "",
+          "shadow": true,
+          "outline": false
+        },
+        "labelStyle": {
+          "size": 11,
+          "bold": false,
+          "italic": false,
+          "color": "#000000",
+          "fillColor": "#ffffff",
+          "fillOpacity": 0,
+          "lineColor": "#ff0000",
+          "weight": 0,
+          "dashArray": "",
+          "shadow": false,
+          "outline": true,
+          "position": "above",
+          "distance": 12,
+          "offsetX": 0,
+          "offsetY": -12,
+          "scaleWithIcon": true
+        },
+        "locked": false,
+        "drawLayerId": "sample-observations",
+        "visible": true,
+        "buffers": [],
+        "icon": {
+          "kind": "target"
+        },
+        "iconSize": 32,
+        "endpoints": {
+          "start": "",
+          "end": ""
+        },
+        "radiusMeters": null,
+        "z": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.9384,
+          60.1699
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "app": "GeoSketch",
+        "appVersion": "v1.0",
+        "kind": "line",
+        "label": "Patrol route",
+        "unitName": "",
+        "higherFormation": "",
+        "showLabel": true,
+        "text": "",
+        "notes": "",
+        "style": {
+          "color": "#64b5f6",
+          "fillColor": "#64b5f6",
+          "opacity": 1,
+          "fillOpacity": 0.2,
+          "weight": 4,
+          "dashArray": "8 8",
+          "pattern": "",
+          "showMeasurements": true
+        },
+        "textStyle": {
+          "size": 13,
+          "bold": false,
+          "italic": false,
+          "color": "#161616",
+          "fillColor": "#fff7d8",
+          "fillOpacity": 0.92,
+          "lineColor": "#161616",
+          "weight": 1,
+          "dashArray": "",
+          "shadow": true,
+          "outline": false
+        },
+        "labelStyle": {
+          "size": 11,
+          "bold": false,
+          "italic": false,
+          "color": "#000000",
+          "fillColor": "#ffffff",
+          "fillOpacity": 0,
+          "lineColor": "#ff0000",
+          "weight": 0,
+          "dashArray": "",
+          "shadow": false,
+          "outline": true,
+          "position": "above",
+          "distance": 12,
+          "offsetX": 0,
+          "offsetY": -12,
+          "scaleWithIcon": true
+        },
+        "locked": false,
+        "drawLayerId": "sample-observations",
+        "visible": true,
+        "buffers": [
+          {
+            "id": "sample-route-buffer",
+            "distance": 0.5,
+            "unit": "kilometers",
+            "side": "both",
+            "showMeasurements": true,
+            "showOverlaps": true,
+            "style": {
+              "color": "#64b5f6",
+              "fillColor": "#64b5f6",
+              "opacity": 0.8,
+              "fillOpacity": 0.16,
+              "weight": 2,
+              "dashArray": "6 6",
+              "pattern": ""
+            }
+          }
+        ],
+        "icon": {
+          "kind": "dot"
+        },
+        "iconSize": 32,
+        "endpoints": {
+          "start": "measure",
+          "end": "arrow"
+        },
+        "radiusMeters": null,
+        "z": 2
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            24.9384,
+            60.1699
+          ],
+          [
+            24.965,
+            60.1742
+          ],
+          [
+            24.986,
+            60.166
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "app": "GeoSketch",
+        "appVersion": "v1.0",
+        "kind": "circle",
+        "label": "1.5 km range",
+        "unitName": "",
+        "higherFormation": "",
+        "showLabel": true,
+        "text": "",
+        "notes": "",
+        "style": {
+          "color": "#f0bc70",
+          "fillColor": "#f0bc70",
+          "opacity": 0.95,
+          "fillOpacity": 0.1,
+          "weight": 3,
+          "dashArray": "",
+          "pattern": "",
+          "showMeasurements": true
+        },
+        "textStyle": {
+          "size": 13,
+          "bold": false,
+          "italic": false,
+          "color": "#161616",
+          "fillColor": "#fff7d8",
+          "fillOpacity": 0.92,
+          "lineColor": "#161616",
+          "weight": 1,
+          "dashArray": "",
+          "shadow": true,
+          "outline": false
+        },
+        "labelStyle": {
+          "size": 11,
+          "bold": false,
+          "italic": false,
+          "color": "#000000",
+          "fillColor": "#ffffff",
+          "fillOpacity": 0,
+          "lineColor": "#ff0000",
+          "weight": 0,
+          "dashArray": "",
+          "shadow": false,
+          "outline": true,
+          "position": "above",
+          "distance": 12,
+          "offsetX": 0,
+          "offsetY": -12,
+          "scaleWithIcon": true
+        },
+        "locked": false,
+        "drawLayerId": "sample-observations",
+        "visible": true,
+        "buffers": [],
+        "icon": {
+          "kind": "dot"
+        },
+        "iconSize": 32,
+        "endpoints": {
+          "start": "",
+          "end": ""
+        },
+        "radiusMeters": 1500,
+        "z": 3
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              25.002054,
+              60.169
+            ],
+            [
+              25.000827,
+              60.175743
+            ],
+            [
+              24.997205,
+              60.182229
+            ],
+            [
+              24.991354,
+              60.188212
+            ],
+            [
+              24.983551,
+              60.193461
+            ],
+            [
+              24.974167,
+              60.197776
+            ],
+            [
+              24.963648,
+              60.200994
+            ],
+            [
+              24.952496,
+              60.202993
+            ],
+            [
+              24.941244,
+              60.203695
+            ],
+            [
+              24.930432,
+              60.203071
+            ],
+            [
+              24.920581,
+              60.201143
+            ],
+            [
+              24.912164,
+              60.19798
+            ],
+            [
+              24.905584,
+              60.193696
+            ],
+            [
+              24.901156,
+              60.188447
+            ],
+            [
+              24.899088,
+              60.182427
+            ],
+            [
+              24.899469,
+              60.175862
+            ],
+            [
+              24.902268,
+              60.169
+            ],
+            [
+              24.899469,
+              60.162138
+            ],
+            [
+              24.899088,
+              60.155573
+            ],
+            [
+              24.901156,
+              60.149553
+            ],
+            [
+              24.905584,
+              60.144304
+            ],
+            [
+              24.912164,
+              60.14002
+            ],
+            [
+              24.920581,
+              60.136857
+            ],
+            [
+              24.930432,
+              60.134929
+            ],
+            [
+              24.941244,
+              60.134305
+            ],
+            [
+              24.952496,
+              60.135007
+            ],
+            [
+              24.963648,
+              60.137006
+            ],
+            [
+              24.974167,
+              60.140224
+            ],
+            [
+              24.983551,
+              60.144539
+            ],
+            [
+              24.991354,
+              60.149788
+            ],
+            [
+              24.997205,
+              60.155771
+            ],
+            [
+              25.000827,
+              60.162257
+            ],
+            [
+              25.002054,
+              60.169
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "app": "GeoSketch",
+        "appVersion": "v1.0",
+        "kind": "polygon",
+        "label": "Area of interest",
+        "unitName": "",
+        "higherFormation": "",
+        "showLabel": true,
+        "text": "",
+        "notes": "",
+        "style": {
+          "color": "#7ed0a6",
+          "fillColor": "#7ed0a6",
+          "opacity": 0.95,
+          "fillOpacity": 0.16,
+          "weight": 3,
+          "dashArray": "",
+          "pattern": "diagonal",
+          "showMeasurements": true
+        },
+        "textStyle": {
+          "size": 13,
+          "bold": false,
+          "italic": false,
+          "color": "#161616",
+          "fillColor": "#fff7d8",
+          "fillOpacity": 0.92,
+          "lineColor": "#161616",
+          "weight": 1,
+          "dashArray": "",
+          "shadow": true,
+          "outline": false
+        },
+        "labelStyle": {
+          "size": 11,
+          "bold": false,
+          "italic": false,
+          "color": "#000000",
+          "fillColor": "#ffffff",
+          "fillOpacity": 0,
+          "lineColor": "#ff0000",
+          "weight": 0,
+          "dashArray": "",
+          "shadow": false,
+          "outline": true,
+          "position": "above",
+          "distance": 12,
+          "offsetX": 0,
+          "offsetY": -12,
+          "scaleWithIcon": true
+        },
+        "locked": false,
+        "drawLayerId": "sample-observations",
+        "visible": true,
+        "buffers": [],
+        "icon": {
+          "kind": "dot"
+        },
+        "iconSize": 32,
+        "endpoints": {
+          "start": "",
+          "end": ""
+        },
+        "radiusMeters": null,
+        "z": 4
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              24.932,
+              60.181
+            ],
+            [
+              24.963,
+              60.186
+            ],
+            [
+              24.972,
+              60.171
+            ],
+            [
+              24.944,
+              60.164
+            ],
+            [
+              24.932,
+              60.181
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "app": "GeoSketch",
+        "appVersion": "v1.0",
+        "kind": "unit",
+        "label": "A/1",
+        "unitName": "Alpha Company",
+        "higherFormation": "1st Battalion",
+        "showLabel": true,
+        "text": "",
+        "notes": "",
+        "style": {
+          "color": "#ffcc4d",
+          "fillColor": "#ffcc4d",
+          "opacity": 1,
+          "fillOpacity": 0.2,
+          "weight": 3,
+          "dashArray": "",
+          "pattern": "",
+          "showMeasurements": false
+        },
+        "textStyle": {
+          "size": 13,
+          "bold": false,
+          "italic": false,
+          "color": "#161616",
+          "fillColor": "#fff7d8",
+          "fillOpacity": 0.92,
+          "lineColor": "#161616",
+          "weight": 1,
+          "dashArray": "",
+          "shadow": true,
+          "outline": false
+        },
+        "labelStyle": {
+          "size": 11,
+          "bold": false,
+          "italic": false,
+          "color": "#000000",
+          "fillColor": "#ffffff",
+          "fillOpacity": 0,
+          "lineColor": "#ff0000",
+          "weight": 0,
+          "dashArray": "",
+          "shadow": false,
+          "outline": true,
+          "position": "above",
+          "distance": 12,
+          "offsetX": 0,
+          "offsetY": -12,
+          "scaleWithIcon": true
+        },
+        "locked": false,
+        "drawLayerId": "sample-units",
+        "visible": true,
+        "buffers": [],
+        "icon": {
+          "kind": "app6",
+          "sidc": "10031000001211000000",
+          "app6": {
+            "identity": "03",
+            "status": "0",
+            "symbolSet": "10",
+            "mainIcon": "121100",
+            "echelon": "00",
+            "modifier1": "00",
+            "symbolModifier1": "00",
+            "symbolModifier2": "00",
+            "reinforcedReduced": "00",
+            "uniqueDesignation": "A/1",
+            "higherFormation": "1st Battalion"
+          }
+        },
+        "iconSize": 32,
+        "endpoints": {
+          "start": "",
+          "end": ""
+        },
+        "radiusMeters": null,
+        "z": 5
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.951,
+          60.178
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "app": "GeoSketch",
+        "appVersion": "v1.0",
+        "kind": "text",
+        "label": "Sample project\nLoad, edit, export, and undo freely.",
+        "unitName": "",
+        "higherFormation": "",
+        "showLabel": false,
+        "text": "Sample project\nLoad, edit, export, and undo freely.",
+        "notes": "",
+        "style": {
+          "color": "#ffcc4d",
+          "fillColor": "#ffcc4d",
+          "opacity": 1,
+          "fillOpacity": 0.2,
+          "weight": 3,
+          "dashArray": "",
+          "pattern": "",
+          "showMeasurements": false
+        },
+        "textStyle": {
+          "size": 13,
+          "bold": false,
+          "italic": false,
+          "color": "#161616",
+          "fillColor": "#fff7d8",
+          "fillOpacity": 0.92,
+          "lineColor": "#161616",
+          "weight": 1,
+          "dashArray": "",
+          "shadow": true,
+          "outline": false
+        },
+        "labelStyle": {
+          "size": 11,
+          "bold": false,
+          "italic": false,
+          "color": "#000000",
+          "fillColor": "#ffffff",
+          "fillOpacity": 0,
+          "lineColor": "#ff0000",
+          "weight": 0,
+          "dashArray": "",
+          "shadow": false,
+          "outline": true,
+          "position": "above",
+          "distance": 12,
+          "offsetX": 0,
+          "offsetY": -12,
+          "scaleWithIcon": true
+        },
+        "locked": false,
+        "drawLayerId": "sample-observations",
+        "visible": true,
+        "buffers": [],
+        "icon": {
+          "kind": "dot"
+        },
+        "iconSize": 32,
+        "endpoints": {
+          "start": "",
+          "end": ""
+        },
+        "radiusMeters": null,
+        "z": 6
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          24.956,
+          60.1605
+        ]
+      }
+    }
+  ]
+}
