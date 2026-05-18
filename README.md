@@ -4,14 +4,16 @@ GeoSketch is a single-file browser tool for quick OSINT map sketching, simple GI
 
 Open the HTML file in a modern browser, choose a background map, add objects, save the project as GeoJSON, and reload it later from the same file format.
 
-![GeoSketch v1.0 screenshot](samples/GeoSketch_v1_0_screenshot.png)
+Live version: [https://jmkorhonen.github.io/geosketch/](https://jmkorhonen.github.io/geosketch/)
+
+![GeoSketch screenshot](samples/GeoSketch_v1_0_screenshot.png)
 
 
 ## Current Status
 
-GeoSketch is a lightweight 1.0 browser tool for field-style sketching and visual analysis. It should be treated as a planning and OSINT visualisation aid rather than a survey-grade GIS package.
+GeoSketch is a lightweight browser tool for field-style sketching and visual analysis. It should be treated as a planning and OSINT visualisation aid rather than a survey-grade GIS package.
 
-Current version: `v1.0`
+Current version: `v1.05`
 
 ## Requirements
 
@@ -24,9 +26,9 @@ The app stores autosave data in browser `localStorage`, so autosaves are local t
 ## Quick Start
 
 1. Open `index.html` in your browser.
-2. Set a map title at the top-left. The title is also used as the default export filename.
+2. Set a map title at the top-left. The title is also used as the default export filename. Add map notes for author, source, or caveat details if needed.
 3. Use **Map Search** to find a place, address, or coordinate.
-4. Use **Add Object** to create points, units, lines, polygons, circles, or text boxes.
+4. Use **Add Object** to create points, units, lines, polygons, circles, text boxes, or export areas.
 5. Select an object on the map or in the Layers list to edit its details in the right pane.
 6. Save the project with **Save project as GeoJSON**.
 7. Use **Load project from GeoJSON** to continue later.
@@ -70,8 +72,15 @@ GeoSketch supports:
 - **Polygon**: areas of interest, zones, and bounded regions.
 - **Circle**: range circles and circular areas.
 - **Text box**: free map annotations.
+- **Export area**: rectangular PNG crop guides with editable coordinates, labels, notes, and line/fill styling.
 
 Objects can have labels, notes, measurements, styles, buffers, visibility toggles, and layer assignment. Locked objects can still be copied or duplicated, but are protected from accidental editing.
+
+### Map Title and Notes
+
+The map title appears at the top-left and is used as the default export filename. It can also be shown as a styled title overlay on the map.
+
+Project-level map notes sit under the map title. Use them for author details, sources, caveats, or links. They are saved with the project and included in interactive HTML exports; plain web and email addresses in those notes are made clickable in the exported map.
 
 ## Coordinates
 
@@ -85,6 +94,8 @@ Coordinate handling is controlled in the Settings panel. Search, Create from coo
 
 The bottom status bar shows live cursor coordinates. `Shift+C` copies the cursor position in the currently selected coordinate format.
 
+Distance labels and measurements use the Settings panel distance unit. The default auto-metric mode switches between metres and kilometres; metres, kilometres, miles, and nautical miles can also be forced.
+
 ## Drawing and Editing
 
 Use the Add Object buttons or keyboard shortcuts:
@@ -96,7 +107,7 @@ Use the Add Object buttons or keyboard shortcuts:
 - `5`: text box
 - `6`: unit
 - `S`: focus search
-- `E`: edit points on selected line/polygon/circle
+- `E`: edit points/shapes on selected line, polygon, circle, or export area
 - `M`: move selected object
 - `Enter`: finish the current drawing
 - `Delete`: delete selected object, with confirmation
@@ -108,6 +119,8 @@ Use the Add Object buttons or keyboard shortcuts:
 - `Shift+C`: copy cursor coordinates
 
 When drawing lines and polygons, dynamic measurements are shown while drawing. Polygon measurements include area, perimeter, and individual segment lengths.
+
+Export areas are rectangular guides for PNG crops. They can be drawn from the Add Object menu or created from two opposite-corner coordinates, then edited like other shapes.
 
 ## Buffers and Measurements
 
@@ -147,6 +160,8 @@ The Layers view displays units as `unique designation (name)` when a name is ava
 
 Use this for normal project save/load. GeoSketch stores object geometry plus app-specific styling and metadata inside GeoJSON feature properties.
 
+Distance-bearing saved data uses SI units: buffer distances and circle radii are stored in metres. The Settings distance unit controls how measurements are displayed after load.
+
 ### Save Selected Layers as GeoJSON
 
 Exports visible layers separately, using safe filenames derived from layer names.
@@ -165,13 +180,19 @@ Loads external GeoJSON data as map layers/templates. This is useful for backgrou
 
 Exports an object table for review and reporting.
 
-### Screenshot
+Buffer distances in Excel exports are reported in metres for consistency with saved GeoJSON.
 
-Exports the visible map as an image. Browser security rules and tile provider CORS settings can affect screenshot output.
+### PNG Export
+
+Use **Save visible PNG** to export the current map viewport. Draw an **Export area** object and use **Save area PNG** to export a rectangular crop; if several export areas exist, GeoSketch asks which one to use. Export area guide rectangles are not burned into the cropped PNG.
+
+Browser security rules and tile provider CORS settings can affect PNG output.
 
 ### HTML Map
 
-Exports an interactive HTML map containing the current project state. The exported map still depends on external libraries and map tile providers unless those resources are separately mirrored or bundled.
+Exports an interactive HTML map containing the current project state, including map title, map notes, links, layer controls, attribution, and projection notes. The exported map uses a collapsed slide-out information pane so the map itself remains unobstructed by default.
+
+The exported map still depends on external libraries and map tile providers unless those resources are separately mirrored or bundled.
 
 ## Autosave and Recovery
 
@@ -204,7 +225,7 @@ Avoid entering sensitive operational information into external search services o
 ## Known Limitations
 
 - The app is a single HTML file, so very large projects may become slow.
-- Browser screenshot export can be affected by CORS restrictions on map tiles.
+- Browser PNG export can be affected by CORS restrictions on map tiles.
 - GeoJSON exports include GeoSketch-specific styling metadata that other GIS tools may ignore.
 - APP-6 symbol support is intentionally practical and UI-driven, not a full doctrinal validation engine.
 - Measurements are appropriate for sketching and planning, not survey-grade work.
@@ -239,3 +260,13 @@ GeoSketch is released under the MIT License. See `LICENSE`.
 - `samples/geosketch-sample.geojson`: sample project for import/export testing and format inspection.
 
 Other files in this workspace may belong to earlier experiments or adjacent tooling and are not required for basic GeoSketch use.
+
+## Changes Since v1.0
+
+- Added project-level map notes, including clickable web/email links in HTML exports.
+- Added Export area objects and separate visible-map vs area PNG export.
+- Added default distance-unit settings, including miles and nautical miles display, while saved distance data remains SI/metres.
+- Improved PNG export rendering for cropped maps, vector overlays, and tile seams.
+- Refined interactive HTML exports with a collapsed slide-out information pane and project/repository links.
+- Added clearer save/load state, save confirmations, safer unsaved-change prompts, and GeoJSON load conflict handling.
+- Added fractional zoom support and a bottom-bar zoom slider.

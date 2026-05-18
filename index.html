@@ -73,6 +73,12 @@
       min-height: 28px;
     }
 
+    input::placeholder,
+    textarea::placeholder {
+      color: #7f8d9d;
+      font-style: italic;
+    }
+
     .side.left input,
     .side.left select,
     .side.left textarea {
@@ -188,6 +194,25 @@
       text-overflow: ellipsis;
     }
 
+    .save-confirm-toast {
+      position: absolute;
+      z-index: 1600;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: min(520px, calc(100vw - 48px));
+      padding: 8px 12px;
+      border: 1px solid rgba(126, 208, 166, 0.72);
+      border-radius: 6px;
+      background: rgba(19, 43, 31, 0.94);
+      color: #e8fff2;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.32);
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      pointer-events: none;
+    }
+
     .map-status-bar {
       position: absolute;
       z-index: 910;
@@ -239,6 +264,32 @@
       bottom: 26px;
     }
 
+    #map.export-render .leaflet-bottom {
+      bottom: 0 !important;
+    }
+
+    #map.export-render .leaflet-control-zoom {
+      display: none !important;
+    }
+
+    #map.export-render .leaflet-tile,
+    #map.export-render .leaflet-tile-loaded {
+      opacity: 1 !important;
+      transition: none !important;
+      filter: none !important;
+      width: 257px !important;
+      height: 257px !important;
+    }
+
+    #map.export-render .leaflet-tile-pane,
+    #map.export-render .leaflet-layer,
+    #map.export-render .leaflet-tile-container {
+      opacity: 1 !important;
+      transition: none !important;
+      filter: none !important;
+      mix-blend-mode: normal !important;
+    }
+
     .brand {
       display: flex;
       align-items: center;
@@ -280,6 +331,17 @@
       color: var(--muted);
       font-size: 11px;
       min-height: 16px;
+    }
+
+    .save-state {
+      min-height: 16px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .save-state.dirty {
+      color: var(--warn);
+      font-weight: 700;
     }
 
     .section {
@@ -821,13 +883,17 @@
     <button id="rightTab" class="collapse-tab" title="Collapse right panel"></button>
     <aside class="side left">
       <div class="brand">
-        <h1>GeoSketch <span class="version">v1.0</span></h1>
+        <h1>GeoSketch <span class="version">v1.05</span></h1>
         <button id="resetViewBtn" title="Zoom to all objects">⌖</button>
       </div>
       <label class="map-title-field">Map title
-        <input id="mapTitleInput" placeholder="Untitled map" title="Map title used on the map and as the default export filename">
+        <input id="mapTitleInput" placeholder="Example: Helsinki observation sketch" title="Map title used on the map and as the default export filename">
+      </label>
+      <label>Map notes
+        <textarea id="mapNotesInput" rows="2" placeholder="Example: Author, sources, caveats, or https://example.com" title="Project-level notes included in saved projects and HTML map exports"></textarea>
       </label>
       <div id="status" class="status">Ready.</div>
+      <div id="saveStatus" class="save-state"></div>
       <label class="check-row"><input id="showMapTitle" type="checkbox" title="Show the title centered over the visible map"> Show title</label>
       <details id="titleStyleControls">
         <summary class="tiny">Edit title style</summary>
@@ -848,7 +914,7 @@
       <div class="section">
         <h2>Map Search</h2>
         <div class="row">
-          <input id="mapSearchInput" placeholder="Search place, address, or coordinates" title="Search OpenStreetMap/Nominatim, or enter decimal, DMS, or MGRS coordinates">
+          <input id="mapSearchInput" placeholder="Example: Helsinki or 60.1699, 24.9384" title="Search OpenStreetMap/Nominatim, or enter decimal, DMS, or MGRS coordinates">
           <button id="mapSearchBtn" title="Find map locations matching the search text">Find</button>
         </div>
         <div id="searchResults" class="search-results"></div>
@@ -863,17 +929,19 @@
           <button data-draw="Polygon" title="Draw polygon. Press Enter to close and finish.">Polygon</button>
           <button data-draw="Circle" title="Draw circle. Press Enter to finish.">Circle</button>
           <button data-draw="Text" title="Add text annotation">Text box</button>
+          <button data-draw="ExportArea" title="Draw a rectangular PNG export area">Export area</button>
         </div>
         <details>
           <summary class="tiny">Create from coordinates</summary>
-          <label>Input coordinates, one per line. Decimal degrees, DMS, and MGRS are accepted. One point creates a point or unit; two points create a line or circle; three or more create a polygon.
-            <textarea id="coordInput" class="coords-box" placeholder="60.1699, 24.9384&#10;60.1720, 24.9490"></textarea>
+          <label>Input coordinates, one per line. Decimal degrees, DMS, and MGRS are accepted. One point creates a point or unit; two points create a line, circle, or export area; three or more create a polygon.
+            <textarea id="coordInput" class="coords-box" placeholder="Example: 60.1699, 24.9384&#10;Example: 60.1720, 24.9490"></textarea>
           </label>
           <div class="grid-3">
             <button id="coordPoint" title="Create a point from the first coordinate">Point</button>
             <button id="coordUnit" title="Create an APP-6 unit from the first coordinate">Unit</button>
             <button id="coordLine" title="Create a line from two or more coordinates">Line</button>
             <button id="coordCircle" title="Create a circle from center and radius point">Circle</button>
+            <button id="coordExportArea" title="Create a rectangular export area from two opposite corners">Export area</button>
           </div>
           <button id="coordPolygon" title="Create a polygon from three or more coordinates">Polygon from Coordinates</button>
         </details>
@@ -887,7 +955,7 @@
           </div>
         </summary>
         <div class="row">
-          <input id="newDrawLayerName" placeholder="Layer name" title="Name for a new drawing layer">
+          <input id="newDrawLayerName" placeholder="Example: Source A" title="Name for a new drawing layer">
           <button id="addDrawLayer" title="Add a new drawing layer and make it active">Add</button>
         </div>
         <select id="activeDrawLayer" hidden></select>
@@ -911,7 +979,10 @@
         </div>
         <div class="grid-2">
           <button id="saveExcel" title="Export object table to Excel">Export Excel</button>
-          <button id="saveScreenshot" title="Export the current visible map as an image">Screenshot</button>
+          <button id="saveScreenshot" title="Export the current visible map as a PNG image">Save visible PNG</button>
+        </div>
+        <div class="grid-2">
+          <button id="saveExportArea" title="Export a drawn export area as a PNG image" disabled>Save area PNG</button>
         </div>
         <div class="grid-2">
           <button id="saveHtmlMap" title="Export an interactive HTML copy of the map">HTML Map</button>
@@ -947,6 +1018,15 @@
             <option value="mgrs">MGRS</option>
           </select>
         </label>
+        <label>Distance unit
+          <select id="distanceUnit">
+            <option value="metric">Auto metric (m/km)</option>
+            <option value="meters">Meters</option>
+            <option value="kilometers">Kilometers</option>
+            <option value="miles">Miles</option>
+            <option value="nauticalmiles">Nautical miles</option>
+          </select>
+        </label>
       </details>
 
       <details id="helpSection" class="section">
@@ -965,13 +1045,17 @@
           <br>
           <strong>Quick start.</strong> Choose a background map, add objects from the Add Object tools, then select any object to edit its coordinates, style, buffers, notes, and layer. Use the Layers section to reorder, hide, lock, or select the active drawing layer.
           <br><br>
+          <strong>Map notes.</strong> Use the notes below the map title for author details, sources, caveats, and links. They are included in interactive HTML exports.
+          <br><br>
+          <strong>Export areas.</strong> Draw an Export area to define a rectangular PNG crop. Use Save visible PNG for the current viewport, or Save area PNG to export a selected/drawn area.
+          <br><br>
           <strong>Coordinates.</strong> Search, coordinate input, and coordinate editing accept decimal degrees, DMS, and MGRS. The Settings panel controls how coordinates are displayed and copied.
           <br><br>
           <strong>Measurements.</strong> Distances and areas are calculated geodesically with Turf/Leaflet helpers and are intended for field planning and OSINT sketching, not survey-grade engineering. Circles and buffers are generated on the globe rather than as simple screen pixels.
           <br><br>
           <strong>Attribution.</strong> Background maps retain their source attribution in the map and exported interactive HTML. Respect OpenStreetMap, OpenTopoMap, Esri, CARTO, and any loaded data licenses.
           <br><br>
-          <strong>Shortcuts.</strong> Draw with 1 point, 2 line, 3 polygon, 4 circle, 5 text box, 6 unit. Use S for search, E edit points, M move, Enter finish drawing, Delete remove, Ctrl+Z undo, Ctrl+S save GeoJSON, Ctrl+C copy object, Ctrl+V paste object at cursor, C copy object coordinates, Shift+C copy cursor coordinates.
+          <strong>Shortcuts.</strong> Draw with 1 point, 2 line, 3 polygon, 4 circle, 5 text box, 6 unit. Use S for search, E edit points/shapes, M move, Enter finish drawing, Delete remove, Ctrl+Z undo, Ctrl+S save GeoJSON, Ctrl+C copy object, Ctrl+V paste object at cursor, C copy object coordinates, Shift+C copy cursor coordinates.
         </div>
       </details>
     </aside>
@@ -980,6 +1064,10 @@
       <div id="mapTitleOverlay" class="map-title-overlay" hidden></div>
       <div id="mapStatusBar" class="map-status-bar no-export">
         <div id="cursorCoordinates" class="cursor-coordinates">Cursor: move over map</div>
+        <label class="scale-control">Zoom
+          <input id="mapZoom" type="range" min="2" max="19" step="0.25" value="12">
+          <span id="mapZoomValue">12.00</span>
+        </label>
         <label class="scale-control">Units
           <input id="unitScale" type="range" min="50" max="300" step="10" value="100">
           <span id="unitScaleValue">100%</span>
@@ -1002,17 +1090,17 @@
         </label>
         <div id="objectLayerStatus" class="tiny"></div>
         <label id="labelControl">Label
-          <textarea id="labelInput" rows="2" placeholder="Optional label"></textarea>
+          <textarea id="labelInput" rows="2" placeholder="Example: OP Alpha"></textarea>
         </label>
         <label id="unitNameControl">Name
-          <input id="unitNameInput" placeholder="Optional full unit name">
+          <input id="unitNameInput" placeholder="Example: Alpha Company">
         </label>
         <label id="higherFormationControl">Higher formation
-          <input id="higherFormationInput" placeholder="Optional higher formation">
+          <input id="higherFormationInput" placeholder="Example: 1st Battalion">
         </label>
         <label id="showLabelControl" class="check-row"><input id="showLabel" type="checkbox"> <span id="showLabelText">Show label</span></label>
         <label>Notes
-          <textarea id="notesInput" rows="3" placeholder="Optional object notes"></textarea>
+          <textarea id="notesInput" rows="3" placeholder="Example: Source, confidence, and assumptions"></textarea>
         </label>
         <label>Coordinates
           <textarea id="coordinateOutput" class="coords-box coords-output" readonly></textarea>
@@ -1095,7 +1183,7 @@
               <input id="app6Sidc" readonly>
             </label>
             <label class="wide">Manual SIDC override
-              <input id="app6ManualSidc" placeholder="Optional SIDC">
+              <input id="app6ManualSidc" placeholder="Example: 10031000001211000000">
             </label>
             <button id="resetApp6Symbol" class="wide" title="Reset to a friendly unspecified land unit with no modifiers">Reset APP-6 symbol</button>
             <div id="app6StatusText" class="tiny wide"></div>
@@ -1248,6 +1336,32 @@
     </div>
   </div>
 
+  <div id="newMapConfirmDialog" class="confirm-backdrop" hidden>
+    <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="newMapConfirmTitle">
+      <strong id="newMapConfirmTitle">Unsaved changes</strong>
+      <p id="newMapConfirmText">This map has unsaved drawing changes. Save a GeoJSON copy before starting a new map, discard the changes, or keep working.</p>
+      <div class="grid-3">
+        <button id="cancelNewMapConfirm">Cancel</button>
+        <button id="discardNewMapConfirm" class="warn">Discard</button>
+        <button id="saveNewMapConfirm">Save GeoJSON</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="loadGeoJsonConfirmDialog" class="confirm-backdrop" hidden>
+    <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="loadGeoJsonConfirmTitle">
+      <strong id="loadGeoJsonConfirmTitle">Load project GeoJSON?</strong>
+      <p id="loadGeoJsonConfirmText">This map already has objects. Choose how to handle them before loading the project.</p>
+      <p id="loadGeoJsonLayerText"></p>
+      <div class="grid-2">
+        <button id="cancelLoadGeoJsonConfirm">Cancel</button>
+        <button id="keepLoadGeoJsonConfirm">Keep existing</button>
+        <button id="discardLoadGeoJsonConfirm" class="warn">Discard existing</button>
+        <button id="saveLoadGeoJsonConfirm">Save existing first</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.17.0/dist/leaflet-geoman.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
@@ -1257,7 +1371,7 @@
   <script src="https://cdn.jsdelivr.net/npm/milsymbol@3/dist/milsymbol.js"></script>
   <script>
     const APP_NAME = "GeoSketch";
-    const APP_VERSION = "v1.0";
+    const APP_VERSION = "v1.05";
     const ATTRIBUTION_NOTE = "Background map attribution: OpenStreetMap contributors, CARTO, OpenTopoMap, SRTM, and Esri as applicable to visible layers. User-loaded data may have separate licenses.";
     const PROJECTION_NOTE = "GeoSketch uses WGS84 coordinates and geodesic Turf/Leaflet calculations for sketching, measurement, buffers, and range circles. Outputs are planning/OSINT visualisations, not survey-grade products.";
     const AUTOSAVE_KEY = "geosketch-autosave-v1";
@@ -1551,6 +1665,7 @@
       objects: new Map(),
       drawLayers: new Map(),
       mapTitle: "",
+      mapNotes: "",
       showMapTitle: false,
       mapTitleStyle: null,
       activeLayerId: null,
@@ -1558,6 +1673,7 @@
       clipboardObject: null,
       lastMouseLatLng: null,
       coordinateSystem: "dd",
+      distanceUnit: "metric",
       unitIconScale: 1,
       pointIconScale: 1,
       nextId: 1,
@@ -1582,16 +1698,85 @@
       lastUndoAt: 0,
       lastUndoLabel: "",
       restoring: false,
-      dirty: false
+      dirty: false,
+      lastGeoJsonSaveFilename: "",
+      lastGeoJsonSavedAt: "",
+      cleanGeoJsonStatus: "",
+      saveConfirmTimer: null
     };
 
     const el = (id) => document.getElementById(id);
     const status = (msg) => { el("status").textContent = msg; };
     const uid = (prefix = "obj") => `${prefix}-${state.nextId++}`;
 
+    function formatSavedAt(iso) {
+      if (!iso) return "";
+      try {
+        return new Date(iso).toLocaleString([], { dateStyle: "short", timeStyle: "short" });
+      } catch {
+        return new Date(iso).toLocaleString();
+      }
+    }
+
+    function updateSaveStatus() {
+      const node = el("saveStatus");
+      if (!node) return;
+      node.classList.toggle("dirty", state.dirty);
+      const saved = state.cleanGeoJsonStatus || (state.lastGeoJsonSaveFilename
+        ? `Last GeoJSON save: ${state.lastGeoJsonSaveFilename} at ${formatSavedAt(state.lastGeoJsonSavedAt)}.`
+        : "No GeoJSON saved this session.");
+      node.textContent = state.dirty ? `Unsaved changes. ${saved}` : saved;
+    }
+
+    function setDirty(value) {
+      state.dirty = Boolean(value);
+      updateSaveStatus();
+    }
+
+    function markGeoJsonSaved(filename) {
+      state.lastGeoJsonSaveFilename = filename || "";
+      state.lastGeoJsonSavedAt = new Date().toISOString();
+      state.cleanGeoJsonStatus = `Last GeoJSON save: ${state.lastGeoJsonSaveFilename} at ${formatSavedAt(state.lastGeoJsonSavedAt)}.`;
+      setDirty(false);
+    }
+
+    function showFileSaveConfirmation(filename, label = "File") {
+      let node = el("saveConfirmToast");
+      if (!node) {
+        node = document.createElement("div");
+        node.id = "saveConfirmToast";
+        node.className = "save-confirm-toast";
+        node.setAttribute("role", "status");
+        document.body.appendChild(node);
+      }
+      node.hidden = false;
+      node.textContent = `${label}: ${filename}`;
+      clearTimeout(state.saveConfirmTimer);
+      state.saveConfirmTimer = setTimeout(() => {
+        node.hidden = true;
+      }, 4500);
+    }
+
+    function markGeoJsonLoaded(filename) {
+      state.lastGeoJsonSaveFilename = "";
+      state.lastGeoJsonSavedAt = "";
+      state.cleanGeoJsonStatus = filename ? `Loaded ${filename}.` : "GeoJSON loaded.";
+      setDirty(false);
+    }
+
+    function clearGeoJsonSaveStatus() {
+      state.lastGeoJsonSaveFilename = "";
+      state.lastGeoJsonSavedAt = "";
+      state.cleanGeoJsonStatus = "";
+      setDirty(false);
+    }
+
     const map = L.map("map", {
       preferCanvas: false,
-      zoomControl: true
+      zoomControl: true,
+      zoomSnap: 0.25,
+      zoomDelta: 1,
+      wheelPxPerZoomLevel: 180
     }).setView([60.1699, 24.9384], 12);
 
     L.PM.setOptIn(false);
@@ -1672,6 +1857,16 @@
       if (save) scheduleSave();
     }
 
+    function setMapNotes(value, save = true) {
+      state.mapNotes = value || "";
+      const input = el("mapNotesInput");
+      if (input) {
+        input.value = state.mapNotes;
+        resizeCoordinateOutput(input);
+      }
+      if (save) scheduleSave();
+    }
+
     function setShowMapTitle(value, save = true) {
       state.showMapTitle = Boolean(value);
       el("showMapTitle").checked = state.showMapTitle;
@@ -1728,6 +1923,15 @@
       el("titleTextOutline").checked = Boolean(s.outline);
     }
 
+    function syncMapZoomControl() {
+      const input = el("mapZoom");
+      const value = el("mapZoomValue");
+      if (!input || !value) return;
+      const zoom = map.getZoom();
+      input.value = zoom.toFixed(2);
+      value.textContent = zoom.toFixed(2);
+    }
+
     function safeMapFilename(extension) {
       const base = (state.mapTitle || APP_NAME)
         .normalize("NFD")
@@ -1779,6 +1983,21 @@
         dashArray: el("dashStyle").value || null,
         pattern: el("fillPattern").value || "",
         showMeasurements: el("showMeasurements").checked
+      };
+    }
+
+    function exportAreaStyle(style = {}) {
+      return {
+        ...baseStyle(),
+        color: "#ff3b30",
+        fillColor: "#ff3b30",
+        opacity: 1,
+        fillOpacity: 0,
+        weight: 4,
+        dashArray: "10 6",
+        pattern: "",
+        showMeasurements: false,
+        ...style
       };
     }
 
@@ -1982,6 +2201,7 @@
       }
       updateSelectionHalo();
       refreshLabelsAndMeasurements();
+      updateExportAreaButton();
     }
 
     function populateApp6Controls() {
@@ -2445,6 +2665,11 @@
       if (obj.kind === "unit" && obj.icon?.kind !== "app6") obj.icon = defaultApp6Icon();
       if (obj.kind === "unit" && !objectExtra.style) obj.style.showMeasurements = false;
       if (obj.kind === "marker" && obj.icon?.kind === "app6") obj.icon = state.activePointIcon;
+      if (obj.kind === "exportArea") {
+        obj.style = exportAreaStyle(objectExtra.style || {});
+        obj.label = obj.label || "Export area";
+        obj.buffers = [];
+      }
       state.objects.set(obj.id, obj);
       if (!map.hasLayer(layer)) layer.addTo(map);
       styleLayer(obj);
@@ -2599,6 +2824,7 @@
       const isUnit = obj?.kind === "unit";
       const pointLike = isPoint || isUnit;
       const isText = obj?.kind === "text";
+      const isExportArea = obj?.kind === "exportArea";
       const locked = Boolean(obj?.locked);
       movePointStyleControls(isPoint);
       el("iconControls").hidden = !pointLike;
@@ -2623,17 +2849,17 @@
       el("endpointControls").hidden = !hasObj || pointLike || obj?.kind !== "line";
       el("measurementBoxControl").hidden = !hasObj || pointLike || isText;
       el("measureToggleLabel").hidden = !hasObj;
-      el("bufferSection").hidden = !hasObj || isText;
+      el("bufferSection").hidden = !hasObj || isText || isExportArea;
       el("objectLayerControl").hidden = !hasObj;
       el("objectLayerStatus").hidden = !hasObj;
       el("objectLayerSelect").disabled = locked || !hasObj;
       el("lockToggle").hidden = !hasObj;
       el("lockToggle").textContent = locked ? "Unlock object" : "Lock object";
       el("lockedNote").hidden = !locked;
-      const canEditPoints = hasObj && ["line", "polygon", "circle"].includes(obj.kind);
+      const canEditPoints = hasObj && ["line", "polygon", "circle", "exportArea"].includes(obj.kind);
       el("editToggle").hidden = !canEditPoints;
-      el("editToggle").textContent = obj?.kind === "circle" ? "Edit shape" : "Edit points";
-      el("editToggle").title = obj?.kind === "circle" ? "Toggle circle shape editing" : "Toggle vertex editing for this object";
+      el("editToggle").textContent = obj?.kind === "circle" || isExportArea ? "Edit shape" : "Edit points";
+      el("editToggle").title = obj?.kind === "circle" || isExportArea ? "Toggle shape editing" : "Toggle vertex editing for this object";
       el("labelControl").firstChild.textContent = isUnit ? "Unique designation" : isText ? "Text" : "Label";
       el("showLabelText").textContent = isUnit ? "Show unit text" : "Show label";
       el("measureToggleText").textContent = pointLike || isText ? "Show coordinates" : "Show measurements";
@@ -2664,7 +2890,7 @@
         state.selectedHalo = L.circle(obj.layer.getLatLng(), { ...haloStyle, radius: obj.layer.getRadius() }).addTo(map);
       } else if (obj.kind === "line") {
         state.selectedHalo = L.polyline(obj.layer.getLatLngs(), haloStyle).addTo(map);
-      } else if (obj.kind === "polygon") {
+      } else if (obj.kind === "polygon" || obj.kind === "exportArea") {
         state.selectedHalo = L.polygon(obj.layer.getLatLngs(), haloStyle).addTo(map);
       }
       state.selectedHalo?.bringToBack?.();
@@ -2829,6 +3055,15 @@
         .replace(/\n/g, "<br>");
     }
 
+    function renderLinkedText(text) {
+      const escaped = escapeHtml(text || "");
+      return escaped
+        .replace(/\bhttps?:\/\/[^\s<]+/g, (url) => `<a href="${url}" target="_blank" rel="noopener">${url}</a>`)
+        .replace(/\bwww\.[^\s<]+/g, (url) => `<a href="https://${url}" target="_blank" rel="noopener">${url}</a>`)
+        .replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, (email) => `<a href="mailto:${email}">${email}</a>`)
+        .replace(/\n/g, "<br>");
+    }
+
     function updateDerived(obj) {
       updateBuffers(obj);
       if (obj.id === state.selectedId) updateSelectionHalo();
@@ -2876,6 +3111,10 @@
         const ring = polygonRing(obj);
         return ring.map((p, index) => `${index + 1}. ${formatLatLng(p)}`).join("\n");
       }
+      if (obj.kind === "exportArea") {
+        const bounds = exportAreaBounds(obj);
+        return `Northwest: ${formatLatLng(bounds.getNorthWest())}\nSoutheast: ${formatLatLng(bounds.getSouthEast())}`;
+      }
       if (obj.kind === "circle") {
         return `Center: ${formatLatLng(obj.layer.getLatLng())}\nRadius: ${formatDistance(obj.layer.getRadius())}`;
       }
@@ -2897,7 +3136,7 @@
           lines.push(`Total: ${formatDistance(total)}`);
           return lines.join("\n");
         }
-        if (obj.kind === "polygon") {
+        if (obj.kind === "polygon" || obj.kind === "exportArea") {
           const ring = polygonRing(obj);
           let perimeter = 0;
           const segments = [];
@@ -2948,8 +3187,9 @@
         obj.layer.setLatLng(parsed.latlng);
       } else if (obj.kind === "line") {
         obj.layer.setLatLngs(parsed.latlngs);
-      } else if (obj.kind === "polygon") {
+      } else if (obj.kind === "polygon" || obj.kind === "exportArea") {
         obj.layer.setLatLngs([parsed.latlngs]);
+        if (obj.kind === "exportArea" && obj.layer.setBounds) obj.layer.setBounds(L.latLngBounds(parsed.latlngs));
       } else if (obj.kind === "circle") {
         obj.layer.setLatLng(parsed.latlng);
         if (parsed.radius) obj.layer.setRadius(parsed.radius);
@@ -2965,6 +3205,10 @@
       if (isPointLike(kind) || kind === "text") return points.length >= 1 ? { latlng: points[0] } : null;
       if (kind === "line") return points.length >= 2 ? { latlngs: points } : null;
       if (kind === "polygon") return points.length >= 3 ? { latlngs: points } : null;
+      if (kind === "exportArea") {
+        if (points.length >= 2) return { latlngs: rectangleCorners(L.latLngBounds(points[0], points[1])) };
+        return null;
+      }
       if (kind === "circle") {
         const radiusMatch = text.match(/radius\s*:\s*([\d.]+)\s*(km|kilometers|m|meters|mi|miles|nm|nauticalmiles)?/i);
         const radius = radiusMatch ? distanceToMeters(Number(radiusMatch[1]), radiusMatch[2] || "meters") : null;
@@ -2987,6 +3231,24 @@
       return Array.isArray(latlngs[0]) ? latlngs[0] : latlngs;
     }
 
+    function rectangleCorners(bounds) {
+      const b = L.latLngBounds(bounds);
+      return [
+        b.getNorthWest(),
+        b.getNorthEast(),
+        b.getSouthEast(),
+        b.getSouthWest()
+      ];
+    }
+
+    function exportAreaBounds(obj) {
+      if (obj?.layer?.getBounds) return obj.layer.getBounds();
+      const g = obj?.geometry || {};
+      if (g.bounds) return L.latLngBounds([g.bounds.south, g.bounds.west], [g.bounds.north, g.bounds.east]);
+      if (g.latlngs?.length) return L.latLngBounds(g.latlngs);
+      return L.latLngBounds(map.getBounds());
+    }
+
     function formatLatLng(p, system = state.coordinateSystem) {
       if (!p) return "";
       if (system === "mgrs") return latLngToMgrs(p.lat, p.lng, 5);
@@ -3006,6 +3268,38 @@
       return `DD: ${formatDecimalLatLng(p)}\nMGRS: ${latLngToMgrs(p.lat, p.lng, 5)}`;
     }
 
+    function normalizeDistanceUnit(unit) {
+      return ["metric", "meters", "kilometers", "miles", "nauticalmiles"].includes(unit) ? unit : "metric";
+    }
+
+    function distanceUnitLabel(unit) {
+      return {
+        meters: "m",
+        kilometers: "km",
+        miles: "mi",
+        nauticalmiles: "NM"
+      }[unit] || "";
+    }
+
+    function distanceUnitToMeters(unit) {
+      return {
+        meters: 1,
+        kilometers: 1000,
+        miles: 1609.344,
+        nauticalmiles: 1852
+      }[unit] || 1;
+    }
+
+    function distanceUnitToAreaDivisor(unit) {
+      const linear = distanceUnitToMeters(unit);
+      return linear * linear;
+    }
+
+    function distanceUnitToBufferUnit(unit = state.distanceUnit) {
+      const normalized = normalizeDistanceUnit(unit);
+      return normalized === "metric" ? "kilometers" : normalized;
+    }
+
     function updateCursorReadout(latlng = state.lastMouseLatLng) {
       const node = el("cursorCoordinates");
       if (!node) return;
@@ -3015,6 +3309,8 @@
 
     function syncSettingsControls() {
       if (el("coordinateSystem")) el("coordinateSystem").value = state.coordinateSystem || "dd";
+      if (el("distanceUnit")) el("distanceUnit").value = normalizeDistanceUnit(state.distanceUnit);
+      if (el("bufferUnit")) el("bufferUnit").value = distanceUnitToBufferUnit(state.distanceUnit);
       if (el("unitScale")) el("unitScale").value = Math.round((state.unitIconScale || 1) * 100);
       if (el("pointScale")) el("pointScale").value = Math.round((state.pointIconScale || 1) * 100);
       if (el("unitScaleValue")) el("unitScaleValue").textContent = `${Math.round((state.unitIconScale || 1) * 100)}%`;
@@ -3028,6 +3324,17 @@
       updateCoordinatePanel();
       refreshLabelsAndMeasurements();
       updateCursorReadout();
+      scheduleSave();
+    }
+
+    function setDistanceUnit(value) {
+      pushUndo("distance-unit", { coalesceMs: 1000 });
+      state.distanceUnit = normalizeDistanceUnit(value);
+      if (el("bufferUnit")) el("bufferUnit").value = distanceUnitToBufferUnit(state.distanceUnit);
+      updateCoordinatePanel();
+      updateMeasurementPanel();
+      refreshLabelsAndMeasurements();
+      syncSettingsControls();
       scheduleSave();
     }
 
@@ -3411,6 +3718,10 @@
       const dLat = target.lat - center.lat;
       const dLng = target.lng - center.lng;
       g.latlngs = points.map((p) => ({ lat: p.lat + dLat, lng: p.lng + dLng }));
+      if (kind === "exportArea") {
+        const bounds = L.latLngBounds(g.latlngs);
+        g.bounds = { north: bounds.getNorth(), south: bounds.getSouth(), east: bounds.getEast(), west: bounds.getWest() };
+      }
       return g;
     }
 
@@ -3426,6 +3737,7 @@
         unit: "Unit",
         line: "Line",
         polygon: "Polygon",
+        exportArea: "Export area",
         circle: "Circle",
         text: "Text box"
       }[kind] || kind || "Object";
@@ -3447,6 +3759,7 @@
       const list = el("objectList");
       list.innerHTML = "";
       updateActiveLayerSummary();
+      updateExportAreaButton();
       const objects = Array.from(state.objects.values()).sort((a, b) => b.z - a.z);
       const layerEntries = Array.from(state.drawLayers.values());
       layerEntries.forEach((drawLayer) => {
@@ -3526,6 +3839,25 @@
       });
       const orphanObjects = objects.filter((obj) => !state.drawLayers.has(obj.drawLayerId));
       orphanObjects.forEach((obj) => list.appendChild(makeObjectRow(obj)));
+      updateExportAreaButton();
+    }
+
+    function exportAreaObjects() {
+      return Array.from(state.objects.values()).filter((obj) => obj.kind === "exportArea");
+    }
+
+    function visibleExportAreaObjects() {
+      return exportAreaObjects().filter(isObjectVisible);
+    }
+
+    function updateExportAreaButton() {
+      const button = el("saveExportArea");
+      if (!button) return;
+      const count = exportAreaObjects().length;
+      button.disabled = count === 0;
+      button.title = count
+        ? `Export one of ${count} drawn export area${count === 1 ? "" : "s"} as PNG`
+        : "Draw an export area before exporting an area PNG";
     }
 
     function setActiveLayer(id) {
@@ -3698,7 +4030,7 @@
         bubblingMouseEvents: false
       };
       if (obj.kind === "line") obj.hitLayer = L.polyline(obj.layer.getLatLngs(), options);
-      if (obj.kind === "polygon") obj.hitLayer = L.polygon(obj.layer.getLatLngs(), options);
+      if (obj.kind === "polygon" || obj.kind === "exportArea") obj.hitLayer = L.polygon(obj.layer.getLatLngs(), options);
       if (obj.kind === "circle") obj.hitLayer = L.circle(obj.layer.getLatLng(), { ...options, radius: obj.layer.getRadius() });
       if (!obj.hitLayer) return;
       obj.hitLayer.on("click", (event) => {
@@ -3825,7 +4157,7 @@
             out.push(makeStaticText(mid, formatDistance(d), "measurement-label", obj.labelStyle));
           }
           out.push(makeStaticText(objectCenter(obj), `Total ${formatDistance(total)}`, "measurement-label", obj.labelStyle));
-        } else if (obj.kind === "polygon") {
+        } else if (obj.kind === "polygon" || obj.kind === "exportArea") {
           const ring = obj.layer.getLatLngs()[0] || [];
           let perimeter = 0;
           for (let i = 0; i < ring.length; i++) {
@@ -3912,7 +4244,7 @@
       if (obj.kind === "line") {
         return turf.lineString(obj.layer.getLatLngs().map((p) => [p.lng, p.lat]));
       }
-      if (obj.kind === "polygon") {
+      if (obj.kind === "polygon" || obj.kind === "exportArea") {
         let ring = polygonRing(obj).map((p) => [p.lng, p.lat]);
         if (ring.length && (ring[0][0] !== ring[ring.length - 1][0] || ring[0][1] !== ring[ring.length - 1][1])) ring.push(ring[0]);
         return turf.polygon([ring]);
@@ -4155,8 +4487,37 @@
     }
 
     function formatBufferDistance(buffer) {
-      const meters = turf.convertLength(buffer.distance, turfUnits(buffer.unit), "meters");
-      return formatDistance(meters);
+      return formatDistance(bufferDistanceMeters(buffer));
+    }
+
+    function bufferDistanceMeters(buffer = {}) {
+      const distance = Number(buffer.distance || 0);
+      if (!Number.isFinite(distance)) return 0;
+      try {
+        return turf.convertLength(distance, turfUnits(buffer.unit), "meters");
+      } catch {
+        return distance;
+      }
+    }
+
+    function bufferForStorage(buffer = {}) {
+      const stored = {
+        ...buffer,
+        distance: bufferDistanceMeters(buffer),
+        unit: "meters"
+      };
+      if (buffer.style) stored.style = { ...buffer.style };
+      return stored;
+    }
+
+    function buffersForStorage(buffers = []) {
+      return (buffers || []).map(bufferForStorage);
+    }
+
+    function formatStoredBufferSummary(buffer) {
+      const stored = bufferForStorage(buffer);
+      const distance = Number(stored.distance.toFixed(3)).toString();
+      return `${distance} meters ${stored.side || "both"}`;
     }
 
     function bearingDegrees(from, to) {
@@ -4301,11 +4662,17 @@
       } else if (kind === "circle") {
         if (pts.length < 2) return status("A circle needs center and edge coordinates.");
         createObject("circle", L.circle(pts[0], { radius: pts[0].distanceTo(pts[1]), pane: "objects" }));
+      } else if (kind === "exportArea") {
+        if (pts.length < 2) return status("An export area needs two opposite corners.");
+        createObject("exportArea", L.rectangle(L.latLngBounds(pts[0], pts[1]), { pane: "objects" }), {
+          label: "Export area",
+          style: exportAreaStyle()
+        });
       } else if (kind === "polygon") {
         if (pts.length < 3) return status("A polygon needs at least three points.");
         createObject("polygon", L.polygon(pts, { pane: "objects" }));
       }
-      status(`${kind} created from coordinates.`);
+      status(`${objectKindLabel(kind === "point" ? "marker" : kind)} created from coordinates.`);
     }
 
     function loadSampleProject() {
@@ -4313,6 +4680,7 @@
       pushUndo("load-sample");
       clearAll(false);
       setMapTitle("GeoSketch Sample Map", false);
+      setMapNotes("Sample map for GeoSketch v1.05. Repository: https://github.com/jmkorhonen/geosketch", false);
       setShowMapTitle(true, false);
       state.drawLayers.clear();
       const obsLayerId = uid("layer");
@@ -4337,8 +4705,8 @@
         endpoints: { start: "measure", end: "arrow" },
         buffers: [{
           id: uid("buffer"),
-          distance: 0.5,
-          unit: "kilometers",
+          distance: 500,
+          unit: "meters",
           showMeasurements: true,
           showOverlaps: true,
           style: { color: "#64b5f6", fillColor: "#64b5f6", opacity: 0.8, fillOpacity: 0.16, weight: 2, dashArray: "6 6", pattern: "" }
@@ -4434,8 +4802,8 @@
     function enableDraw(shape) {
       map.pm.disableDraw();
       clearDrawingMeasurement();
-      state.pendingDrawKind = shape === "Unit" ? "unit" : null;
-      state.activeDrawShape = shape === "Unit" ? "Marker" : shape;
+      state.pendingDrawKind = shape === "Unit" ? "unit" : shape === "ExportArea" ? "exportArea" : null;
+      state.activeDrawShape = shape === "Unit" ? "Marker" : shape === "ExportArea" ? "Rectangle" : shape;
       map.getContainer().classList.toggle("placing-marker", shape === "Marker" || shape === "Unit");
       syncDrawingInteractivity();
       if (shape === "Text") {
@@ -4450,15 +4818,15 @@
         });
         return;
       }
-      const requestedShape = shape === "Unit" ? "Marker" : shape;
+      const requestedShape = shape === "Unit" ? "Marker" : shape === "ExportArea" ? "Rectangle" : shape;
       const mapShape = requestedShape === "Line" ? "Line" : requestedShape;
       map.pm.enableDraw(mapShape, {
         snappable: true,
-        pathOptions: { ...baseStyle(), pane: "objects" },
+        pathOptions: { ...(shape === "ExportArea" ? exportAreaStyle() : baseStyle()), pane: "objects" },
         markerStyle: { draggable: true, pane: "objects" },
         tooltips: requestedShape !== "Marker"
       });
-      status(`Drawing ${shape.toLowerCase()}.`);
+      status(`Drawing ${shape === "ExportArea" ? "export area" : shape.toLowerCase()}.`);
     }
 
     function finishActiveDrawing() {
@@ -4466,7 +4834,7 @@
       if (!shape || shape === "Marker" || shape === "Text") return false;
       const workingLayer = state.drawingMeasure?.layer;
       if (shape === "Line" && (workingLayer?.getLatLngs?.() || []).length < 2) return false;
-      if (shape === "Polygon") {
+      if (shape === "Polygon" || shape === "Rectangle") {
         const rings = workingLayer?.getLatLngs?.() || [];
         const ring = Array.isArray(rings[0]) ? rings[0] : rings;
         if (ring.length < 3) return false;
@@ -4512,12 +4880,13 @@
       if (event.shape === "Line") kind = "line";
       if (event.shape === "Circle") kind = "circle";
       if (event.shape === "Polygon" || event.shape === "Rectangle") kind = "polygon";
+      if (event.shape === "Rectangle" && state.pendingDrawKind === "exportArea") kind = "exportArea";
       if (isPointLike(kind)) layer.dragging?.enable();
       state.pendingDrawKind = null;
       state.activeDrawShape = null;
       syncDrawingInteractivity();
-      createObject(kind, layer);
-      status(`${kind} created.`);
+      createObject(kind, layer, kind === "exportArea" ? { label: "Export area", style: exportAreaStyle() } : {});
+      status(`${objectKindLabel(kind)} created.`);
     });
 
     function clearDrawingMeasurement() {
@@ -4563,7 +4932,7 @@
             text = `Seg ${formatDistance(current)} | Total ${formatDistance(total)} | Brg ${formatBearing(bearing)}`;
             at = pts[pts.length - 1];
           }
-        } else if (obj.kind === "polygon") {
+        } else if (obj.kind === "polygon" || obj.kind === "exportArea") {
           const ring = obj.layer.getLatLngs()[0] || [];
           if (ring.length > 1) {
             let perimeter = 0;
@@ -4618,13 +4987,20 @@
             }
             if (at) text = `Seg ${formatDistance(current)} | Total ${formatDistance(total)} | Brg ${formatBearing(bearing)}`;
           }
-        } else if (shape === "Polygon" && layer.getLatLngs) {
+        } else if ((shape === "Polygon" || shape === "Rectangle") && layer.getLatLngs) {
           const ring = layer.getLatLngs()[0] || layer.getLatLngs();
           if (ring.length > 1) {
             let total = 0;
             for (let i = 1; i < ring.length; i++) total += ring[i - 1].distanceTo(ring[i]);
-            text = formatDistance(total);
-            at = ring[ring.length - 1];
+            if (shape === "Rectangle" && layer.getBounds) {
+              const bounds = layer.getBounds();
+              const feature = turf.polygon([rectangleCorners(bounds).map((p) => [p.lng, p.lat]).concat([[bounds.getNorthWest().lng, bounds.getNorthWest().lat]])]);
+              text = `${formatArea(turf.area(feature))} | P ${formatDistance(total)}`;
+              at = bounds.getCenter();
+            } else {
+              text = formatDistance(total);
+              at = ring[ring.length - 1];
+            }
           }
         } else if (shape === "Circle" && layer.getRadius) {
           text = `R ${formatDistance(layer.getRadius())}`;
@@ -4643,10 +5019,10 @@
 
     function toggleEdit() {
       const obj = selectedObj();
-      if (!obj || !["line", "polygon", "circle"].includes(obj.kind)) {
+      if (!obj || !["line", "polygon", "circle", "exportArea"].includes(obj.kind)) {
         state.editOn = false;
         applyInteractionModes();
-        return status("Select a line, polygon, or circle to edit points.");
+        return status("Select a line, polygon, circle, or export area to edit.");
       }
       if (obj?.locked) return status("Unlock the object before editing it.");
       const next = !state.editOn;
@@ -4753,6 +5129,114 @@
       });
     }
 
+    async function confirmNewMapAction() {
+      const dialog = el("newMapConfirmDialog");
+      if (!dialog) {
+        const choice = prompt('Unsaved drawing changes. Type "save" to save GeoJSON first, "discard" to clear without saving, or "cancel" to keep working.', "save");
+        if (!choice || choice.toLowerCase().startsWith("c")) return "cancel";
+        if (choice.toLowerCase().startsWith("s")) return "save";
+        if (choice.toLowerCase().startsWith("d")) return "discard";
+        return "cancel";
+      }
+      dialog.hidden = false;
+      return new Promise((resolve) => {
+        const close = (action) => {
+          dialog.hidden = true;
+          el("saveNewMapConfirm").removeEventListener("click", save);
+          el("discardNewMapConfirm").removeEventListener("click", discard);
+          el("cancelNewMapConfirm").removeEventListener("click", cancel);
+          dialog.removeEventListener("click", backdrop);
+          document.removeEventListener("keydown", keyHandler);
+          resolve(action);
+        };
+        const save = () => close("save");
+        const discard = () => close("discard");
+        const cancel = () => close("cancel");
+        const backdrop = (event) => {
+          if (event.target === dialog) close("cancel");
+        };
+        const keyHandler = (event) => {
+          if (event.key === "Escape") close("cancel");
+        };
+        el("saveNewMapConfirm").addEventListener("click", save);
+        el("discardNewMapConfirm").addEventListener("click", discard);
+        el("cancelNewMapConfirm").addEventListener("click", cancel);
+        dialog.addEventListener("click", backdrop);
+        document.addEventListener("keydown", keyHandler);
+        el("cancelNewMapConfirm").focus();
+      });
+    }
+
+    function readFileText(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error || new Error("File read failed"));
+        reader.readAsText(file);
+      });
+    }
+
+    function normalizedLayerName(name) {
+      return String(name || "").trim().toLowerCase();
+    }
+
+    function geoJsonLayerMergeNames(geojson) {
+      const current = new Map(Array.from(state.drawLayers.values()).map((layer) => [normalizedLayerName(layer.name), layer.name]));
+      return (geojson.properties?.drawLayers || [])
+        .map((layer) => layer.name || "")
+        .filter((name) => current.has(normalizedLayerName(name)));
+    }
+
+    async function confirmLoadGeoJsonProject(file, geojson) {
+      if (!state.objects.size) return "discard";
+      const dialog = el("loadGeoJsonConfirmDialog");
+      const mergeNames = geoJsonLayerMergeNames(geojson);
+      const featureCount = Array.isArray(geojson.features) ? geojson.features.length : 0;
+      const layerNote = mergeNames.length
+        ? `If you keep existing objects, imported layers with matching names will be combined: ${mergeNames.join(", ")}.`
+        : "If you keep existing objects, imported layers will be added as separate layers; no same-name layers will be combined.";
+      if (!dialog) {
+        const choice = prompt(`This map already has ${state.objects.size} object(s). Loading "${file.name}" adds ${featureCount} feature(s).\n${layerNote}\nType "keep", "save", "discard", or "cancel".`, "keep");
+        const normalized = String(choice || "").toLowerCase();
+        if (normalized.startsWith("k")) return "keep";
+        if (normalized.startsWith("s")) return "save";
+        if (normalized.startsWith("d")) return "discard";
+        return "cancel";
+      }
+      el("loadGeoJsonConfirmText").textContent = `This map already has ${state.objects.size} object(s). Loading "${file.name}" adds ${featureCount} feature(s). Keep existing objects, save them first, discard them, or cancel.`;
+      el("loadGeoJsonLayerText").textContent = layerNote;
+      dialog.hidden = false;
+      return new Promise((resolve) => {
+        const close = (action) => {
+          dialog.hidden = true;
+          el("keepLoadGeoJsonConfirm").removeEventListener("click", keep);
+          el("saveLoadGeoJsonConfirm").removeEventListener("click", save);
+          el("discardLoadGeoJsonConfirm").removeEventListener("click", discard);
+          el("cancelLoadGeoJsonConfirm").removeEventListener("click", cancel);
+          dialog.removeEventListener("click", backdrop);
+          document.removeEventListener("keydown", keyHandler);
+          resolve(action);
+        };
+        const keep = () => close("keep");
+        const save = () => close("save");
+        const discard = () => close("discard");
+        const cancel = () => close("cancel");
+        const backdrop = (event) => {
+          if (event.target === dialog) close("cancel");
+        };
+        const keyHandler = (event) => {
+          if (event.key === "Escape") close("cancel");
+        };
+        el("keepLoadGeoJsonConfirm").addEventListener("click", keep);
+        el("saveLoadGeoJsonConfirm").addEventListener("click", save);
+        el("discardLoadGeoJsonConfirm").addEventListener("click", discard);
+        el("cancelLoadGeoJsonConfirm").addEventListener("click", cancel);
+        dialog.addEventListener("click", backdrop);
+        document.addEventListener("keydown", keyHandler);
+        el("keepLoadGeoJsonConfirm").focus();
+      });
+    }
+
     async function deleteSelected() {
       const obj = selectedObj();
       if (!obj) return;
@@ -4787,7 +5271,7 @@
         style: obj.style,
         textStyle: obj.textStyle,
         labelStyle: obj.labelStyle,
-        buffers: obj.buffers,
+        buffers: buffersForStorage(obj.buffers),
         icon: obj.icon,
         iconSize: obj.iconSize,
         endpoints: obj.endpoints,
@@ -4812,9 +5296,11 @@
           app: APP_NAME,
           appVersion: APP_VERSION,
           title: state.mapTitle,
+          mapNotes: state.mapNotes,
           showMapTitle: state.showMapTitle,
           mapTitleStyle: normalizeTitleStyle(state.mapTitleStyle),
           coordinateSystem: state.coordinateSystem,
+          distanceUnit: state.distanceUnit,
           unitIconScale: state.unitIconScale,
           pointIconScale: state.pointIconScale,
           attribution: ATTRIBUTION_NOTE,
@@ -4826,9 +5312,15 @@
       }, null, 2);
     }
 
-    function exportGeoJSON(filename = safeMapFilename("geojson")) {
-      download(filename, makeGeoJSONText(), "application/geo+json");
-      state.dirty = false;
+    function exportGeoJSON(filename = null) {
+      const resolvedFilename = typeof filename === "string" && filename.trim()
+        ? filename
+        : safeMapFilename("geojson");
+      download(resolvedFilename, makeGeoJSONText(), "application/geo+json");
+      markGeoJsonSaved(resolvedFilename);
+      showFileSaveConfirmation(resolvedFilename, "GeoJSON saved");
+      status(`Saved GeoJSON as ${resolvedFilename}.`);
+      return resolvedFilename;
     }
 
     function exportGeoJSONAs() {
@@ -4843,13 +5335,16 @@
         status("No visible layers to export.");
         return;
       }
+      const filenames = [];
       layers.forEach((layer, index) => {
         const filename = sanitizeFilename(layer.name || `Layer_${index + 1}`, "geojson");
+        filenames.push(filename);
         setTimeout(() => {
           download(filename, makeGeoJSONText([layer.id]), "application/geo+json");
         }, index * 200);
       });
-      state.dirty = false;
+      const fileList = filenames.length <= 3 ? filenames.join(", ") : `${filenames.length} files`;
+      showFileSaveConfirmation(fileList, "Layer GeoJSON saved");
       status(`Exported ${layers.length} visible layer${layers.length === 1 ? "" : "s"} as GeoJSON.`);
     }
 
@@ -4866,54 +5361,414 @@
         sidc: obj.kind === "unit" || obj.icon?.kind === "app6" ? obj.icon.sidc : "",
         measurement: measurementSummary(obj),
         coordinates: objectCoordinateText(obj),
-        buffers: obj.buffers.map((b) => `${b.distance} ${b.unit} ${b.side}`).join("; "),
+        buffers: obj.buffers.map(formatStoredBufferSummary).join("; "),
         geojson: JSON.stringify(toTurfFeature(obj)?.geometry || null)
       }));
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.json_to_sheet(rows);
       XLSX.utils.book_append_sheet(wb, ws, "Objects");
-      XLSX.writeFile(wb, safeMapFilename("xlsx"));
-      state.dirty = false;
+      const filename = safeMapFilename("xlsx");
+      XLSX.writeFile(wb, filename);
+      showFileSaveConfirmation(filename, "Excel saved");
+      status(`Saved Excel export as ${filename}.`);
+    }
+
+    async function renderMapPngBlob(clip = null) {
+      const node = el("map");
+      let blob;
+      if (window.html2canvas) {
+        const canvas = await html2canvas(node, {
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: "#101418",
+          width: node.clientWidth,
+          height: node.clientHeight,
+          scale: 1,
+          scrollX: 0,
+          scrollY: 0,
+          ignoreElements: (element) => Boolean(element.closest?.(".leaflet-overlay-pane"))
+        });
+        const outputCanvas = clip ? cropCanvas(canvas, clip) : canvas;
+        drawVectorCanvasOverlay(outputCanvas, clip);
+        blob = await canvasToPngBlob(outputCanvas);
+        if (!blob) throw new Error("PNG renderer unavailable.");
+        return blob;
+      } else if (window.domtoimage) {
+        blob = await domtoimage.toBlob(node, {
+          width: node.clientWidth,
+          height: node.clientHeight,
+          cacheBust: true,
+          bgcolor: "#101418"
+        });
+      }
+      if (!blob) throw new Error("PNG renderer unavailable.");
+      if (!clip) return blob;
+      return cropPngBlob(blob, clip);
+    }
+
+    function canvasToPngBlob(canvas) {
+      return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+    }
+
+    function cropCanvasToBlob(source, clip) {
+      return canvasToPngBlob(cropCanvas(source, clip));
+    }
+
+    function cropCanvas(source, clip) {
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(clip.width));
+      canvas.height = Math.max(1, Math.round(clip.height));
+      canvas.getContext("2d").drawImage(source, clip.x, clip.y, clip.width, clip.height, 0, 0, canvas.width, canvas.height);
+      return canvas;
+    }
+
+    async function drawLeafletSvgOverlay(canvas) {
+      const node = el("map");
+      const mapRect = node.getBoundingClientRect();
+      const ctx = canvas.getContext("2d");
+      const svgs = Array.from(node.querySelectorAll(".leaflet-overlay-pane svg"));
+      for (const svg of svgs) {
+        const rect = svg.getBoundingClientRect();
+        if (rect.width < 1 || rect.height < 1) continue;
+        const clone = svg.cloneNode(true);
+        clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        clone.setAttribute("width", rect.width);
+        clone.setAttribute("height", rect.height);
+        clone.style.transform = "none";
+        clone.style.position = "static";
+        clone.style.left = "0";
+        clone.style.top = "0";
+        clone.querySelectorAll("path").forEach((path) => {
+          if (!path.getAttribute("fill")) path.setAttribute("fill", "none");
+        });
+        const text = new XMLSerializer().serializeToString(clone);
+        const url = URL.createObjectURL(new Blob([text], { type: "image/svg+xml;charset=utf-8" }));
+        try {
+          const image = new Image();
+          image.src = url;
+          await new Promise((resolve, reject) => {
+            image.onload = resolve;
+            image.onerror = reject;
+          });
+          ctx.drawImage(image, rect.left - mapRect.left, rect.top - mapRect.top, rect.width, rect.height);
+        } finally {
+          URL.revokeObjectURL(url);
+        }
+      }
+    }
+
+    function drawVectorCanvasOverlay(canvas, clip = null) {
+      const ctx = canvas.getContext("2d");
+      const objects = Array.from(state.objects.values())
+        .filter((obj) => !isPointLike(obj) && obj.kind !== "text" && isObjectVisible(obj))
+        .sort((a, b) => (a.z || 0) - (b.z || 0));
+      ctx.save();
+      if (clip) ctx.translate(-clip.x, -clip.y);
+      objects.forEach((obj) => {
+        (obj.buffers || []).forEach((buffer) => {
+          const feature = makeBufferFeature(obj, buffer);
+          if (feature) drawGeoJsonFeature(ctx, feature, normalizeBufferStyle(buffer.style || {}, obj));
+        });
+      });
+      objects.forEach((obj) => drawVectorObject(ctx, obj));
+      ctx.restore();
+    }
+
+    function drawVectorObject(ctx, obj) {
+      if (obj.kind === "line") {
+        drawLatLngPath(ctx, objectLatLngsForCanvas(obj), obj.style, false);
+      } else if (obj.kind === "polygon" || obj.kind === "exportArea") {
+        drawLatLngPath(ctx, objectLatLngsForCanvas(obj), obj.style, true);
+      } else if (obj.kind === "circle") {
+        drawCanvasCircle(ctx, obj);
+      }
+    }
+
+    function objectLatLngsForCanvas(obj) {
+      if (obj.kind === "line") return obj.layer?.getLatLngs?.() || serializeGeometry(obj).latlngs || [];
+      if (obj.kind === "polygon" || obj.kind === "exportArea") {
+        const live = obj.layer?.getLatLngs?.();
+        if (live?.length) return Array.isArray(live[0]) ? live[0] : live;
+        return serializeGeometry(obj).latlngs || [];
+      }
+      return [];
+    }
+
+    function drawCanvasCircle(ctx, obj) {
+      const center = map.latLngToContainerPoint(obj.layer.getLatLng());
+      const edge = map.latLngToContainerPoint(circleEdgePoint(obj.layer));
+      const radius = center.distanceTo(edge);
+      const style = obj.style || {};
+      ctx.save();
+      applyCanvasStyle(ctx, style);
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, radius, 0, Math.PI * 2);
+      if ((style.fillOpacity ?? 0.25) > 0) ctx.fill();
+      if ((style.weight ?? 3) > 0) ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawGeoJsonFeature(ctx, feature, style) {
+      if (!feature) return;
+      if (feature.type === "FeatureCollection") {
+        (feature.features || []).forEach((part) => drawGeoJsonFeature(ctx, part, style));
+        return;
+      }
+      const geometry = feature.type === "Feature" ? feature.geometry : feature;
+      if (!geometry) return;
+      if (geometry.type === "Polygon") {
+        drawPolygonCoordinates(ctx, geometry.coordinates, style);
+      } else if (geometry.type === "MultiPolygon") {
+        geometry.coordinates.forEach((polygon) => drawPolygonCoordinates(ctx, polygon, style));
+      } else if (geometry.type === "LineString") {
+        drawCoordinatePath(ctx, geometry.coordinates, style, false);
+      } else if (geometry.type === "MultiLineString") {
+        geometry.coordinates.forEach((line) => drawCoordinatePath(ctx, line, style, false));
+      }
+    }
+
+    function drawPolygonCoordinates(ctx, rings, style) {
+      ctx.save();
+      applyCanvasStyle(ctx, style);
+      ctx.beginPath();
+      (rings || []).forEach((ring) => addCoordinateRingToCanvasPath(ctx, ring));
+      if ((style.fillOpacity ?? 0.25) > 0) ctx.fill("evenodd");
+      if ((style.weight ?? 3) > 0) ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawCoordinatePath(ctx, coords, style, closePath) {
+      const points = (coords || []).map((coord) => L.latLng(coord[1], coord[0]));
+      drawLatLngPath(ctx, points, style, closePath);
+    }
+
+    function drawLatLngPath(ctx, latlngs, style = {}, closePath = false) {
+      const points = (latlngs || []).filter(Boolean);
+      if (points.length < (closePath ? 3 : 2)) return;
+      ctx.save();
+      applyCanvasStyle(ctx, style);
+      ctx.beginPath();
+      points.forEach((latlng, index) => {
+        const point = map.latLngToContainerPoint(latlng);
+        if (index === 0) ctx.moveTo(point.x, point.y);
+        else ctx.lineTo(point.x, point.y);
+      });
+      if (closePath) ctx.closePath();
+      if (closePath && (style.fillOpacity ?? 0.25) > 0) ctx.fill();
+      if ((style.weight ?? 3) > 0) ctx.stroke();
+      ctx.restore();
+    }
+
+    function addCoordinateRingToCanvasPath(ctx, ring) {
+      (ring || []).forEach((coord, index) => {
+        const point = map.latLngToContainerPoint([coord[1], coord[0]]);
+        if (index === 0) ctx.moveTo(point.x, point.y);
+        else ctx.lineTo(point.x, point.y);
+      });
+      ctx.closePath();
+    }
+
+    function applyCanvasStyle(ctx, style = {}) {
+      ctx.strokeStyle = hexToRgba(style.color || "#ffcc4d", style.opacity ?? 1);
+      ctx.fillStyle = hexToRgba(style.fillColor || style.color || "#ffcc4d", style.fillOpacity ?? 0.25);
+      ctx.lineWidth = Math.max(0, Number(style.weight ?? 3));
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      const dash = String(style.dashArray || "").trim().split(/\s+/).map(Number).filter((value) => Number.isFinite(value) && value > 0);
+      ctx.setLineDash(dash);
+    }
+
+    async function cropPngBlob(blob, clip) {
+      const url = URL.createObjectURL(blob);
+      try {
+        const image = new Image();
+        image.src = url;
+        await new Promise((resolve, reject) => {
+          image.onload = resolve;
+          image.onerror = reject;
+        });
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(clip.width));
+        canvas.height = Math.max(1, Math.round(clip.height));
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(image, clip.x, clip.y, clip.width, clip.height, 0, 0, canvas.width, canvas.height);
+        return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    async function withMapExportRender(work) {
+      const hiddenNodes = Array.from(document.querySelectorAll(".no-export"));
+      const node = el("map");
+      try {
+        hiddenNodes.forEach((node) => { node.dataset.exportDisplay = node.style.display || ""; node.style.display = "none"; });
+        node.classList.add("export-render");
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        return await work();
+      } finally {
+        node.classList.remove("export-render");
+        hiddenNodes.forEach((node) => { node.style.display = node.dataset.exportDisplay || ""; delete node.dataset.exportDisplay; });
+      }
+    }
+
+    function downloadBlob(filename, blob, type = "image/png") {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.type = type;
+      a.click();
+      URL.revokeObjectURL(url);
     }
 
     async function exportScreenshot() {
-      status("Rendering screenshot…");
-      const hiddenNodes = Array.from(document.querySelectorAll(".no-export"));
+      status("Rendering visible map PNG…");
       try {
-        hiddenNodes.forEach((node) => { node.dataset.exportDisplay = node.style.display || ""; node.style.display = "none"; });
-        await new Promise((resolve) => requestAnimationFrame(resolve));
-        const node = el("map");
-        let blob;
-        if (window.domtoimage) {
-          blob = await domtoimage.toBlob(node, {
-            width: node.clientWidth,
-            height: node.clientHeight,
-            cacheBust: true,
-            bgcolor: "#101418"
-          });
-        } else {
-          const canvas = await html2canvas(node, {
-            useCORS: true,
-            allowTaint: false,
-            backgroundColor: "#101418",
-            width: node.clientWidth,
-            height: node.clientHeight,
-            scrollX: 0,
-            scrollY: 0
-          });
-          blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
-        }
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = safeMapFilename("png");
-        a.click();
-        URL.revokeObjectURL(url);
-        status("Screenshot saved.");
+        const blob = await withMapExportRender(() => renderMapPngBlob());
+        const filename = safeMapFilename("png");
+        downloadBlob(filename, blob);
+        showFileSaveConfirmation(filename, "Visible PNG saved");
+        status(`Saved visible map PNG as ${filename}.`);
       } catch (error) {
-        status(`Screenshot failed: ${error.message}`);
+        status(`PNG export failed: ${error.message}`);
+      }
+    }
+
+    function chooseExportAreaForPng() {
+      const areas = exportAreaObjects();
+      if (!areas.length) return null;
+      const visibleAreas = visibleExportAreaObjects();
+      const selected = selectedObj();
+      if (selected?.kind === "exportArea" && isObjectVisible(selected)) return selected;
+      if (visibleAreas.length === 1) return visibleAreas[0];
+      const choices = (visibleAreas.length ? visibleAreas : areas);
+      if (choices.length === 1) return choices[0];
+      const defaultIndex = selected?.kind === "exportArea"
+        ? Math.max(0, choices.findIndex((obj) => obj.id === selected.id))
+        : 0;
+      const menu = choices.map((obj, index) => `${index + 1}: ${objectName(obj)}${isObjectVisible(obj) ? "" : " (hidden)"}`).join("\n");
+      const answer = prompt(`Select export area to save as PNG:\n${menu}`, String(defaultIndex + 1));
+      if (answer === null) return null;
+      const byIndex = choices[Number(answer.trim()) - 1];
+      const byName = choices.find((obj) => objectName(obj).toLowerCase() === answer.trim().toLowerCase());
+      return byIndex || byName || null;
+    }
+
+    function clipForBounds(bounds) {
+      const node = el("map");
+      const nw = map.latLngToContainerPoint(bounds.getNorthWest());
+      const se = map.latLngToContainerPoint(bounds.getSouthEast());
+      const x1 = Math.max(0, Math.min(nw.x, se.x));
+      const y1 = Math.max(0, Math.min(nw.y, se.y));
+      const x2 = Math.min(node.clientWidth, Math.max(nw.x, se.x));
+      const y2 = Math.min(node.clientHeight, Math.max(nw.y, se.y));
+      return { x: x1, y: y1, width: x2 - x1, height: y2 - y1 };
+    }
+
+    function waitForMapFrame() {
+      return new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    }
+
+    function wait(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    function visibleTileLayers() {
+      return Array.from(tiles.values()).filter((layer) => map.hasLayer(layer));
+    }
+
+    function mapTilesSettled() {
+      const activeTiles = visibleTileLayers();
+      const loadingLayer = activeTiles.some((layer) => layer._loading);
+      const loadingImages = Array.from(el("map").querySelectorAll(".leaflet-tile"))
+        .some((image) => !image.complete);
+      return !loadingLayer && !loadingImages;
+    }
+
+    async function waitForTilesToSettle(timeoutMs = 5000) {
+      await waitForMapFrame();
+      const activeTiles = visibleTileLayers();
+      if (!activeTiles.length || mapTilesSettled()) {
+        await waitForMapFrame();
+        return;
+      }
+      await new Promise((resolve) => {
+        let done = false;
+        const cleanup = () => {
+          clearTimeout(timer);
+          activeTiles.forEach((layer) => {
+            layer.off("load", check);
+            layer.off("tileload", check);
+            layer.off("tileerror", check);
+          });
+        };
+        const finish = () => {
+          if (done) return;
+          done = true;
+          cleanup();
+          resolve();
+        };
+        const check = () => {
+          if (mapTilesSettled()) finish();
+        };
+        const timer = setTimeout(finish, timeoutMs);
+        activeTiles.forEach((layer) => {
+          layer.on("load", check);
+          layer.on("tileload", check);
+          layer.on("tileerror", check);
+        });
+        check();
+      });
+      await waitForMapFrame();
+      await wait(250);
+      await waitForMapFrame();
+    }
+
+    function setExportAreaGuidesVisible(visible) {
+      for (const obj of exportAreaObjects()) {
+        if (!visible && obj._exportAreaPreviousVisible === undefined) {
+          obj._exportAreaPreviousVisible = obj.visible;
+          obj.visible = false;
+        } else if (visible && obj._exportAreaPreviousVisible !== undefined) {
+          obj.visible = obj._exportAreaPreviousVisible;
+          delete obj._exportAreaPreviousVisible;
+        }
+      }
+      syncLayerVisibility();
+    }
+
+    async function exportAreaScreenshot() {
+      const area = chooseExportAreaForPng();
+      if (!area) return status("No export area selected.");
+      const bounds = exportAreaBounds(area);
+      if (!bounds.isValid()) return status("Selected export area has invalid bounds.");
+      const originalView = { center: map.getCenter(), zoom: map.getZoom() };
+      const wasRestoring = state.restoring;
+      status(`Rendering ${objectName(area)} as PNG…`);
+      try {
+        state.restoring = true;
+        await withMapExportRender(async () => {
+          setExportAreaGuidesVisible(false);
+          map.fitBounds(bounds, { animate: false, padding: [24, 24] });
+          await waitForMapFrame();
+          status("Waiting for map tiles before PNG export…");
+          await waitForTilesToSettle();
+          const clip = clipForBounds(bounds);
+          if (clip.width < 2 || clip.height < 2) throw new Error("Export area is outside the rendered map view.");
+          const blob = await renderMapPngBlob(clip);
+          const filename = sanitizeFilename(`${state.mapTitle || APP_NAME}_${objectName(area)}`, "png");
+          downloadBlob(filename, blob);
+          showFileSaveConfirmation(filename, "Area PNG saved");
+          status(`Saved export area PNG as ${filename}.`);
+        });
+      } catch (error) {
+        status(`Area PNG export failed: ${error.message}`);
       } finally {
-        hiddenNodes.forEach((node) => { node.style.display = node.dataset.exportDisplay || ""; delete node.dataset.exportDisplay; });
+        map.setView(originalView.center, originalView.zoom, { animate: false });
+        setExportAreaGuidesVisible(true);
+        updateSelectionHalo();
+        state.restoring = wasRestoring;
       }
     }
 
@@ -4927,14 +5782,28 @@
   <title>${escapeHtml(state.mapTitle || "GeoSketch Interactive Map")}</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <style>
+    :root { --panel-width: min(292px, calc(100vw - 28px)); }
     html, body, #map { height: 100%; margin: 0; }
     body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #101418; color: #e7edf4; }
-    #panel { position: absolute; z-index: 1000; top: 10px; right: 10px; width: 260px; max-height: calc(100vh - 20px); overflow: auto; background: rgba(23,29,35,.94); border: 1px solid #303b47; border-radius: 8px; padding: 10px; box-shadow: 0 8px 28px rgba(0,0,0,.32); }
+    #panel { position: absolute; z-index: 1000; top: 0; left: 0; box-sizing: border-box; width: var(--panel-width); height: 100%; overflow: auto; background: rgba(23,29,35,.96); border: 1px solid #303b47; border-left: 0; border-radius: 0 8px 8px 0; padding: 10px; box-shadow: 0 8px 28px rgba(0,0,0,.32); transform: translateX(calc(-100% - 1px)); transition: transform .18s ease; }
+    body.export-panel-open #panel { transform: translateX(0); }
+    #panelTab { position: absolute; z-index: 1001; top: 82px; left: 0; width: 14px; height: 82px; padding: 0; border: 1px solid #52745f; border-left: 0; border-radius: 0 6px 6px 0; background: rgba(126,208,166,.82); color: #0e1511; box-shadow: 0 4px 14px rgba(0,0,0,.28); font-size: 13px; font-weight: 900; line-height: 1; cursor: pointer; transition: left .18s ease, background .12s ease; }
+    #panelTab:hover { background: rgba(126,208,166,.98); }
+    body.export-panel-open #panelTab { left: var(--panel-width); }
     #mapTitleOverlay { position: absolute; z-index: 900; top: 12px; left: 50%; transform: translateX(-50%); max-width: min(720px, calc(100% - 80px)); padding: 5px 12px; border: 1px solid rgba(255,255,255,.22); border-radius: 6px; background: rgba(12,16,20,.78); color: #f2f6fb; font-size: 17px; font-weight: 700; text-align: center; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     h1 { font-size: 14px; margin: 0 0 8px; }
-    h2 { font-size: 11px; margin: 10px 0 6px; color: #c7d0da; text-transform: uppercase; letter-spacing: .08em; }
+    .map-notes { margin: 0 0 10px; color: #c7d0da; font-size: 11px; line-height: 1.35; white-space: normal; overflow-wrap: anywhere; }
+    .map-notes a { color: #7ed0a6; text-decoration: none; }
+    .map-notes a:hover { text-decoration: underline; }
+    h2 { font-size: 11px; margin: 9px 0 5px; color: #c7d0da; text-transform: uppercase; letter-spacing: .08em; }
+    details { margin-top: 8px; border-top: 1px solid #303b47; padding-top: 8px; }
+    summary { cursor: pointer; color: #e7edf4; font-size: 12px; font-weight: 700; user-select: none; }
     label { display: grid; grid-template-columns: auto 1fr; gap: 6px; align-items: center; font-size: 12px; margin: 5px 0; color: #d9e1ea; }
     input[type="range"] { grid-column: 1 / -1; width: 100%; }
+    .info-copy { color: #c7d0da; font-size: 11px; line-height: 1.35; }
+    .info-copy p { margin: 7px 0; }
+    .info-copy a { color: #7ed0a6; text-decoration: none; }
+    .info-copy a:hover { text-decoration: underline; }
     .object-label, .measurement-label { background: rgba(12,16,20,.82); color: #f2f6fb; border: 1px solid rgba(255,255,255,.22); border-radius: 4px; padding: 2px 5px; font-size: 11px; white-space: nowrap; }
     .text-annotation { display: block; width: max-content; min-width: 40px; max-width: min(320px, calc(100vw - 40px)); padding: 4px 6px; background: rgba(255,250,230,.92); color: #161616; border: 1px solid rgba(0,0,0,.28); border-radius: 4px; font-size: 12px; line-height: 1.25; white-space: pre-wrap; overflow-wrap: break-word; box-shadow: 0 2px 8px rgba(0,0,0,.24); }
     .leaflet-div-icon { background: transparent; border: 0; }
@@ -4945,19 +5814,33 @@
     .endpoint-tick { width: 24px; height: 3px; border-radius: 2px; background: currentColor; }
     .popup-note { max-width: 280px; white-space: pre-wrap; }
     .popup-coords { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 11px; white-space: pre-wrap; }
-    #exportInfo { position: absolute; z-index: 900; left: 10px; bottom: 28px; max-width: min(620px, calc(100% - 20px)); padding: 5px 8px; background: rgba(12,16,20,.78); border: 1px solid rgba(255,255,255,.2); border-radius: 6px; color: #e7edf4; font-size: 10px; line-height: 1.3; pointer-events: none; }
+    .leaflet-bottom { bottom: 0 !important; }
   </style>
 </head>
 <body>
   <div id="map"></div>
   <div id="mapTitleOverlay" ${exportedState.showMapTitle && exportedState.mapTitle ? "" : "hidden"}>${escapeHtml(exportedState.mapTitle || "")}</div>
-  <div id="exportInfo">${escapeHtml(ATTRIBUTION_NOTE)}<br>${escapeHtml(PROJECTION_NOTE)}</div>
   <div id="panel">
     <h1>${escapeHtml(state.mapTitle || "GeoSketch Interactive Map")}</h1>
-    <div id="baseControls"></div>
-    <h2>Layers</h2>
-    <div id="drawControls"></div>
+    ${state.mapNotes ? `<div class="map-notes">${renderLinkedText(state.mapNotes)}</div>` : ""}
+    <details open>
+      <summary>Layer controls</summary>
+      <h2>Background maps</h2>
+      <div id="baseControls"></div>
+      <h2>Drawing layers</h2>
+      <div id="drawControls"></div>
+    </details>
+    <details>
+      <summary>Map details</summary>
+      <div class="info-copy">
+        <p>${escapeHtml(ATTRIBUTION_NOTE)}</p>
+        <p>${escapeHtml(PROJECTION_NOTE)}</p>
+        <p><a href="https://jmkorhonen.github.io/geosketch/" target="_blank" rel="noopener">GeoSketch live app</a></p>
+        <p><a href="https://github.com/jmkorhonen/geosketch" target="_blank" rel="noopener">GeoSketch repository</a></p>
+      </div>
+    </details>
   </div>
+  <button id="panelTab" type="button" aria-controls="panel" aria-expanded="false" title="Show map controls">&gt;</button>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"><\/script>
   <script src="https://cdn.jsdelivr.net/npm/milsymbol@3/dist/milsymbol.js"><\/script>
@@ -4966,7 +5849,7 @@
   <script>
     const tileConfigs = JSON.parse(document.getElementById("tile-configs").textContent);
     const saved = JSON.parse(document.getElementById("map-state").textContent);
-    const map = L.map("map").setView(saved.view?.center || [60.1699, 24.9384], saved.view?.zoom || 12);
+    const map = L.map("map", { zoomSnap: 0.25, zoomDelta: 1, wheelPxPerZoomLevel: 180 }).setView(saved.view?.center || [60.1699, 24.9384], saved.view?.zoom || 12);
     const objectGroup = L.layerGroup().addTo(map);
     const bufferGroup = L.layerGroup().addTo(map);
     const labels = L.layerGroup().addTo(map);
@@ -4984,12 +5867,23 @@
     });
 
     renderControls();
+    setupPanelToggle();
     applyTitleStyle();
     renderMap();
 
+    function setupPanelToggle() {
+      const button = document.getElementById("panelTab");
+      button.addEventListener("click", () => {
+        const open = document.body.classList.toggle("export-panel-open");
+        button.setAttribute("aria-expanded", String(open));
+        button.title = open ? "Hide map controls" : "Show map controls";
+        button.textContent = open ? "<" : ">";
+      });
+    }
+
     function renderControls() {
       const base = document.getElementById("baseControls");
-      base.innerHTML = "<h2>Base Layers</h2>";
+      base.innerHTML = "";
       tileConfigs.forEach((cfg) => {
         const layer = tiles.get(cfg.id);
         const row = document.createElement("label");
@@ -5043,6 +5937,7 @@
       if (obj.kind === "marker" || obj.kind === "unit") return L.marker(g.latlng, { icon: markerIcon(obj) });
       if (obj.kind === "text") return L.marker(g.latlng, { icon: textIcon(obj) });
       if (obj.kind === "line") return L.polyline(g.latlngs || []);
+      if (obj.kind === "exportArea") return L.rectangle(exportAreaBoundsFromGeometry(g));
       if (obj.kind === "polygon") return L.polygon(g.latlngs || []);
       if (obj.kind === "circle") return L.circle(g.latlng, { radius: g.radius || 1 });
       return null;
@@ -5074,7 +5969,7 @@
       const g = obj.geometry || {};
       if (obj.kind === "marker" || obj.kind === "unit" || obj.kind === "text") return turf.point([g.latlng.lng, g.latlng.lat]);
       if (obj.kind === "line") return turf.lineString((g.latlngs || []).map((p) => [p.lng, p.lat]));
-      if (obj.kind === "polygon") {
+      if (obj.kind === "polygon" || obj.kind === "exportArea") {
         const ring = (g.latlngs || []).map((p) => [p.lng, p.lat]);
         if (ring.length && (ring[0][0] !== ring[ring.length - 1][0] || ring[0][1] !== ring[ring.length - 1][1])) ring.push(ring[0]);
         return turf.polygon([ring]);
@@ -5308,6 +6203,11 @@
       return { lat: c[1], lng: c[0] };
     }
 
+    function exportAreaBoundsFromGeometry(g) {
+      if (g.bounds) return L.latLngBounds([g.bounds.south, g.bounds.west], [g.bounds.north, g.bounds.east]);
+      return L.latLngBounds(g.latlngs || []);
+    }
+
     function objectPopup(obj) {
       const title = obj.label || obj.text || obj.kind || "Object";
       let html = "<strong>" + escapeHtml(title) + "</strong>";
@@ -5321,6 +6221,10 @@
       if (obj.kind === "marker" || obj.kind === "unit" || obj.kind === "text") return formatLatLng(g.latlng);
       if (obj.kind === "line") return (g.latlngs || []).map((p, i) => (i + 1) + ". " + formatLatLng(p)).join("\\n");
       if (obj.kind === "polygon") return (g.latlngs || []).map((p, i) => (i + 1) + ". " + formatLatLng(p)).join("\\n");
+      if (obj.kind === "exportArea") {
+        const bounds = exportAreaBoundsFromGeometry(g);
+        return "Northwest: " + formatLatLng(bounds.getNorthWest()) + "\\nSoutheast: " + formatLatLng(bounds.getSouthEast());
+      }
       if (obj.kind === "circle") return "Center: " + formatLatLng(g.latlng) + "\\nRadius: " + formatDistance(g.radius || 1);
       return "";
     }
@@ -5339,7 +6243,7 @@
       } else if (obj.kind === "circle") {
         const p = turf.destination([g.latlng.lng, g.latlng.lat], (g.radius || 1) / 1000, 90, { units: "kilometers" }).geometry.coordinates;
         out.push(textMarker({ lat: p[1], lng: p[0] }, "R " + formatDistance(g.radius || 1), "measurement-label", obj.labelStyle));
-      } else if (obj.kind === "polygon") {
+      } else if (obj.kind === "polygon" || obj.kind === "exportArea") {
         out.push(textMarker(objectCenter(obj), formatArea(turf.area(toTurfFeature(obj))), "measurement-label", obj.labelStyle));
       }
       return out;
@@ -5403,15 +6307,34 @@
     }
 
     function turfUnits(unit) { return unit || "meters"; }
+    function normalizeDistanceUnit(unit) { return ["metric", "meters", "kilometers", "miles", "nauticalmiles"].includes(unit) ? unit : "metric"; }
+    function distanceUnitLabel(unit) { return { meters: "m", kilometers: "km", miles: "mi", nauticalmiles: "NM" }[unit] || ""; }
+    function distanceUnitToMeters(unit) { return { meters: 1, kilometers: 1000, miles: 1609.344, nauticalmiles: 1852 }[unit] || 1; }
     function formatBufferDistance(buffer) { return formatDistance(turf.convertLength(buffer.distance, turfUnits(buffer.unit), "meters")); }
-    function formatDistance(m) { return m >= 1000 ? (m / 1000).toFixed(2) + " km" : m.toFixed(0) + " m"; }
-    function formatArea(a) { return a >= 1000000 ? (a / 1000000).toFixed(2) + " km²" : a.toFixed(0) + " m²"; }
+    function formatDistance(m) {
+      const unit = normalizeDistanceUnit(saved.distanceUnit);
+      if (unit === "metric") return m >= 1000 ? (m / 1000).toFixed(2) + " km" : m.toFixed(0) + " m";
+      const value = m / distanceUnitToMeters(unit);
+      const precision = unit === "meters" ? 0 : value >= 100 ? 1 : 2;
+      return value.toFixed(precision) + " " + distanceUnitLabel(unit);
+    }
+    function formatArea(a) {
+      const unit = normalizeDistanceUnit(saved.distanceUnit);
+      if (unit === "metric") return a >= 1000000 ? (a / 1000000).toFixed(2) + " km²" : a.toFixed(0) + " m²";
+      const linear = distanceUnitToMeters(unit);
+      const value = a / (linear * linear);
+      const label = unit === "meters" ? "m²" : distanceUnitLabel(unit) + "²";
+      const precision = unit === "meters" ? 0 : value >= 100 ? 1 : 2;
+      return value.toFixed(precision) + " " + label;
+    }
     function escapeHtml(value) { return String(value ?? "").replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[ch])); }
   <\/script>
 </body>
 </html>`;
-      download(safeMapFilename("html"), html, "text/html");
-      state.dirty = false;
+      const filename = safeMapFilename("html");
+      download(filename, html, "text/html");
+      showFileSaveConfirmation(filename, "HTML map saved");
+      status(`Saved HTML map as ${filename}.`);
     }
 
     function measurementSummary(obj) {
@@ -5422,7 +6345,7 @@
           for (let i = 1; i < pts.length; i++) total += pts[i - 1].distanceTo(pts[i]);
           return formatDistance(total);
         }
-        if (obj.kind === "polygon") return formatArea(turf.area(toTurfFeature(obj)));
+        if (obj.kind === "polygon" || obj.kind === "exportArea") return formatArea(turf.area(toTurfFeature(obj)));
         if (obj.kind === "circle") return `radius ${formatDistance(obj.layer.getRadius())}`;
       } catch (error) {
         return "";
@@ -5437,9 +6360,11 @@
         attribution: ATTRIBUTION_NOTE,
         projectionNote: PROJECTION_NOTE,
         mapTitle: state.mapTitle,
+        mapNotes: state.mapNotes,
         showMapTitle: state.showMapTitle,
         mapTitleStyle: normalizeTitleStyle(state.mapTitleStyle),
         coordinateSystem: state.coordinateSystem,
+        distanceUnit: state.distanceUnit,
         unitIconScale: state.unitIconScale,
         pointIconScale: state.pointIconScale,
         view: { center: map.getCenter(), zoom: map.getZoom() },
@@ -5464,7 +6389,7 @@
           drawLayerId: obj.drawLayerId,
           z: obj.z,
           visible: obj.visible !== false,
-          buffers: obj.buffers,
+          buffers: buffersForStorage(obj.buffers),
           icon: obj.icon,
           iconSize: obj.iconSize,
           endpoints: obj.endpoints,
@@ -5476,6 +6401,18 @@
     function serializeGeometry(obj) {
       if (isPointLike(obj) || obj.kind === "text") return { latlng: obj.layer.getLatLng() };
       if (obj.kind === "line") return { latlngs: obj.layer.getLatLngs() };
+      if (obj.kind === "exportArea") {
+        const bounds = exportAreaBounds(obj);
+        return {
+          bounds: {
+            north: bounds.getNorth(),
+            south: bounds.getSouth(),
+            east: bounds.getEast(),
+            west: bounds.getWest()
+          },
+          latlngs: rectangleCorners(bounds)
+        };
+      }
       if (obj.kind === "polygon") return { latlngs: obj.layer.getLatLngs()[0] };
       if (obj.kind === "circle") return { latlng: obj.layer.getLatLng(), radius: obj.layer.getRadius() };
       return {};
@@ -5524,7 +6461,7 @@
 
     function scheduleSave() {
       if (state.restoring) return;
-      state.dirty = true;
+      setDirty(true);
       clearTimeout(state.saveTimer);
       state.saveTimer = setTimeout(() => {
         localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(saveStateObject()));
@@ -5536,11 +6473,13 @@
       if (!saved) return;
       clearAll(false);
       setMapTitle(saved.mapTitle || saved.properties?.title || "", false);
+      setMapNotes(saved.mapNotes || saved.properties?.mapNotes || "", false);
       setShowMapTitle(saved.showMapTitle ?? saved.properties?.showMapTitle ?? false, false);
       state.mapTitleStyle = normalizeTitleStyle(saved.mapTitleStyle || saved.properties?.mapTitleStyle || {});
       setTitleStyleControls(state.mapTitleStyle);
       updateMapTitleOverlay();
       state.coordinateSystem = saved.coordinateSystem || "dd";
+      state.distanceUnit = normalizeDistanceUnit(saved.distanceUnit || saved.properties?.distanceUnit);
       state.unitIconScale = Number(saved.unitIconScale || 1);
       state.pointIconScale = Number(saved.pointIconScale || 1);
       syncSettingsControls();
@@ -5579,12 +6518,16 @@
           drawLayerId: item.drawLayerId || state.activeLayerId,
           z: item.z || state.zCounter++,
           visible: item.visible !== false,
-          buffers: item.buffers || [],
+          buffers: buffersForStorage(item.buffers),
           bufferLayers: [],
           icon: item.icon || (restoredKind === "unit" ? FALLBACK_ICONS[0] : FALLBACK_ICONS[1]),
           iconSize: item.iconSize || 32,
           endpoints: item.endpoints || { start: "", end: "" }
         };
+        if (obj.kind === "exportArea") {
+          obj.style = exportAreaStyle(item.style || {});
+          obj.buffers = [];
+        }
         state.objects.set(obj.id, obj);
         attachLayerEvents(obj);
         layer.addTo(map);
@@ -5602,7 +6545,7 @@
       refreshLabelsAndMeasurements();
       syncRightPane();
       applyInteractionModes();
-      state.dirty = false;
+      setDirty(false);
       status("Saved work restored.");
     }
 
@@ -5611,17 +6554,40 @@
       if (item.kind === "marker" || item.kind === "unit") return L.marker(g.latlng, { draggable: true, pane: "objects" });
       if (item.kind === "text") return L.marker(g.latlng, { draggable: true, pane: "objects" });
       if (item.kind === "line") return L.polyline(g.latlngs || [], { pane: "objects" });
+      if (item.kind === "exportArea") {
+        const bounds = g.bounds
+          ? L.latLngBounds([g.bounds.south, g.bounds.west], [g.bounds.north, g.bounds.east])
+          : L.latLngBounds(g.latlngs || []);
+        return L.rectangle(bounds, { pane: "objects" });
+      }
       if (item.kind === "polygon") return L.polygon(g.latlngs || [], { pane: "objects" });
       if (item.kind === "circle") return L.circle(g.latlng, { radius: g.radius || 1, pane: "objects" });
       return null;
     }
 
-    function loadGeoJson(file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const geojson = JSON.parse(reader.result);
-        pushUndo("load");
+    async function loadGeoJson(file) {
+      try {
+        const geojson = JSON.parse(await readFileText(file));
+        const action = await confirmLoadGeoJsonProject(file, geojson);
+        if (action === "cancel") return status("GeoJSON load cancelled.");
+        if (action === "save") exportGeoJSON();
+        applyGeoJsonProject(geojson, action === "keep" ? "keep" : "discard", file.name);
+      } catch (error) {
+        status(`GeoJSON load failed: ${error.message}`);
+      }
+    }
+
+    function applyGeoJsonProject(geojson, mode = "discard", filename = "") {
+      const keepExisting = mode === "keep";
+      pushUndo(keepExisting ? "merge-geojson" : "load");
+      const sourceLayers = geojson.properties?.drawLayers || [];
+      const layerIdMap = new Map();
+      let defaultLayerId = null;
+
+      if (!keepExisting) {
+        clearAll(false);
         if (geojson.properties?.title) setMapTitle(geojson.properties.title, false);
+        setMapNotes(geojson.properties?.mapNotes || "", false);
         if (geojson.properties?.showMapTitle !== undefined) setShowMapTitle(geojson.properties.showMapTitle, false);
         if (geojson.properties?.mapTitleStyle) {
           state.mapTitleStyle = normalizeTitleStyle(geojson.properties.mapTitleStyle);
@@ -5629,52 +6595,86 @@
           updateMapTitleOverlay();
         }
         if (geojson.properties?.coordinateSystem) state.coordinateSystem = geojson.properties.coordinateSystem;
+        if (geojson.properties?.distanceUnit) state.distanceUnit = normalizeDistanceUnit(geojson.properties.distanceUnit);
         if (geojson.properties?.unitIconScale) state.unitIconScale = Number(geojson.properties.unitIconScale) || 1;
         if (geojson.properties?.pointIconScale) state.pointIconScale = Number(geojson.properties.pointIconScale) || 1;
         syncSettingsControls();
-        if (geojson.properties?.drawLayers) {
-          state.drawLayers = new Map(geojson.properties.drawLayers.map((layer) => [layer.id, layer]));
-          state.activeLayerId = geojson.properties.drawLayers[0]?.id || state.activeLayerId;
-        }
-        L.geoJSON(geojson, {
-          pointToLayer: (feature, latlng) => {
-            if (feature.properties?.kind === "text") return L.marker(latlng, { draggable: true, pane: "objects" });
-            return L.marker(latlng, { draggable: true, pane: "objects" });
-          },
-          onEachFeature: (feature, layer) => {
-            const props = feature.properties || {};
-            let kind = props.kind || geometryKind(feature.geometry.type);
-            if (kind === "marker" && props.icon?.kind === "app6") kind = "unit";
-            if (kind === "circle") {
-              const center = turf.center(feature).geometry.coordinates;
-              layer = L.circle([center[1], center[0]], { radius: props.radiusMeters || 1, pane: "objects" }).addTo(map);
-            }
-            const obj = createObject(kind, layer, {
-              label: props.label || "",
-              unitName: props.unitName || "",
-              higherFormation: props.higherFormation || props.icon?.app6?.higherFormation || "",
-              showLabel: props.showLabel !== false,
-              text: props.text || "",
-              notes: props.notes || "",
-              style: props.style || baseStyle(),
-              textStyle: props.textStyle || baseTextStyle(),
-              labelStyle: props.labelStyle || baseLabelStyle(),
-              locked: Boolean(props.locked),
-              drawLayerId: props.drawLayerId || layerForNewObject(),
-              visible: props.visible !== false,
-              buffers: props.buffers || [],
-              icon: props.icon || state.activeIcon,
-              iconSize: props.iconSize || 32,
-              endpoints: props.endpoints || { start: "", end: "" },
-              skipUndo: true
-            });
-            if (kind === "text") updateTextAnnotation(obj);
+        state.drawLayers.clear();
+        state.activeLayerId = null;
+      }
+
+      const existingByName = new Map(Array.from(state.drawLayers.values()).map((layer) => [normalizedLayerName(layer.name), layer]));
+      sourceLayers.forEach((layer) => {
+        if (keepExisting) {
+          const existing = existingByName.get(normalizedLayerName(layer.name));
+          if (existing) {
+            layerIdMap.set(layer.id, existing.id);
+            return;
           }
-        });
-        renderDrawLayers();
+        }
+        const id = keepExisting || state.drawLayers.has(layer.id) ? uid("layer") : (layer.id || uid("layer"));
+        layerIdMap.set(layer.id, id);
+        state.drawLayers.set(id, { id, name: layer.name || "Imported layer", visible: layer.visible !== false, objectsCollapsed: false });
+      });
+
+      if (!state.drawLayers.size) addDefaultDrawLayer();
+      defaultLayerId = Array.from(layerIdMap.values())[0] || state.activeLayerId || layerForNewObject();
+      if (!keepExisting) state.activeLayerId = defaultLayerId;
+      else if (Array.from(layerIdMap.values())[0]) state.activeLayerId = Array.from(layerIdMap.values())[0];
+
+      L.geoJSON(geojson, {
+        pointToLayer: (feature, latlng) => L.marker(latlng, { draggable: true, pane: "objects" }),
+        onEachFeature: (feature, layer) => {
+          const props = feature.properties || {};
+          let kind = props.kind || geometryKind(feature.geometry.type);
+          if (kind === "marker" && props.icon?.kind === "app6") kind = "unit";
+          if (kind === "circle") {
+            const center = turf.center(feature).geometry.coordinates;
+            layer = L.circle([center[1], center[0]], { radius: props.radiusMeters || 1, pane: "objects" }).addTo(map);
+          }
+          if (kind === "exportArea") {
+            layer = L.rectangle(layer.getBounds(), { pane: "objects" }).addTo(map);
+          }
+          const targetLayerId = layerIdMap.get(props.drawLayerId) || defaultLayerId || layerForNewObject();
+          const obj = createObject(kind, layer, {
+            label: props.label || "",
+            unitName: props.unitName || "",
+            higherFormation: props.higherFormation || props.icon?.app6?.higherFormation || "",
+            showLabel: props.showLabel !== false,
+            text: props.text || "",
+            notes: props.notes || "",
+            style: props.style || baseStyle(),
+            textStyle: props.textStyle || baseTextStyle(),
+            labelStyle: props.labelStyle || baseLabelStyle(),
+            locked: Boolean(props.locked),
+            drawLayerId: targetLayerId,
+            visible: props.visible !== false,
+            buffers: buffersForStorage(props.buffers),
+            icon: props.icon || state.activeIcon,
+            iconSize: props.iconSize || 32,
+            endpoints: props.endpoints || { start: "", end: "" },
+            skipUndo: true
+          });
+          if (kind === "exportArea") {
+            obj.style = exportAreaStyle(props.style || {});
+            obj.buffers = [];
+            styleLayer(obj);
+          }
+          if (kind === "text") updateTextAnnotation(obj);
+        }
+      });
+      renderDrawLayers();
+      renderObjectList();
+      syncLayerVisibility();
+      refreshLabelsAndMeasurements();
+      if (geojson.properties?.view?.center) map.setView(geojson.properties.view.center, geojson.properties.view.zoom || map.getZoom(), { animate: false });
+      if (keepExisting) {
+        scheduleSave();
+        status("GeoJSON merged into current map.");
+      } else {
+        markGeoJsonLoaded(filename || safeMapFilename("geojson"));
         status("GeoJSON loaded.");
-      };
-      reader.readAsText(file);
+      }
     }
 
     function loadGeoJsonAsLayers(file) {
@@ -5726,6 +6726,9 @@
               const center = turf.center(feature).geometry.coordinates;
               layer = L.circle([center[1], center[0]], { radius: props.radiusMeters || 1, pane: "objects" }).addTo(map);
             }
+            if (kind === "exportArea") {
+              layer = L.rectangle(layer.getBounds(), { pane: "objects" }).addTo(map);
+            }
             const targetLayerId = layerIdMap.get(props.drawLayerId) || defaultLayerId || layerForNewObject();
             const obj = createObject(kind, layer, {
               label: props.label || "",
@@ -5740,12 +6743,17 @@
               locked: Boolean(props.locked),
               drawLayerId: targetLayerId,
               visible: props.visible !== false,
-              buffers: props.buffers || [],
+              buffers: buffersForStorage(props.buffers),
               icon: props.icon || state.activeIcon,
               iconSize: props.iconSize || 32,
               endpoints: props.endpoints || { start: "", end: "" },
               skipUndo: true
             });
+            if (kind === "exportArea") {
+              obj.style = exportAreaStyle(props.style || {});
+              obj.buffers = [];
+              styleLayer(obj);
+            }
             if (kind === "text") updateTextAnnotation(obj);
           }
         });
@@ -5796,20 +6804,21 @@
       if (save) scheduleSave();
     }
 
-    function startNewMap() {
-      if (state.objects.size) {
+    async function startNewMap() {
+      const hasWork = state.objects.size || state.mapTitle.trim() || state.mapNotes.trim() || state.dirty;
+      if (hasWork) {
         if (state.dirty) {
-          const choice = prompt('Unsaved drawing changes. Type "save" to save GeoJSON first, "discard" to clear without saving, or "cancel" to keep working.', "save");
-          if (!choice || choice.toLowerCase().startsWith("c")) return;
-          if (choice.toLowerCase().startsWith("s")) exportGeoJSON();
-          if (!choice.toLowerCase().startsWith("s") && !choice.toLowerCase().startsWith("d")) return;
+          const action = await confirmNewMapAction();
+          if (action === "cancel") return;
+          if (action === "save") exportGeoJSON();
         } else if (!confirm("Clear all drawings and start a new map?")) {
           return;
         }
       }
-      if (state.objects.size) pushUndo("new");
+      if (hasWork) pushUndo("new");
       clearAll(false);
       setMapTitle("", false);
+      setMapNotes("", false);
       setShowMapTitle(false, false);
       state.drawLayers.clear();
       state.activeLayerId = null;
@@ -5821,7 +6830,7 @@
       selectObject(null);
       localStorage.removeItem(AUTOSAVE_KEY);
       localStorage.removeItem(LEGACY_AUTOSAVE_KEY);
-      state.dirty = false;
+      clearGeoJsonSaveStatus();
       status("New map ready.");
     }
 
@@ -5843,11 +6852,20 @@
     }
 
     function formatDistance(meters) {
-      return meters >= 1000 ? `${(meters / 1000).toFixed(2)} km` : `${meters.toFixed(0)} m`;
+      const unit = normalizeDistanceUnit(state.distanceUnit);
+      if (unit === "metric") return meters >= 1000 ? `${(meters / 1000).toFixed(2)} km` : `${meters.toFixed(0)} m`;
+      const value = meters / distanceUnitToMeters(unit);
+      const precision = unit === "meters" ? 0 : value >= 100 ? 1 : 2;
+      return `${value.toFixed(precision)} ${distanceUnitLabel(unit)}`;
     }
 
     function formatArea(sqm) {
-      return sqm >= 1000000 ? `${(sqm / 1000000).toFixed(2)} km²` : `${sqm.toFixed(0)} m²`;
+      const unit = normalizeDistanceUnit(state.distanceUnit);
+      if (unit === "metric") return sqm >= 1000000 ? `${(sqm / 1000000).toFixed(2)} km²` : `${sqm.toFixed(0)} m²`;
+      const label = unit === "meters" ? "m²" : `${distanceUnitLabel(unit)}²`;
+      const value = sqm / distanceUnitToAreaDivisor(unit);
+      const precision = unit === "meters" ? 0 : value >= 100 ? 1 : 2;
+      return `${value.toFixed(precision)} ${label}`;
     }
 
     function formatBearing(degrees) {
@@ -5868,6 +6886,10 @@
       pushUndo("map-title", { coalesceMs: 1000 });
       setMapTitle(event.target.value);
     });
+    el("mapNotesInput").addEventListener("input", (event) => {
+      pushUndo("map-notes", { coalesceMs: 1000 });
+      setMapNotes(event.target.value);
+    });
     el("showMapTitle").addEventListener("change", (event) => {
       pushUndo("show-map-title");
       setShowMapTitle(event.target.checked);
@@ -5887,6 +6909,7 @@
     el("coordUnit").addEventListener("click", () => drawFromCoords("unit"));
     el("coordLine").addEventListener("click", () => drawFromCoords("line"));
     el("coordCircle").addEventListener("click", () => drawFromCoords("circle"));
+    el("coordExportArea").addEventListener("click", () => drawFromCoords("exportArea"));
     el("coordPolygon").addEventListener("click", () => drawFromCoords("polygon"));
     el("editCoordinates").addEventListener("click", toggleCoordinateEditing);
     el("coordinateOutput").addEventListener("input", (event) => resizeCoordinateOutput(event.target));
@@ -5955,6 +6978,8 @@
       el(id).addEventListener("change", setMapTitleStyleFromControls);
     });
     el("coordinateSystem").addEventListener("change", (event) => setCoordinateSystem(event.target.value));
+    el("distanceUnit").addEventListener("change", (event) => setDistanceUnit(event.target.value));
+    el("mapZoom").addEventListener("input", (event) => map.setZoom(Number(event.target.value), { animate: false }));
     el("unitScale").addEventListener("input", (event) => setGlobalIconScale("unit", event.target.value));
     el("pointScale").addEventListener("input", (event) => setGlobalIconScale("point", event.target.value));
     el("activeDrawLayer").addEventListener("change", (event) => {
@@ -5974,11 +6999,12 @@
       renderObjectList();
       scheduleSave();
     });
-    el("saveGeojson").addEventListener("click", exportGeoJSON);
+    el("saveGeojson").addEventListener("click", () => exportGeoJSON());
     el("saveGeojsonAs").addEventListener("click", exportGeoJSONAs);
     el("saveSelectedLayers").addEventListener("click", exportSelectedLayersGeoJSON);
     el("saveExcel").addEventListener("click", exportExcel);
     el("saveScreenshot").addEventListener("click", exportScreenshot);
+    el("saveExportArea").addEventListener("click", exportAreaScreenshot);
     el("saveHtmlMap").addEventListener("click", exportHtmlMap);
     el("loadFile").addEventListener("change", (event) => {
       if (event.target.files[0]) loadGeoJson(event.target.files[0]);
@@ -6080,6 +7106,7 @@
     });
     map.on("click", () => selectObject(null));
     map.on("zoomend", refreshLabelsAndMeasurements);
+    map.on("zoomend", syncMapZoomControl);
     map.on("zoomend moveend", scheduleSave);
 
     renderTileControls();
@@ -6090,6 +7117,7 @@
     setTitleStyleControls(state.mapTitleStyle);
     syncSettingsControls();
     setMapTitle("", false);
+    setMapNotes("", false);
     setShowMapTitle(false, false);
     const autosaved = localStorage.getItem(AUTOSAVE_KEY) || localStorage.getItem(LEGACY_AUTOSAVE_KEY);
     if (autosaved) {
@@ -6097,6 +7125,8 @@
     }
     syncRightPane();
     updateUndoButton();
+    updateSaveStatus();
+    syncMapZoomControl();
   </script>
 </body>
 </html>
