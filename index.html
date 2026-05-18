@@ -609,6 +609,13 @@
       display: block;
     }
 
+    .object-icon-preview svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+      overflow: visible;
+    }
+
     .coords-box {
       min-height: 74px;
       resize: vertical;
@@ -889,9 +896,6 @@
       <label class="map-title-field">Map title
         <input id="mapTitleInput" placeholder="Example: Helsinki observation sketch" title="Map title used on the map and as the default export filename">
       </label>
-      <label>Map notes
-        <textarea id="mapNotesInput" rows="2" placeholder="Example: Author, sources, caveats, or https://example.com" title="Project-level notes included in saved projects and HTML map exports"></textarea>
-      </label>
       <div id="status" class="status">Ready.</div>
       <div id="saveStatus" class="save-state"></div>
       <label class="check-row"><input id="showMapTitle" type="checkbox" title="Show the title centered over the visible map"> Show title</label>
@@ -910,6 +914,9 @@
           <label class="check-row"><input id="titleTextOutline" type="checkbox" checked> White text outline</label>
         </div>
       </details>
+      <label>Map notes
+        <textarea id="mapNotesInput" rows="2" placeholder="Example: Author, sources, caveats, or https://example.com" title="Project-level notes included in saved projects and HTML map exports"></textarea>
+      </label>
 
       <div class="section">
         <h2>Map Search</h2>
@@ -3968,14 +3975,30 @@
     }
 
     function objectListIconHtml(obj) {
+      const color = escapeHtml(obj.style?.color || "#ffcc4d");
+      const fill = escapeHtml(obj.style?.fillColor || obj.style?.color || "#ffcc4d");
+      const opacity = Number(obj.style?.opacity ?? 1);
+      const fillOpacity = Number(obj.style?.fillOpacity ?? 0.25);
+      const weight = Math.max(1.5, Math.min(4, Number(obj.style?.weight || 3)));
       if (isPointLike(obj)) {
-        const opacity = obj.style?.opacity ?? 1;
         if (obj.kind === "unit" || obj.icon?.kind === "app6") return `<span class="object-icon-preview">${app6Svg(obj.icon, 18, opacity)}</span>`;
         if (obj.icon?.url) return `<span class="object-icon-preview"><img src="${escapeHtml(obj.icon.url)}" alt="" style="opacity:${opacity};"></span>`;
         return `<span class="object-icon-preview">${pointMarkerSvg(obj.icon?.kind || "dot", 18, obj.style?.color, obj.style?.fillColor, opacity)}</span>`;
       }
       if (obj.kind === "text") return `<span class="object-icon-preview" style="color:${escapeHtml(normalizeTextStyle(obj.textStyle).color)};">T</span>`;
-      return `<span class="swatch" style="background:${obj.style.fillColor}; border-color:${obj.style.color};"></span>`;
+      if (obj.kind === "line") {
+        return `<span class="object-icon-preview" title="Line"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 13 L7 5 L16 10" fill="none" stroke="${color}" stroke-width="${weight}" stroke-linecap="round" stroke-linejoin="round" opacity="${opacity}"/></svg></span>`;
+      }
+      if (obj.kind === "polygon") {
+        return `<span class="object-icon-preview" title="Polygon"><svg viewBox="0 0 18 18" aria-hidden="true"><polygon points="4,4 15,7 12,15 3,13" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${color}" stroke-width="${weight}" stroke-linejoin="round" opacity="${opacity}"/></svg></span>`;
+      }
+      if (obj.kind === "circle") {
+        return `<span class="object-icon-preview" title="Circle"><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${color}" stroke-width="${weight}" opacity="${opacity}"/></svg></span>`;
+      }
+      if (obj.kind === "exportArea") {
+        return `<span class="object-icon-preview" title="Export area"><svg viewBox="0 0 18 18" aria-hidden="true"><rect x="3" y="4" width="12" height="10" fill="none" stroke="${color}" stroke-width="${weight}" stroke-dasharray="3 2" opacity="${opacity}"/></svg></span>`;
+      }
+      return `<span class="swatch" style="background:${fill}; border-color:${color};"></span>`;
     }
 
     function refreshLabelsAndMeasurements() {
