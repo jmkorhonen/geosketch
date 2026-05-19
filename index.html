@@ -380,6 +380,15 @@
       letter-spacing: 0.08em;
     }
 
+    .selected-object-title {
+      font-size: 12px;
+      color: #e7edf4;
+      text-transform: none;
+      line-height: 1.25;
+      letter-spacing: 0;
+      overflow-wrap: anywhere;
+    }
+
     .section-summary {
       display: grid;
       gap: 3px;
@@ -524,6 +533,19 @@
 
     .tile-row input[type="range"] {
       grid-column: 1 / -1;
+    }
+
+    .tile-row {
+      grid-template-columns: auto 1fr auto auto auto;
+    }
+
+    .tile-row .tile-meta {
+      min-width: 0;
+    }
+
+    .tile-row .tile-meta strong {
+      display: block;
+      line-height: 1.2;
     }
 
     .object-row {
@@ -972,6 +994,7 @@
 
       <details id="backgroundMapSection" class="section" open>
         <summary><h2>Background Map</h2></summary>
+        <p class="tiny">Top layers draw above lower layers. Use opacity to place a map layer over imagery.</p>
         <div id="tileLayers"></div>
       </details>
 
@@ -1088,8 +1111,7 @@
 
     <aside class="side right">
       <div class="section" style="border-top:0; margin-top:0; padding-top:0;">
-        <h2>Selected Object</h2>
-        <div id="selectedHint" class="tiny">Select an object on the map or in the list.</div>
+        <h2 id="selectedObjectTitle" class="selected-object-title">No object selected</h2>
         <button id="lockToggle" title="Lock or unlock the selected object so it cannot be edited accidentally">Lock object</button>
         <div id="lockedNote" class="locked-note" hidden>Locked. Copy and duplicate still work.</div>
         <label id="objectLayerControl">Layer
@@ -1793,6 +1815,7 @@
       {
         id: "osm",
         name: "OpenStreetMap",
+        role: "base",
         url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
         attr: "&copy; OpenStreetMap contributors &copy; CARTO",
         checked: true,
@@ -1801,6 +1824,7 @@
       {
         id: "topo",
         name: "OpenTopoMap",
+        role: "base",
         url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
         attr: "Map data &copy; OpenStreetMap contributors, SRTM | OpenTopoMap",
         checked: false,
@@ -1809,6 +1833,7 @@
       {
         id: "esri",
         name: "Esri Satellite",
+        role: "imagery",
         url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
         attr: "Tiles &copy; Esri",
         checked: false,
@@ -1818,10 +1843,18 @@
 
     const tiles = new Map();
     tileConfigs.forEach((cfg) => {
-      const layer = L.tileLayer(cfg.url, { attribution: cfg.attr, opacity: cfg.opacity, maxZoom: 19, crossOrigin: true });
+      const layer = L.tileLayer(cfg.url, {
+        attribution: cfg.attr,
+        opacity: cfg.opacity,
+        minZoom: cfg.minZoom ?? 0,
+        maxZoom: cfg.maxZoom ?? 19,
+        className: cfg.className || "",
+        crossOrigin: cfg.crossOrigin === undefined ? true : cfg.crossOrigin
+      });
       tiles.set(cfg.id, layer);
       if (cfg.checked) layer.addTo(map);
     });
+    applyTileLayerOrder();
 
     const bufferPane = map.createPane("buffers");
     bufferPane.style.zIndex = 410;
@@ -2058,33 +2091,95 @@
     function renderTileControls() {
       const wrap = el("tileLayers");
       wrap.innerHTML = "";
-      tileConfigs.forEach((cfg) => {
+      tileConfigs.forEach((cfg, index) => {
+        const layer = tiles.get(cfg.id);
         const row = document.createElement("div");
         row.className = "tile-row";
         row.innerHTML = `
-          <input type="checkbox" ${map.hasLayer(tiles.get(cfg.id)) ? "checked" : ""} aria-label="${cfg.name}">
-          <strong>${cfg.name}</strong>
-          <span class="tiny">${Math.round(tiles.get(cfg.id).options.opacity * 100)}%</span>
-          <input type="range" min="0" max="1" step="0.05" value="${tiles.get(cfg.id).options.opacity}">
+          <input type="checkbox" ${map.hasLayer(layer) ? "checked" : ""} aria-label="${cfg.name}">
+          <span class="tile-meta"><strong>${cfg.name}</strong><span class="tiny">${escapeHtml(layerRoleLabel(cfg))} · ${index === 0 ? "top" : index === tileConfigs.length - 1 ? "bottom" : "middle"}</span></span>
+          <span class="tile-opacity tiny">${Math.round(layer.options.opacity * 100)}%</span>
+          <button title="Move background layer up">↑</button>
+          <button title="Move background layer down">↓</button>
+          <input type="range" min="0" max="1" step="0.05" value="${layer.options.opacity}">
         `;
         const check = row.querySelector("input[type='checkbox']");
         const range = row.querySelector("input[type='range']");
-        const pct = row.querySelector("span");
+        const pct = row.querySelector(".tile-opacity");
+        const buttons = row.querySelectorAll("button");
         check.addEventListener("change", () => {
           pushUndo("tile-layer");
-          const layer = tiles.get(cfg.id);
           check.checked ? layer.addTo(map) : map.removeLayer(layer);
+          applyTileLayerOrder();
           scheduleSave();
         });
         range.addEventListener("input", () => {
           pushUndo("tile-opacity", { coalesceMs: 1000 });
-          const layer = tiles.get(cfg.id);
           layer.setOpacity(Number(range.value));
           pct.textContent = `${Math.round(Number(range.value) * 100)}%`;
           scheduleSave();
         });
+        buttons[0].disabled = index === 0;
+        buttons[1].disabled = index === tileConfigs.length - 1;
+        buttons[0].addEventListener("click", () => moveTileLayer(cfg.id, -1));
+        buttons[1].addEventListener("click", () => moveTileLayer(cfg.id, 1));
         wrap.appendChild(row);
       });
+    }
+
+    function layerRoleLabel(cfg) {
+      if (cfg.role === "overlay") return "overlay";
+      if (cfg.role === "imagery") return "imagery";
+      return "base map";
+    }
+
+    function applyTileLayerOrder() {
+      tileConfigs.forEach((cfg, index) => {
+        const layer = tiles.get(cfg.id);
+        if (!layer) return;
+        layer.setZIndex(tileConfigs.length - index);
+      });
+    }
+
+    function moveTileLayer(id, direction) {
+      const index = tileConfigs.findIndex((cfg) => cfg.id === id);
+      const next = index + direction;
+      if (index < 0 || next < 0 || next >= tileConfigs.length) return;
+      pushUndo("tile-order");
+      [tileConfigs[index], tileConfigs[next]] = [tileConfigs[next], tileConfigs[index]];
+      applyTileLayerOrder();
+      renderTileControls();
+      scheduleSave();
+    }
+
+    function restoreTileLayerOrder(savedLayers = []) {
+      if (!savedLayers.some((layer) => Number.isFinite(Number(layer.order)))) return;
+      const order = new Map(savedLayers.map((layer) => [layer.id, Number(layer.order)]));
+      tileConfigs.sort((a, b) => (order.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (order.get(b.id) ?? Number.MAX_SAFE_INTEGER));
+    }
+
+    function tileLayerState() {
+      return tileConfigs.map((cfg, order) => ({
+        id: cfg.id,
+        visible: map.hasLayer(tiles.get(cfg.id)),
+        opacity: tiles.get(cfg.id).options.opacity,
+        order
+      }));
+    }
+
+    function applyTileLayerState(savedLayers = []) {
+      restoreTileLayerOrder(savedLayers);
+      const savedById = new Map(savedLayers.map((cfg) => [cfg.id, cfg]));
+      tileConfigs.forEach((cfg) => {
+        const layer = tiles.get(cfg.id);
+        if (!layer) return;
+        const saved = savedById.get(cfg.id);
+        const visible = saved ? saved.visible !== false : Boolean(cfg.checked);
+        layer.setOpacity(saved?.opacity ?? cfg.opacity ?? 1);
+        if (visible && !map.hasLayer(layer)) layer.addTo(map);
+        if (!visible && map.hasLayer(layer)) map.removeLayer(layer);
+      });
+      applyTileLayerOrder();
     }
 
     function updateActiveLayerSummary() {
@@ -2727,7 +2822,7 @@
     function selectObject(id) {
       state.selectedId = id;
       const obj = selectedObj();
-      el("selectedHint").textContent = obj ? selectedObjectDescription(obj) : "Select an object on the map or in the list.";
+      updateSelectedObjectTitle(obj);
       if (obj) {
         if (obj.kind === "text" && !obj.label && obj.text) obj.label = obj.text;
         obj.textStyle = normalizeTextStyle(obj.textStyle);
@@ -2863,6 +2958,7 @@
       el("lockToggle").hidden = !hasObj;
       el("lockToggle").textContent = locked ? "Unlock object" : "Lock object";
       el("lockedNote").hidden = !locked;
+      updateSelectedObjectTitle(obj);
       const canEditPoints = hasObj && ["line", "polygon", "circle", "exportArea"].includes(obj.kind);
       el("editToggle").hidden = !canEditPoints;
       el("editToggle").textContent = obj?.kind === "circle" || isExportArea ? "Edit shape" : "Edit points";
@@ -2946,7 +3042,7 @@
       if (obj.kind === "text") updateTextAnnotation(obj);
       styleLayer(obj);
       updateDerived(obj);
-      el("selectedHint").textContent = selectedObjectDescription(obj);
+      updateSelectedObjectTitle(obj);
       renderObjectList();
       renderBufferList();
       updateMeasurementPanel();
@@ -3752,14 +3848,31 @@
 
     function objectName(obj) {
       if (obj.kind === "unit") {
-        const id = obj.label || `${objectKindLabel(obj.kind)} ${obj.id.split("-").pop()}`;
-        return obj.unitName ? `${id} (${obj.unitName})` : id;
+        return unitDisplayName(obj);
       }
       return obj.label || obj.higherFormation || obj.text || `${objectKindLabel(obj.kind)} ${obj.id.split("-").pop()}`;
     }
 
-    function selectedObjectDescription(obj) {
-      return `${objectKindLabel(obj.kind)} "${objectName(obj)}" selected`;
+    function unitDisplayName(obj) {
+      const designation = String(obj.label || "").trim();
+      const formation = String(obj.higherFormation || obj.icon?.app6?.higherFormation || "").trim();
+      const name = String(obj.unitName || "").trim();
+      if (!designation && !formation) return name || `${objectKindLabel(obj.kind)} ${obj.id.split("-").pop()}`;
+      const id = formation ? `${designation || "?"}/${formation}` : designation;
+      return name ? `${id} (${name})` : id;
+    }
+
+    function selectedObjectTitle(obj) {
+      if (!obj) return "No object selected";
+      if (obj.kind === "unit") return unitDisplayName(obj);
+      return `${objectName(obj)} (${objectKindLabel(obj.kind)})`;
+    }
+
+    function updateSelectedObjectTitle(obj = selectedObj()) {
+      const node = el("selectedObjectTitle");
+      if (!node) return;
+      node.textContent = obj ? selectedObjectTitle(obj) : "No object selected";
+      node.title = obj ? `${objectKindLabel(obj.kind)} selected` : "Select an object on the map or in the list";
     }
 
     function renderObjectList() {
@@ -3933,10 +4046,11 @@
         const row = document.createElement("div");
         row.className = "object-row" + (obj.id === state.selectedId ? " selected" : "");
         const layer = state.drawLayers.get(obj.drawLayerId);
+        const name = objectName(obj);
         row.innerHTML = `
           <input type="checkbox" ${obj.visible !== false ? "checked" : ""} aria-label="Visible">
           ${objectListIconHtml(obj)}
-          <span title="${escapeHtml(layer?.name || "")}">${escapeHtml(objectName(obj))}<br><span class="tiny">${objectKindLabel(obj.kind)}${layer ? ` · ${escapeHtml(layer.name)}` : ""}</span></span>
+          <span title="${escapeHtml(`${name}${layer ? ` · ${layer.name}` : ""}`)}">${escapeHtml(name)}<br><span class="tiny">${objectKindLabel(obj.kind)}${layer ? ` · ${escapeHtml(layer.name)}` : ""}</span></span>
           <button title="${obj.locked ? "Unlock object" : "Lock object"}">${obj.locked ? "🔒" : "🔓"}</button>
           <button title="Up">↑</button>
           <button title="Down">↓</button>`;
@@ -4767,6 +4881,7 @@
         text: "Sample project\nLoad, edit, export, and undo freely.",
         showLabel: false,
         drawLayerId: obsLayerId,
+        textStyle: { ...baseTextStyle(), color: "#161616", fillColor: "#fff7d8", fillOpacity: 0.92, lineColor: "#161616", weight: 1, shadow: true },
         skipUndo: true
       });
       updateTextAnnotation(text);
@@ -5326,6 +5441,8 @@
           distanceUnit: state.distanceUnit,
           unitIconScale: state.unitIconScale,
           pointIconScale: state.pointIconScale,
+          view: { center: map.getCenter(), zoom: map.getZoom() },
+          tileLayers: tileLayerState(),
           attribution: ATTRIBUTION_NOTE,
           projectionNote: PROJECTION_NOTE,
           savedAt: new Date().toISOString(),
@@ -5882,9 +5999,17 @@
     const tiles = new Map();
     const drawLayerVisibility = new Map((saved.drawLayers || []).map((layer) => [layer.id, layer.visible !== false]));
 
-    tileConfigs.forEach((cfg) => {
+    tileConfigs.forEach((cfg, index) => {
       const savedTile = (saved.tileLayers || []).find((tile) => tile.id === cfg.id) || {};
-      const layer = L.tileLayer(cfg.url, { attribution: cfg.attr, opacity: savedTile.opacity ?? cfg.opacity ?? 1, maxZoom: 19, crossOrigin: true });
+      const layer = L.tileLayer(cfg.url, {
+        attribution: cfg.attr,
+        opacity: savedTile.opacity ?? cfg.opacity ?? 1,
+        minZoom: cfg.minZoom ?? 0,
+        maxZoom: cfg.maxZoom ?? 19,
+        zIndex: tileConfigs.length - index,
+        className: cfg.className || "",
+        crossOrigin: cfg.crossOrigin === undefined ? true : cfg.crossOrigin
+      });
       tiles.set(cfg.id, layer);
       if (savedTile.visible ?? cfg.checked) layer.addTo(map);
     });
@@ -6391,7 +6516,7 @@
         unitIconScale: state.unitIconScale,
         pointIconScale: state.pointIconScale,
         view: { center: map.getCenter(), zoom: map.getZoom() },
-        tileLayers: tileConfigs.map((cfg) => ({ id: cfg.id, visible: map.hasLayer(tiles.get(cfg.id)), opacity: tiles.get(cfg.id).options.opacity })),
+        tileLayers: tileLayerState(),
         drawLayers: Array.from(state.drawLayers.values()),
         activeLayerId: state.activeLayerId,
         nextId: state.nextId,
@@ -6511,13 +6636,7 @@
       state.drawLayers = new Map((saved.drawLayers || []).map((layer) => [layer.id, layer]));
       state.activeLayerId = saved.activeLayerId || saved.drawLayers?.[0]?.id || null;
       if (!state.drawLayers.size) addDefaultDrawLayer();
-      (saved.tileLayers || []).forEach((cfg) => {
-        const layer = tiles.get(cfg.id);
-        if (!layer) return;
-        layer.setOpacity(cfg.opacity ?? 1);
-        if (cfg.visible && !map.hasLayer(layer)) layer.addTo(map);
-        if (!cfg.visible && map.hasLayer(layer)) map.removeLayer(layer);
-      });
+      applyTileLayerState(saved.tileLayers || saved.properties?.tileLayers || []);
       (saved.objects || []).forEach((item) => {
         const layer = layerFromSaved(item);
         if (!layer) return;
@@ -6621,6 +6740,7 @@
         if (geojson.properties?.distanceUnit) state.distanceUnit = normalizeDistanceUnit(geojson.properties.distanceUnit);
         if (geojson.properties?.unitIconScale) state.unitIconScale = Number(geojson.properties.unitIconScale) || 1;
         if (geojson.properties?.pointIconScale) state.pointIconScale = Number(geojson.properties.pointIconScale) || 1;
+        applyTileLayerState(geojson.properties?.tileLayers || []);
         syncSettingsControls();
         state.drawLayers.clear();
         state.activeLayerId = null;
@@ -6686,6 +6806,7 @@
           if (kind === "text") updateTextAnnotation(obj);
         }
       });
+      renderTileControls();
       renderDrawLayers();
       renderObjectList();
       syncLayerVisibility();

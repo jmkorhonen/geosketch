@@ -6,7 +6,7 @@ Open the HTML file in a modern browser, choose a background map, add objects, sa
 
 Live version: [https://jmkorhonen.github.io/geosketch/](https://jmkorhonen.github.io/geosketch/)
 
-![GeoSketch screenshot](samples/GeoSketch_v1_0_screenshot.png)
+![GeoSketch screenshot](samples/GeoSketch_v1_05_screenshot.png)
 
 
 ## Current Status
@@ -41,7 +41,7 @@ The same demo is also available as `samples/geosketch-sample.geojson` for testin
 
 ### Background Map
 
-GeoSketch supports selectable background layers with opacity controls:
+GeoSketch supports selectable background layers with opacity and stack-order controls. Layers higher in the list draw above layers below them, so a street or topographic layer can be made translucent over satellite imagery.
 
 - OpenStreetMap/CARTO raster tiles
 - OpenTopoMap
@@ -152,7 +152,7 @@ Unit fields include:
 - Higher formation
 - Notes
 
-The Layers view displays units as `unique designation (name)` when a name is available.
+The Layers view and selected-object pane display units as `unique designation/higher formation (name)` when those fields are available. If only a name exists, the unit is shown by name alone.
 
 ## Import and Export
 
@@ -270,3 +270,5 @@ Other files in this workspace may belong to earlier experiments or adjacent tool
 - Refined interactive HTML exports with a collapsed slide-out information pane and project/repository links.
 - Added clearer save/load state, save confirmations, safer unsaved-change prompts, and GeoJSON load conflict handling.
 - Added fractional zoom support and a bottom-bar zoom slider.
+- Added background map stack ordering.
+- Cleaned selected-object titles and unit display names.
