@@ -1,0 +1,19 @@
+# .gitignore used as a WHITELIST
+# 1. Block everything by default with an all-encompassing wildcard *
+*
+
+# 2. A second line is needed because of the way Git handles files: 
+# if it sees a directory is blocked, it won't even try to check 
+# anything in the directory to see if it was unblocked later. 
+# It simply skips it and ignores all rules inside that directory. 
+# So, !*/ here tells Git to specifically check subfolders.
+!*/
+
+# track these files
+!.gitignore
+!index.html
+!LICENSE
+!README.md
+    
+# whitelist everything in ./samples/
+!samples/

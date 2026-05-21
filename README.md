@@ -13,7 +13,7 @@ Live version: [https://jmkorhonen.github.io/geosketch/](https://jmkorhonen.githu
 
 GeoSketch is a lightweight browser tool for field-style sketching and visual analysis. It should be treated as a planning and OSINT visualisation aid rather than a survey-grade GIS package.
 
-Current version: `v1.05`
+Current version: `v1.1`
 
 ## Requirements
 
@@ -28,7 +28,7 @@ The app stores autosave data in browser `localStorage`, so autosaves are local t
 1. Open `index.html` in your browser.
 2. Set a map title at the top-left. The title is also used as the default export filename. Add map notes for author, source, or caveat details if needed.
 3. Use **Map Search** to find a place, address, or coordinate.
-4. Use **Add Object** to create points, units, lines, polygons, circles, text boxes, or export areas.
+4. Use **Add Object** to create points, units, lines, polygons, circles, or text boxes. Use **Files > Define export area** when you want a PNG crop guide.
 5. Select an object on the map or in the Layers list to edit its details in the right pane.
 6. Save the project with **Save project as GeoJSON**.
 7. Use **Load project from GeoJSON** to continue later.
@@ -44,6 +44,7 @@ The same demo is also available as `samples/geosketch-sample.geojson` for testin
 GeoSketch supports selectable background layers with opacity and stack-order controls. Layers higher in the list draw above layers below them, so a street or topographic layer can be made translucent over satellite imagery.
 
 - OpenStreetMap/CARTO raster tiles
+- OpenFreeMap Liberty vector tiles through MapLibre GL
 - OpenTopoMap
 - Esri satellite imagery
 
@@ -90,7 +91,7 @@ GeoSketch accepts and displays multiple coordinate styles:
 - DMS-style latitude/longitude
 - MGRS
 
-Coordinate handling is controlled in the Settings panel. Search, Create from coordinates, and Edit coordinates are designed to accept any recognised coordinate format.
+Coordinate handling is controlled in the Settings panel. Search, Create from coordinates, and Edit coordinates are designed to accept any recognised coordinate format. Export areas show two opposite corners in the coordinate editor; applying those coordinates always produces a rectangle.
 
 The bottom status bar shows live cursor coordinates. `Shift+C` copies the cursor position in the currently selected coordinate format.
 
@@ -120,13 +121,15 @@ Use the Add Object buttons or keyboard shortcuts:
 
 When drawing lines and polygons, dynamic measurements are shown while drawing. Polygon measurements include area, perimeter, and individual segment lengths.
 
-Export areas are rectangular guides for PNG crops. They can be drawn from the Add Object menu or created from two opposite-corner coordinates, then edited like other shapes.
+Shape styling separates line color, fill color, opacity, line width, line dash, and optional fill patterns. Buffer styling uses the same line/fill pattern controls, but remains attached to the parent object.
+
+Export areas are rectangular guides for PNG crops. They are managed from the Files section, then edited like other shapes after creation. A format selector can constrain newly drawn export areas to common ratios such as 1:1, 4:3, 16:9, or A4 portrait/landscape.
 
 ## Buffers and Measurements
 
 Objects can show measurements on the map and in the object pane. Lines and polygons can have buffers; point and circle-style range objects can be used for distance visualisation.
 
-Buffers are attached to the object that created them. If the object is edited or moved, the buffer updates with it. Buffer style can be edited separately from the source object.
+Buffers are attached to the object that created them. If the object is edited or moved, the buffer updates with it. Buffer style can be edited separately from the source object using the same line and fill controls as drawn shapes.
 
 GeoSketch uses WGS84 coordinates and geodesic calculations from Leaflet and Turf.js where practical. Range circles and buffers are generated as geographic shapes rather than simple screen-pixel overlays. This is suitable for OSINT sketching and planning, not legal boundary work, engineering survey, fire-control computation, or navigation safety.
 
@@ -184,7 +187,9 @@ Buffer distances in Excel exports are reported in metres for consistency with sa
 
 ### PNG Export
 
-Use **Save visible PNG** to export the current map viewport. Draw an **Export area** object and use **Save area PNG** to export a rectangular crop; if several export areas exist, GeoSketch asks which one to use. Export area guide rectangles are not burned into the cropped PNG.
+Use **Save visible PNG** to export the current map viewport. Use **Define export area** and **Export area format** in the Files section to draw a rectangular crop guide, then use **Save [area name] (width x height px) as PNG** to export it. The displayed pixel size is the expected PNG output size after GeoSketch automatically fits the map to that export area. If more than one export area exists, select the area from the map, Layers list, or the Files section export-area drawer first; GeoSketch keeps the button disabled until the intended crop is explicit. Export area guide rectangles are not burned into the cropped PNG. Settings can add a "Created with GeoSketch" credit and export date to PNGs, and can hide PNG map attribution when a particular output needs a cleaner frame.
+
+PNG export can be used with raster background maps, or with no background map for an object-only export against the dark map canvas. Raster layer opacity is preserved. Vector backgrounds such as OpenFreeMap are available for live viewing and interactive HTML export, but are not included in PNG export because browser-side WebGL capture is not reliable enough for release-quality map output.
 
 Browser security rules and tile provider CORS settings can affect PNG output.
 
@@ -226,6 +231,7 @@ Avoid entering sensitive operational information into external search services o
 
 - The app is a single HTML file, so very large projects may become slow.
 - Browser PNG export can be affected by CORS restrictions on map tiles.
+- Vector background maps use MapLibre GL through a Leaflet bridge; they add WebGL/CDN requirements and are intentionally excluded from PNG export.
 - GeoJSON exports include GeoSketch-specific styling metadata that other GIS tools may ignore.
 - APP-6 symbol support is intentionally practical and UI-driven, not a full doctrinal validation engine.
 - Measurements are appropriate for sketching and planning, not survey-grade work.
@@ -236,6 +242,7 @@ Avoid entering sensitive operational information into external search services o
 GeoSketch is possible because of excellent open-source mapping and web tooling:
 
 - [Leaflet](https://leafletjs.com/) for browser map rendering.
+- [MapLibre GL JS](https://maplibre.org/) and [MapLibre GL Leaflet](https://github.com/maplibre/maplibre-gl-leaflet) for optional vector-tile background rendering.
 - [Leaflet-Geoman](https://geoman.io/leaflet-geoman) for geometry editing interactions.
 - [Turf.js](https://turfjs.org/) for geospatial calculations, buffers, distances, areas, and GeoJSON helpers.
 - [milsymbol](https://github.com/spatialillusions/milsymbol), created by Måns Beckman / Spatial Illusions, for generating APP-6 / MIL-STD-2525 style unit symbols in the browser.
@@ -245,6 +252,7 @@ GeoSketch is possible because of excellent open-source mapping and web tooling:
 - [OpenTopoMap](https://opentopomap.org/) and SRTM contributors for topographic map context.
 - [Esri World Imagery](https://www.esri.com/) for satellite imagery tiles where available.
 - [CARTO](https://carto.com/) for raster tile styling used by the OpenStreetMap background option.
+- [OpenFreeMap](https://openfreemap.org/) and [OpenMapTiles](https://openmaptiles.org/) for the optional OpenStreetMap-based vector background.
 
 Please respect the licenses, attribution requirements, tile usage policies, and rate limits of all upstream data and library providers.
 
@@ -266,9 +274,21 @@ Other files in this workspace may belong to earlier experiments or adjacent tool
 - Added project-level map notes, including clickable web/email links in HTML exports.
 - Added Export area objects and separate visible-map vs area PNG export.
 - Added default distance-unit settings, including miles and nautical miles display, while saved distance data remains SI/metres.
-- Improved PNG export rendering for cropped maps, vector overlays, and tile seams.
+- Improved PNG export rendering for cropped raster maps and tile seams.
 - Refined interactive HTML exports with a collapsed slide-out information pane and project/repository links.
 - Added clearer save/load state, save confirmations, safer unsaved-change prompts, and GeoJSON load conflict handling.
 - Added fractional zoom support and a bottom-bar zoom slider.
 - Added background map stack ordering.
 - Cleaned selected-object titles and unit display names.
+- Added initial MapLibre/OpenFreeMap vector background support for live viewing and HTML exports.
+- Added PNG export credit/date controls.
+- Tightened visible PNG export to Leaflet's active map size and folded PNG credit/date text into the attribution box.
+- Made the GeoSketch credit in HTML exports link to the live site.
+- Made PNG credit/date visible on the live map when enabled and aligned PNG capture to the refreshed Leaflet viewport.
+- Disabled PNG export when only vector backgrounds are visible and documented vector backgrounds as live/HTML-export only.
+- Added an attribution/credit/date strip to cropped export-area PNGs.
+- Added export-area width, height, and current-view pixel dimensions to the object measurement pane.
+- Added a pre-draw export-area format selector and renamed the tool to Define export area.
+- Added live export-area PNG dimension labels, more compact attribution, and area-export button text that names the selected crop.
+- Finalized the v1.1 export-area flow so multiple export areas require an explicit selection before PNG export.
+- Moved export-area creation and format controls into the Files workflow and added a compact export-area selector drawer.

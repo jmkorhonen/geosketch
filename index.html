@@ -6,6 +6,7 @@
   <title>GeoSketch</title>
   <link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="12" fill="%23101418"/%3E%3Cpath d="M46 17 35 12 22 17 15 29 17 43 29 52 43 49 51 38 51 33 37 33" fill="none" stroke="%237ed0a6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/%3E%3Cg fill="%23f0bc70"%3E%3Ccircle cx="46" cy="17" r="4"/%3E%3Ccircle cx="22" cy="17" r="4"/%3E%3Ccircle cx="17" cy="43" r="4"/%3E%3Ccircle cx="43" cy="49" r="4"/%3E%3Ccircle cx="37" cy="33" r="4"/%3E%3C/g%3E%3C/svg%3E'>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
   <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.17.0/dist/leaflet-geoman.css">
   <style>
     :root {
@@ -422,6 +423,41 @@
       grid-column: 1 / -1;
     }
 
+    .compact-details {
+      margin-top: 6px;
+    }
+
+    .export-area-picker {
+      display: grid;
+      gap: 4px;
+      margin-top: 6px;
+    }
+
+    .export-area-choice {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6px;
+      align-items: center;
+      width: 100%;
+      min-height: 28px;
+      padding: 5px 7px;
+      text-align: left;
+      border: 1px solid var(--line);
+      background: #182129;
+    }
+
+    .export-area-choice.active {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px rgba(126, 208, 166, .35);
+    }
+
+    .export-area-choice span:first-child {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .row {
       display: flex;
       gap: 6px;
@@ -429,6 +465,10 @@
     }
 
     .row > * { flex: 1; }
+
+    .row.narrow-action button {
+      flex: 0 0 calc((100% - 12px) / 3);
+    }
 
     .check-row {
       display: inline-flex;
@@ -596,8 +636,29 @@
     .buffer-style-grid {
       grid-column: 1 / -1;
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 6px;
+    }
+
+    .pattern-control {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .pattern-control > span:first-child {
+      grid-column: 1 / -1;
+    }
+
+    .pattern-preview {
+      width: 30px;
+      height: 22px;
+      border: 1px solid rgba(255,255,255,.38);
+      border-radius: 4px;
+      background-color: rgba(126,208,166,.18);
+      background-size: 8px 8px;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.18);
     }
 
     .object-row.selected {
@@ -912,7 +973,7 @@
     <button id="rightTab" class="collapse-tab" title="Collapse right panel"></button>
     <aside class="side left">
       <div class="brand">
-        <h1>GeoSketch <span class="version">v1.05</span></h1>
+        <h1>GeoSketch <span class="version">v1.1</span></h1>
         <button id="resetViewBtn" title="Zoom to all objects">⌖</button>
       </div>
       <label class="map-title-field">Map title
@@ -942,7 +1003,7 @@
 
       <div class="section">
         <h2>Map Search</h2>
-        <div class="row">
+        <div class="row narrow-action">
           <input id="mapSearchInput" placeholder="Example: Helsinki or 60.1699, 24.9384" title="Search OpenStreetMap/Nominatim, or enter decimal, DMS, or MGRS coordinates">
           <button id="mapSearchBtn" title="Find map locations matching the search text">Find</button>
         </div>
@@ -958,11 +1019,10 @@
           <button data-draw="Polygon" title="Draw polygon. Press Enter to close and finish.">Polygon</button>
           <button data-draw="Circle" title="Draw circle. Press Enter to finish.">Circle</button>
           <button data-draw="Text" title="Add text annotation">Text box</button>
-          <button data-draw="ExportArea" title="Draw a rectangular PNG export area">Export area</button>
         </div>
         <details>
           <summary class="tiny">Create from coordinates</summary>
-          <label>Input coordinates, one per line. Decimal degrees, DMS, and MGRS are accepted. One point creates a point or unit; two points create a line, circle, or export area; three or more create a polygon.
+          <label>Input coordinates, one per line. Decimal degrees, DMS, and MGRS are accepted. One point creates a point or unit; two or more create a line; center and edge coordinates create a circle; three or more create a polygon.
             <textarea id="coordInput" class="coords-box" placeholder="Example: 60.1699, 24.9384&#10;Example: 60.1720, 24.9490"></textarea>
           </label>
           <div class="grid-3">
@@ -970,7 +1030,6 @@
             <button id="coordUnit" title="Create an APP-6 unit from the first coordinate">Unit</button>
             <button id="coordLine" title="Create a line from two or more coordinates">Line</button>
             <button id="coordCircle" title="Create a circle from center and radius point">Circle</button>
-            <button id="coordExportArea" title="Create a rectangular export area from two opposite corners">Export area</button>
           </div>
           <button id="coordPolygon" title="Create a polygon from three or more coordinates">Polygon from Coordinates</button>
         </details>
@@ -979,11 +1038,11 @@
       <details id="layersSection" class="section" open>
         <summary>
           <div class="section-summary">
-            <h2>Layers</h2>
-            <div id="activeLayerSummary" class="active-layer-summary">Active: Drawing 1</div>
+            <h2 id="layersHeading">Layers (Drawing 1 active)</h2>
+            <div id="activeLayerSummary" class="active-layer-summary" hidden></div>
           </div>
         </summary>
-        <div class="row">
+        <div class="row narrow-action">
           <input id="newDrawLayerName" placeholder="Example: Source A" title="Name for a new drawing layer">
           <button id="addDrawLayer" title="Add a new drawing layer and make it active">Add</button>
         </div>
@@ -1008,24 +1067,41 @@
           <button id="saveSelectedLayers" class="wide" title="Export visible/checked layers as separate GeoJSON files">Save selected layers as GeoJSON</button>
         </div>
         <div class="grid-2">
-          <button id="saveExcel" title="Export object table to Excel">Export Excel</button>
+          <button id="saveExcel" title="Export object table to Excel">Export as Excel</button>
           <button id="saveScreenshot" title="Export the current visible map as a PNG image">Save visible PNG</button>
         </div>
         <div class="grid-2">
-          <button id="saveExportArea" title="Export a drawn export area as a PNG image" disabled>Save area PNG</button>
+          <button id="saveHtmlMap" class="wide" title="Export an interactive HTML copy of the map">Export HTML map</button>
         </div>
         <div class="grid-2">
-          <button id="saveHtmlMap" title="Export an interactive HTML copy of the map">HTML Map</button>
+          <button data-draw="ExportArea" class="wide" title="Draw a rectangular PNG export area. The area object will be created in the currently active layer.">Define export area</button>
+        </div>
+        <label>Export area format
+          <select id="exportAreaRatio" title="Aspect ratio for newly drawn export areas">
+            <option value="free">Free</option>
+            <option value="1:1">□ 1:1 square</option>
+            <option value="4:3">▭ 4:3 landscape</option>
+            <option value="3:4">▯ 3:4 portrait</option>
+            <option value="16:9">▭ 16:9 widescreen</option>
+            <option value="9:16">▯ 9:16 vertical</option>
+            <option value="a4p">▯ A4 portrait</option>
+            <option value="a4l">▭ A4 landscape</option>
+          </select>
+        </label>
+        <details id="exportAreaChooser" class="compact-details">
+          <summary class="tiny">All defined export areas</summary>
+          <div id="exportAreaPickerList" class="export-area-picker"></div>
+        </details>
+        <div class="grid-2">
+          <button id="saveExportArea" class="wide" title="Select an export area before exporting an area PNG" disabled>Save area as PNG</button>
         </div>
         <div class="grid-2">
           <button id="newMapBtn" class="danger" title="Clear this project and start a new map">New</button>
           <button id="undoBtn" disabled title="Undo the last edit">Undo</button>
         </div>
         <div class="grid-2">
-          <button id="restoreAutosave" class="wide" title="Restore the browser autosave for this tool">Restore Autosave</button>
-        </div>
-        <div class="grid-2">
-          <button id="runProjectChecks" class="wide" title="Run basic project export and geometry checks">Run Checks</button>
+          <button id="restoreAutosave" title="Restore the browser autosave for this tool">Restore Autosave</button>
+          <button id="runProjectChecks" title="Run basic project export and geometry checks">Run Checks</button>
         </div>
         <label>Load project from GeoJSON
           <input id="loadFile" type="file" accept=".geojson,.json,application/geo+json,application/json">
@@ -1077,7 +1153,7 @@
           <br><br>
           <strong>Map notes.</strong> Use the notes below the map title for author details, sources, caveats, and links. They are included in interactive HTML exports.
           <br><br>
-          <strong>Export areas.</strong> Draw an Export area to define a rectangular PNG crop. Use Save visible PNG for the current viewport, or Save area PNG to export a selected/drawn area.
+          <strong>Export areas.</strong> Use Files > Define export area to draw a rectangular PNG crop. The format selector can constrain new export areas to common ratios. Use Save visible PNG for the current viewport, or select an export area and use Save area as PNG for a crop.
           <br><br>
           <strong>Coordinates.</strong> Search, coordinate input, and coordinate editing accept decimal degrees, DMS, and MGRS. The Settings panel controls how coordinates are displayed and copied.
           <br><br>
@@ -1271,15 +1347,15 @@
         </details>
         <div id="generalStyleSlot"></div>
         <div id="strokeFillControls" class="grid-2">
-          <label><span id="strokeColorText">Stroke</span>
+          <label><span id="strokeColorText">Line color</span>
             <input id="strokeColor" type="color" value="#ffcc4d">
           </label>
-          <label><span id="fillColorText">Fill</span>
+          <label><span id="fillColorText">Fill color</span>
             <input id="fillColor" type="color" value="#ffcc4d">
           </label>
         </div>
         <div id="opacityControls" class="grid-2">
-          <label id="strokeOpacityLabel">Stroke opacity
+          <label id="strokeOpacityLabel">Line opacity
             <input id="strokeOpacity" type="range" min="0" max="1" step="0.05" value="1">
           </label>
           <label id="fillOpacityLabel">Fill opacity
@@ -1287,10 +1363,10 @@
           </label>
         </div>
         <div id="lineControls" class="grid-2">
-          <label>Line weight
+          <label>Line width
             <input id="lineWeight" type="number" min="1" max="24" value="3">
           </label>
-          <label>Line style
+          <label>Line dash
             <select id="dashStyle">
               <option value="">Solid</option>
               <option value="8 8">Dashed</option>
@@ -1299,14 +1375,17 @@
             </select>
           </label>
         </div>
-        <label id="fillPatternControl">Fill pattern
-          <select id="fillPattern">
-            <option value="">Solid</option>
-            <option value="diagonal">Diagonal hatch</option>
-            <option value="cross">Cross hatch</option>
-            <option value="dots">Dots</option>
-          </select>
-        </label>
+        <div id="fillPatternControl" class="grid-2">
+          <label class="wide pattern-control"><span>Fill pattern</span>
+            <span id="fillPatternPreview" class="pattern-preview" aria-hidden="true"></span>
+            <select id="fillPattern">
+              <option value="">None / solid fill</option>
+              <option value="diagonal">Diagonal hatch</option>
+              <option value="cross">Crosshatch</option>
+              <option value="dots">Dots</option>
+            </select>
+          </label>
+        </div>
         <div id="endpointControls" class="grid-2">
           <label>Start endpoint
             <select id="startEndpoint">
@@ -1392,6 +1471,8 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.3/leaflet-maplibre-gl.js"></script>
   <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.17.0/dist/leaflet-geoman.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dom-to-image-more@3.5.0/dist/dom-to-image-more.min.js"></script>
@@ -1400,11 +1481,22 @@
   <script src="https://cdn.jsdelivr.net/npm/milsymbol@3/dist/milsymbol.js"></script>
   <script>
     const APP_NAME = "GeoSketch";
-    const APP_VERSION = "v1.05";
-    const ATTRIBUTION_NOTE = "Background map attribution: OpenStreetMap contributors, CARTO, OpenTopoMap, SRTM, and Esri as applicable to visible layers. User-loaded data may have separate licenses.";
+    const APP_VERSION = "v1.1";
+    const ATTRIBUTION_NOTE = "Background map attribution: OpenStreetMap contributors, CARTO, OpenTopoMap, SRTM, Esri, OpenMapTiles, and OpenFreeMap as applicable to visible layers. User-loaded data may have separate licenses.";
     const PROJECTION_NOTE = "GeoSketch uses WGS84 coordinates and geodesic Turf/Leaflet calculations for sketching, measurement, buffers, and range circles. Outputs are planning/OSINT visualisations, not survey-grade products.";
     const AUTOSAVE_KEY = "geosketch-autosave-v1";
     const LEGACY_AUTOSAVE_KEY = "osint-map-sketchpad-autosave-v1";
+    const EXPORT_AREA_PNG_PADDING = L.point(24, 24);
+    const EXPORT_AREA_RATIOS = {
+      free: null,
+      "1:1": 1,
+      "4:3": 4 / 3,
+      "3:4": 3 / 4,
+      "16:9": 16 / 9,
+      "9:16": 9 / 16,
+      a4p: 210 / 297,
+      a4l: 297 / 210
+    };
     const FALLBACK_ICONS = [
       { name: "Friendly infantry", kind: "app6", sidc: "10031000001211000000", app6: { identity: "03", status: "0", symbolSet: "10", mainIcon: "infantry", echelon: "00", entityType: "11", entitySubtype: "00", hq: false, modifier1: "0", symbolModifier1: "00", symbolModifier2: "00", reinforcedReduced: "00", modifier2: "00", outline: true, manualSidc: "" } },
       { name: "Observation", url: "", kind: "dot" },
@@ -1703,6 +1795,7 @@
       lastMouseLatLng: null,
       coordinateSystem: "dd",
       distanceUnit: "metric",
+      exportAreaRatio: "free",
       unitIconScale: 1,
       pointIconScale: 1,
       nextId: 1,
@@ -1813,6 +1906,16 @@
 
     const tileConfigs = [
       {
+        id: "openfreemap-liberty",
+        name: "OpenFreeMap Liberty",
+        role: "base",
+        kind: "maplibre",
+        style: "https://tiles.openfreemap.org/styles/liberty",
+        attr: "&copy; OpenStreetMap contributors &copy; OpenMapTiles | OpenFreeMap",
+        checked: false,
+        opacity: 1
+      },
+      {
         id: "osm",
         name: "OpenStreetMap",
         role: "base",
@@ -1842,17 +1945,12 @@
     ];
 
     const tiles = new Map();
-    tileConfigs.forEach((cfg) => {
-      const layer = L.tileLayer(cfg.url, {
-        attribution: cfg.attr,
-        opacity: cfg.opacity,
-        minZoom: cfg.minZoom ?? 0,
-        maxZoom: cfg.maxZoom ?? 19,
-        className: cfg.className || "",
-        crossOrigin: cfg.crossOrigin === undefined ? true : cfg.crossOrigin
-      });
+    tileConfigs.forEach((cfg, index) => {
+      const layer = createBackgroundLayer(cfg, index);
+      if (!layer) return;
       tiles.set(cfg.id, layer);
       if (cfg.checked) layer.addTo(map);
+      setBackgroundLayerOpacity(layer, cfg.opacity ?? 1);
     });
     applyTileLayerOrder();
 
@@ -2013,6 +2111,32 @@
       patternDefs.set(svg, defs);
     }
 
+    function patternPreviewBackground(pattern, color = "#7ed0a6", fillColor = "#7ed0a6", fillOpacity = 0.18) {
+      const stroke = color || fillColor || "#7ed0a6";
+      const fill = hexToRgba(fillColor || stroke, fillOpacity);
+      if (pattern === "diagonal") {
+        return `background-color:${fill};background-image:repeating-linear-gradient(135deg, transparent 0 5px, ${stroke} 5px 7px);`;
+      }
+      if (pattern === "cross") {
+        return `background-color:${fill};background-image:linear-gradient(${stroke} 1px, transparent 1px),linear-gradient(90deg, ${stroke} 1px, transparent 1px);`;
+      }
+      if (pattern === "dots") {
+        return `background-color:${fill};background-image:radial-gradient(${stroke} 1.8px, transparent 2px);`;
+      }
+      return `background-color:${fill};background-image:none;`;
+    }
+
+    function updatePatternPreview() {
+      const preview = el("fillPatternPreview");
+      if (!preview) return;
+      preview.setAttribute("style", patternPreviewBackground(
+        el("fillPattern")?.value || "",
+        el("strokeColor")?.value || "#7ed0a6",
+        el("fillColor")?.value || "#7ed0a6",
+        Number(el("fillOpacity")?.value ?? 0.18)
+      ));
+    }
+
     function baseStyle() {
       return {
         color: el("strokeColor").value,
@@ -2088,20 +2212,62 @@
       return state.activeLayerId;
     }
 
+    function createBackgroundLayer(cfg, index = 0, savedTile = {}) {
+      const opacity = savedTile.opacity ?? cfg.opacity ?? 1;
+      if (cfg.kind === "maplibre") {
+        if (!window.maplibregl || !L.maplibreGL) return null;
+        return L.maplibreGL({
+          style: cfg.style,
+          opacity,
+          attributionControl: { customAttribution: cfg.attr || "" },
+          interactive: false,
+          pane: "tilePane",
+          preserveDrawingBuffer: true
+        });
+      }
+      return L.tileLayer(cfg.url, {
+        attribution: cfg.attr,
+        opacity,
+        minZoom: cfg.minZoom ?? 0,
+        maxZoom: cfg.maxZoom ?? 19,
+        zIndex: tileConfigs.length - index,
+        className: cfg.className || "",
+        crossOrigin: cfg.crossOrigin === undefined ? true : cfg.crossOrigin
+      });
+    }
+
+    function backgroundLayerOpacity(layer, cfg) {
+      const value = layer?.options?.opacity ?? cfg?.opacity ?? 1;
+      return Number.isFinite(Number(value)) ? Number(value) : 1;
+    }
+
+    function setBackgroundLayerOpacity(layer, opacity) {
+      const value = Math.max(0, Math.min(1, Number(opacity)));
+      layer.options.opacity = value;
+      if (typeof layer.setOpacity === "function") {
+        layer.setOpacity(value);
+      } else {
+        const container = layer.getContainer?.();
+        if (container) container.style.opacity = value;
+      }
+    }
+
     function renderTileControls() {
       const wrap = el("tileLayers");
       wrap.innerHTML = "";
       tileConfigs.forEach((cfg, index) => {
         const layer = tiles.get(cfg.id);
+        if (!layer) return;
         const row = document.createElement("div");
         row.className = "tile-row";
+        const opacity = backgroundLayerOpacity(layer, cfg);
         row.innerHTML = `
           <input type="checkbox" ${map.hasLayer(layer) ? "checked" : ""} aria-label="${cfg.name}">
           <span class="tile-meta"><strong>${cfg.name}</strong><span class="tiny">${escapeHtml(layerRoleLabel(cfg))} · ${index === 0 ? "top" : index === tileConfigs.length - 1 ? "bottom" : "middle"}</span></span>
-          <span class="tile-opacity tiny">${Math.round(layer.options.opacity * 100)}%</span>
+          <span class="tile-opacity tiny">${Math.round(opacity * 100)}%</span>
           <button title="Move background layer up">↑</button>
           <button title="Move background layer down">↓</button>
-          <input type="range" min="0" max="1" step="0.05" value="${layer.options.opacity}">
+          <input type="range" min="0" max="1" step="0.05" value="${opacity}">
         `;
         const check = row.querySelector("input[type='checkbox']");
         const range = row.querySelector("input[type='range']");
@@ -2110,12 +2276,13 @@
         check.addEventListener("change", () => {
           pushUndo("tile-layer");
           check.checked ? layer.addTo(map) : map.removeLayer(layer);
+          setBackgroundLayerOpacity(layer, backgroundLayerOpacity(layer, cfg));
           applyTileLayerOrder();
           scheduleSave();
         });
         range.addEventListener("input", () => {
           pushUndo("tile-opacity", { coalesceMs: 1000 });
-          layer.setOpacity(Number(range.value));
+          setBackgroundLayerOpacity(layer, Number(range.value));
           pct.textContent = `${Math.round(Number(range.value) * 100)}%`;
           scheduleSave();
         });
@@ -2137,7 +2304,10 @@
       tileConfigs.forEach((cfg, index) => {
         const layer = tiles.get(cfg.id);
         if (!layer) return;
-        layer.setZIndex(tileConfigs.length - index);
+        const zIndex = tileConfigs.length - index;
+        if (typeof layer.setZIndex === "function") layer.setZIndex(zIndex);
+        const container = layer.getContainer?.();
+        if (container) container.style.zIndex = zIndex;
       });
     }
 
@@ -2162,7 +2332,7 @@
       return tileConfigs.map((cfg, order) => ({
         id: cfg.id,
         visible: map.hasLayer(tiles.get(cfg.id)),
-        opacity: tiles.get(cfg.id).options.opacity,
+        opacity: backgroundLayerOpacity(tiles.get(cfg.id), cfg),
         order
       }));
     }
@@ -2175,7 +2345,7 @@
         if (!layer) return;
         const saved = savedById.get(cfg.id);
         const visible = saved ? saved.visible !== false : Boolean(cfg.checked);
-        layer.setOpacity(saved?.opacity ?? cfg.opacity ?? 1);
+        setBackgroundLayerOpacity(layer, saved?.opacity ?? cfg.opacity ?? 1);
         if (visible && !map.hasLayer(layer)) layer.addTo(map);
         if (!visible && map.hasLayer(layer)) map.removeLayer(layer);
       });
@@ -2183,11 +2353,18 @@
     }
 
     function updateActiveLayerSummary() {
+      const heading = el("layersHeading");
       const summary = el("activeLayerSummary");
-      if (!summary) return;
       const active = state.drawLayers.get(state.activeLayerId);
-      summary.textContent = `Active: ${active?.name || "None"}`;
-      summary.title = active?.name ? `Active layer: ${active.name}` : "No active layer";
+      const activeName = active?.name || "None";
+      if (heading) {
+        heading.textContent = `Layers (${activeName} active)`;
+        heading.title = active?.name ? `Active layer: ${active.name}` : "No active layer";
+      }
+      if (summary) {
+        summary.textContent = "";
+        summary.title = "";
+      }
     }
 
     function populateObjectLayerSelect(obj = selectedObj()) {
@@ -2799,6 +2976,7 @@
       obj.layer.on("pm:edit pm:update pm:dragend pm:markerdragend pm:change", () => {
         updateHitLayer(obj);
         updateDerived(obj);
+        if (obj.kind === "exportArea") updateExportAreaPixelUi();
         scheduleSave();
       });
       obj.layer.on("pm:dragend dragend moveend pm:markerdragend", () => clearMoveGuide());
@@ -2810,6 +2988,7 @@
           clearMoveGuide();
           updateHitLayer(obj);
           updateDerived(obj);
+          if (obj.kind === "exportArea") updateExportAreaPixelUi();
           scheduleSave();
         });
       }
@@ -2966,9 +3145,9 @@
       el("labelControl").firstChild.textContent = isUnit ? "Unique designation" : isText ? "Text" : "Label";
       el("showLabelText").textContent = isUnit ? "Show unit text" : "Show label";
       el("measureToggleText").textContent = pointLike || isText ? "Show coordinates" : "Show measurements";
-      el("strokeColorText").textContent = isPoint ? "Icon line" : "Stroke";
-      el("fillColorText").textContent = isPoint ? "Icon fill" : "Fill";
-      el("strokeOpacityLabel").firstChild.textContent = pointLike ? "Icon opacity" : "Stroke opacity";
+      el("strokeColorText").textContent = isPoint ? "Icon line" : "Line color";
+      el("fillColorText").textContent = isPoint ? "Icon fill" : "Fill color";
+      el("strokeOpacityLabel").firstChild.textContent = pointLike ? "Icon opacity" : "Line opacity";
       ["objectLayerControl", "labelControl", "unitNameControl", "higherFormationControl", "showLabelControl", "measureToggleLabel", "iconControls", "textStyleControls", "labelStyleControls", "strokeFillControls", "opacityControls", "strokeOpacityLabel", "fillOpacityLabel", "lineControls", "fillPatternControl", "endpointControls", "bufferSection"].forEach((id) => {
         el(id)?.classList.toggle("locked-disabled", locked);
       });
@@ -2976,6 +3155,7 @@
         if (el(id)) el(id).disabled = locked || !hasObj;
       });
       updatePointIconPreview();
+      updatePatternPreview();
       updateObjectLayerStatus(obj);
     }
 
@@ -3047,6 +3227,7 @@
       renderBufferList();
       updateMeasurementPanel();
       updatePointIconPreview();
+      updatePatternPreview();
       scheduleSave();
     }
 
@@ -3239,7 +3420,21 @@
           lines.push(`Total: ${formatDistance(total)}`);
           return lines.join("\n");
         }
-        if (obj.kind === "polygon" || obj.kind === "exportArea") {
+        if (obj.kind === "exportArea") {
+          const bounds = exportAreaBounds(obj);
+          const northWidth = bounds.getNorthWest().distanceTo(bounds.getNorthEast());
+          const southWidth = bounds.getSouthWest().distanceTo(bounds.getSouthEast());
+          const westHeight = bounds.getNorthWest().distanceTo(bounds.getSouthWest());
+          const eastHeight = bounds.getNorthEast().distanceTo(bounds.getSouthEast());
+          return [
+            `Width: ${formatDistance((northWidth + southWidth) / 2)}`,
+            `Height: ${formatDistance((westHeight + eastHeight) / 2)}`,
+            `PNG size: ${exportAreaSizeLabel(obj)}`,
+            `Northwest: ${formatLatLng(bounds.getNorthWest())}`,
+            `Southeast: ${formatLatLng(bounds.getSouthEast())}`
+          ].join("\n");
+        }
+        if (obj.kind === "polygon") {
           const ring = polygonRing(obj);
           let perimeter = 0;
           const segments = [];
@@ -3352,6 +3547,59 @@
       return L.latLngBounds(map.getBounds());
     }
 
+    function exportAreaPixelSize(bounds) {
+      const b = L.latLngBounds(bounds);
+      if (!b.isValid()) return null;
+      const padding = EXPORT_AREA_PNG_PADDING.multiplyBy(2);
+      const zoom = map.getBoundsZoom(b, false, padding);
+      const nw = map.project(b.getNorthWest(), zoom);
+      const se = map.project(b.getSouthEast(), zoom);
+      return {
+        width: Math.max(1, Math.round(Math.abs(se.x - nw.x))),
+        height: Math.max(1, Math.round(Math.abs(se.y - nw.y)))
+      };
+    }
+
+    function formatPixelSize(size) {
+      return size ? `${size.width} x ${size.height} px` : "unknown px";
+    }
+
+    function exportAreaSizeLabel(obj) {
+      return formatPixelSize(exportAreaPixelSize(exportAreaBounds(obj)));
+    }
+
+    function normalizeExportAreaRatio(value) {
+      return Object.prototype.hasOwnProperty.call(EXPORT_AREA_RATIOS, value) ? value : "free";
+    }
+
+    function setExportAreaRatio(value) {
+      state.exportAreaRatio = normalizeExportAreaRatio(value);
+      syncSettingsControls();
+      scheduleSave();
+    }
+
+    function constrainedExportAreaBounds(bounds, ratioKey = state.exportAreaRatio) {
+      const ratio = EXPORT_AREA_RATIOS[normalizeExportAreaRatio(ratioKey)];
+      const b = L.latLngBounds(bounds);
+      if (!ratio || !b.isValid()) return b;
+      const nw = map.latLngToLayerPoint(b.getNorthWest());
+      const se = map.latLngToLayerPoint(b.getSouthEast());
+      const sx = se.x >= nw.x ? 1 : -1;
+      const sy = se.y >= nw.y ? 1 : -1;
+      const width = Math.abs(se.x - nw.x);
+      const height = Math.abs(se.y - nw.y);
+      if (!width || !height) return b;
+      let targetWidth = width;
+      let targetHeight = height;
+      if (width / height > ratio) {
+        targetWidth = height * ratio;
+      } else {
+        targetHeight = width / ratio;
+      }
+      const adjusted = L.point(nw.x + sx * targetWidth, nw.y + sy * targetHeight);
+      return L.latLngBounds(map.layerPointToLatLng(nw), map.layerPointToLatLng(adjusted));
+    }
+
     function formatLatLng(p, system = state.coordinateSystem) {
       if (!p) return "";
       if (system === "mgrs") return latLngToMgrs(p.lat, p.lng, 5);
@@ -3413,6 +3661,7 @@
     function syncSettingsControls() {
       if (el("coordinateSystem")) el("coordinateSystem").value = state.coordinateSystem || "dd";
       if (el("distanceUnit")) el("distanceUnit").value = normalizeDistanceUnit(state.distanceUnit);
+      if (el("exportAreaRatio")) el("exportAreaRatio").value = normalizeExportAreaRatio(state.exportAreaRatio);
       if (el("bufferUnit")) el("bufferUnit").value = distanceUnitToBufferUnit(state.distanceUnit);
       if (el("unitScale")) el("unitScale").value = Math.round((state.unitIconScale || 1) * 100);
       if (el("pointScale")) el("pointScale").value = Math.round((state.pointIconScale || 1) * 100);
@@ -3440,6 +3689,7 @@
       syncSettingsControls();
       scheduleSave();
     }
+
 
     function setGlobalIconScale(kind, percent) {
       pushUndo(`${kind}-icon-scale`, { coalesceMs: 1000 });
@@ -3973,11 +4223,64 @@
     function updateExportAreaButton() {
       const button = el("saveExportArea");
       if (!button) return;
-      const count = exportAreaObjects().length;
-      button.disabled = count === 0;
-      button.title = count
-        ? `Export one of ${count} drawn export area${count === 1 ? "" : "s"} as PNG`
-        : "Draw an export area before exporting an area PNG";
+      const areas = exportAreaObjects();
+      const selected = selectedObj();
+      const selectedArea = selected?.kind === "exportArea" ? selected : null;
+      const target = areas.length === 1 ? areas[0] : selectedArea;
+      if (!areas.length) {
+        button.disabled = true;
+        button.textContent = "Save area as PNG";
+        button.title = "Draw an export area before exporting an area PNG.";
+      } else if (!target) {
+        button.disabled = true;
+        button.textContent = "Save area as PNG";
+        button.title = "Select an export area first. Use the map, Layers list, or All defined export areas.";
+      } else if (!isObjectVisible(target)) {
+        button.disabled = true;
+        button.textContent = `Save ${objectName(target)} as PNG`;
+        button.title = "The selected export area is hidden. Show its layer/object before exporting.";
+      } else {
+        button.disabled = false;
+        button.textContent = `Save ${objectName(target)} (${exportAreaSizeLabel(target)}) as PNG`;
+        button.title = `Export ${objectName(target)} as a PNG image.`;
+      }
+      renderExportAreaPicker(areas);
+    }
+
+    function renderExportAreaPicker(areas = exportAreaObjects()) {
+      const list = el("exportAreaPickerList");
+      const details = el("exportAreaChooser");
+      if (!list || !details) return;
+      details.hidden = areas.length === 0;
+      list.innerHTML = "";
+      if (!areas.length) return;
+      areas.forEach((obj) => {
+        const layer = state.drawLayers.get(obj.drawLayerId);
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `export-area-choice${obj.id === state.selectedId ? " active" : ""}`;
+        button.title = `Layer: ${layer?.name || "Unknown layer"}${isObjectVisible(obj) ? "" : " (hidden)"}`;
+        button.innerHTML = `<span>${escapeHtml(objectName(obj))} (${escapeHtml(exportAreaSizeLabel(obj))})</span><span class="tiny">${escapeHtml(layer?.name || "Unknown layer")}</span>`;
+        button.addEventListener("click", () => {
+          selectObject(obj.id);
+          if (obj.layer?.getBounds) map.fitBounds(obj.layer.getBounds().pad(0.1));
+        });
+        list.appendChild(button);
+      });
+    }
+
+    function defaultExportAreaForPng() {
+      const areas = exportAreaObjects();
+      if (!areas.length) return null;
+      const selected = selectedObj();
+      if (selected?.kind === "exportArea" && isObjectVisible(selected)) return selected;
+      if (areas.length === 1 && isObjectVisible(areas[0])) return areas[0];
+      return null;
+    }
+
+    function updateExportAreaPixelUi() {
+      updateExportAreaButton();
+      if (selectedObj()?.kind === "exportArea") updateMeasurementPanel();
     }
 
     function setActiveLayer(id) {
@@ -4047,10 +4350,11 @@
         row.className = "object-row" + (obj.id === state.selectedId ? " selected" : "");
         const layer = state.drawLayers.get(obj.drawLayerId);
         const name = objectName(obj);
+        const displayName = obj.kind === "exportArea" ? `${name} (${exportAreaSizeLabel(obj)})` : name;
         row.innerHTML = `
           <input type="checkbox" ${obj.visible !== false ? "checked" : ""} aria-label="Visible">
           ${objectListIconHtml(obj)}
-          <span title="${escapeHtml(`${name}${layer ? ` · ${layer.name}` : ""}`)}">${escapeHtml(name)}<br><span class="tiny">${objectKindLabel(obj.kind)}${layer ? ` · ${escapeHtml(layer.name)}` : ""}</span></span>
+          <span title="${escapeHtml(`${displayName}${layer ? ` · ${layer.name}` : ""}`)}">${escapeHtml(displayName)}<br><span class="tiny">${objectKindLabel(obj.kind)}${layer ? ` · ${escapeHtml(layer.name)}` : ""}</span></span>
           <button title="${obj.locked ? "Unlock object" : "Lock object"}">${obj.locked ? "🔒" : "🔓"}</button>
           <button title="Up">↑</button>
           <button title="Down">↓</button>`;
@@ -4061,6 +4365,7 @@
           obj.visible = event.target.checked;
           syncLayerVisibility();
           updateSelectionHalo();
+          updateExportAreaButton();
           scheduleSave();
         });
         row.querySelectorAll("button")[0].addEventListener("click", (event) => {
@@ -4518,23 +4823,26 @@
           </select>
           <button class="danger" title="Delete buffer">×</button>
           <div class="buffer-style-grid">
-            <label>Line<input data-buf="color" type="color" value="${buffer.style.color}"></label>
-            <label>Fill<input data-buf="fillColor" type="color" value="${buffer.style.fillColor}"></label>
-            <label>Weight<input data-buf="weight" type="number" min="1" max="24" value="${buffer.style.weight}"></label>
-            <label>Line op.<input data-buf="opacity" type="range" min="0" max="1" step="0.05" value="${buffer.style.opacity}"></label>
-            <label>Fill op.<input data-buf="fillOpacity" type="range" min="0" max="1" step="0.05" value="${buffer.style.fillOpacity}"></label>
-            <label>Dash<select data-buf="dashArray">
+            <label>Line color<input data-buf="color" type="color" value="${buffer.style.color}"></label>
+            <label>Line opacity<input data-buf="opacity" type="range" min="0" max="1" step="0.05" value="${buffer.style.opacity}"></label>
+            <label>Line width<input data-buf="weight" type="number" min="1" max="24" value="${buffer.style.weight}"></label>
+            <label>Line dash<select data-buf="dashArray">
               <option value="" ${!buffer.style.dashArray ? "selected" : ""}>Solid</option>
               <option value="8 8" ${buffer.style.dashArray === "8 8" ? "selected" : ""}>Dashed</option>
               <option value="2 8" ${buffer.style.dashArray === "2 8" ? "selected" : ""}>Dotted</option>
               <option value="12 6 2 6" ${buffer.style.dashArray === "12 6 2 6" ? "selected" : ""}>Dash-dot</option>
             </select></label>
-            <label>Pattern<select data-buf="pattern">
-              <option value="" ${!buffer.style.pattern ? "selected" : ""}>Solid</option>
-              <option value="diagonal" ${buffer.style.pattern === "diagonal" ? "selected" : ""}>Diagonal</option>
-              <option value="cross" ${buffer.style.pattern === "cross" ? "selected" : ""}>Cross</option>
-              <option value="dots" ${buffer.style.pattern === "dots" ? "selected" : ""}>Dots</option>
-            </select></label>
+            <label>Fill color<input data-buf="fillColor" type="color" value="${buffer.style.fillColor}"></label>
+            <label>Fill opacity<input data-buf="fillOpacity" type="range" min="0" max="1" step="0.05" value="${buffer.style.fillOpacity}"></label>
+            <label class="wide pattern-control"><span>Fill pattern</span>
+              <span class="pattern-preview" style="${patternPreviewBackground(buffer.style.pattern, buffer.style.color, buffer.style.fillColor, buffer.style.fillOpacity)}" aria-hidden="true"></span>
+              <select data-buf="pattern">
+                <option value="" ${!buffer.style.pattern ? "selected" : ""}>None / solid fill</option>
+                <option value="diagonal" ${buffer.style.pattern === "diagonal" ? "selected" : ""}>Diagonal hatch</option>
+                <option value="cross" ${buffer.style.pattern === "cross" ? "selected" : ""}>Crosshatch</option>
+                <option value="dots" ${buffer.style.pattern === "dots" ? "selected" : ""}>Dots</option>
+              </select>
+            </label>
             <label class="check-row"><input data-buf="showMeasurements" type="checkbox" ${buffer.showMeasurements ? "checked" : ""}> Measure</label>
             <label class="check-row"><input data-buf="showOverlaps" type="checkbox" ${buffer.showOverlaps ? "checked" : ""}> Show fill overlaps</label>
           </div>`;
@@ -4594,6 +4902,15 @@
         buffer.style[key] = Number(input.value);
       } else {
         buffer.style[key] = input.value;
+      }
+      const preview = input.closest(".buffer-style-grid")?.querySelector(".pattern-preview");
+      if (preview) {
+        preview.setAttribute("style", patternPreviewBackground(
+          buffer.style.pattern,
+          buffer.style.color,
+          buffer.style.fillColor,
+          buffer.style.fillOpacity
+        ));
       }
       updateBuffers(obj);
       refreshLabelsAndMeasurements();
@@ -4817,8 +5134,9 @@
       pushUndo("load-sample");
       clearAll(false);
       setMapTitle("GeoSketch Sample Map", false);
-      setMapNotes("Sample map for GeoSketch v1.05. Repository: https://github.com/jmkorhonen/geosketch", false);
+      setMapNotes("Sample map for GeoSketch. Repository: https://github.com/jmkorhonen/geosketch", false);
       setShowMapTitle(true, false);
+      state.exportAreaRatio = "free";
       state.drawLayers.clear();
       const obsLayerId = uid("layer");
       const unitLayerId = uid("layer");
@@ -5019,6 +5337,9 @@
       if (event.shape === "Circle") kind = "circle";
       if (event.shape === "Polygon" || event.shape === "Rectangle") kind = "polygon";
       if (event.shape === "Rectangle" && state.pendingDrawKind === "exportArea") kind = "exportArea";
+      if (kind === "exportArea" && layer.setBounds) {
+        layer.setBounds(constrainedExportAreaBounds(layer.getBounds()));
+      }
       if (isPointLike(kind)) layer.dragging?.enable();
       state.pendingDrawKind = null;
       state.activeDrawShape = null;
@@ -5126,6 +5447,9 @@
             if (at) text = `Seg ${formatDistance(current)} | Total ${formatDistance(total)} | Brg ${formatBearing(bearing)}`;
           }
         } else if ((shape === "Polygon" || shape === "Rectangle") && layer.getLatLngs) {
+          if (shape === "Rectangle" && state.pendingDrawKind === "exportArea" && layer.getBounds && layer.setBounds) {
+            layer.setBounds(constrainedExportAreaBounds(layer.getBounds()));
+          }
           const ring = layer.getLatLngs()[0] || layer.getLatLngs();
           if (ring.length > 1) {
             let total = 0;
@@ -5439,6 +5763,7 @@
           mapTitleStyle: normalizeTitleStyle(state.mapTitleStyle),
           coordinateSystem: state.coordinateSystem,
           distanceUnit: state.distanceUnit,
+          exportAreaRatio: normalizeExportAreaRatio(state.exportAreaRatio),
           unitIconScale: state.unitIconScale,
           pointIconScale: state.pointIconScale,
           view: { center: map.getCenter(), zoom: map.getZoom() },
@@ -5763,6 +6088,8 @@
     }
 
     async function exportScreenshot() {
+      const blocked = pngExportBlockedReason();
+      if (blocked) return status(blocked);
       status("Rendering visible map PNG…");
       try {
         const blob = await withMapExportRender(() => renderMapPngBlob());
@@ -5776,23 +6103,7 @@
     }
 
     function chooseExportAreaForPng() {
-      const areas = exportAreaObjects();
-      if (!areas.length) return null;
-      const visibleAreas = visibleExportAreaObjects();
-      const selected = selectedObj();
-      if (selected?.kind === "exportArea" && isObjectVisible(selected)) return selected;
-      if (visibleAreas.length === 1) return visibleAreas[0];
-      const choices = (visibleAreas.length ? visibleAreas : areas);
-      if (choices.length === 1) return choices[0];
-      const defaultIndex = selected?.kind === "exportArea"
-        ? Math.max(0, choices.findIndex((obj) => obj.id === selected.id))
-        : 0;
-      const menu = choices.map((obj, index) => `${index + 1}: ${objectName(obj)}${isObjectVisible(obj) ? "" : " (hidden)"}`).join("\n");
-      const answer = prompt(`Select export area to save as PNG:\n${menu}`, String(defaultIndex + 1));
-      if (answer === null) return null;
-      const byIndex = choices[Number(answer.trim()) - 1];
-      const byName = choices.find((obj) => objectName(obj).toLowerCase() === answer.trim().toLowerCase());
-      return byIndex || byName || null;
+      return defaultExportAreaForPng();
     }
 
     function clipForBounds(bounds) {
@@ -5816,6 +6127,21 @@
 
     function visibleTileLayers() {
       return Array.from(tiles.values()).filter((layer) => map.hasLayer(layer));
+    }
+
+    function visibleMapLibreLayers() {
+      return Array.from(tiles.values()).filter((layer) => map.hasLayer(layer) && typeof layer.getMaplibreMap === "function");
+    }
+
+    function visibleRasterTileLayers() {
+      return Array.from(tiles.values()).filter((layer) => map.hasLayer(layer) && typeof layer.getMaplibreMap !== "function");
+    }
+
+    function pngExportBlockedReason() {
+      if (visibleMapLibreLayers().length && !visibleRasterTileLayers().length) {
+        return "PNG export is disabled when only vector background maps are visible. Enable a raster background map, or export an interactive HTML map.";
+      }
+      return "";
     }
 
     function mapTilesSettled() {
@@ -5879,6 +6205,8 @@
     }
 
     async function exportAreaScreenshot() {
+      const blocked = pngExportBlockedReason();
+      if (blocked) return status(blocked);
       const area = chooseExportAreaForPng();
       if (!area) return status("No export area selected.");
       const bounds = exportAreaBounds(area);
@@ -5890,7 +6218,7 @@
         state.restoring = true;
         await withMapExportRender(async () => {
           setExportAreaGuidesVisible(false);
-          map.fitBounds(bounds, { animate: false, padding: [24, 24] });
+          map.fitBounds(bounds, { animate: false, padding: EXPORT_AREA_PNG_PADDING });
           await waitForMapFrame();
           status("Waiting for map tiles before PNG export…");
           await waitForTilesToSettle();
@@ -5921,6 +6249,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escapeHtml(state.mapTitle || "GeoSketch Interactive Map")}</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
   <style>
     :root { --panel-width: min(292px, calc(100vw - 28px)); }
     html, body, #map { height: 100%; margin: 0; }
@@ -5982,6 +6311,8 @@
   </div>
   <button id="panelTab" type="button" aria-controls="panel" aria-expanded="false" title="Show map controls">&gt;</button>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
+  <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"><\/script>
+  <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.3/leaflet-maplibre-gl.js"><\/script>
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"><\/script>
   <script src="https://cdn.jsdelivr.net/npm/milsymbol@3/dist/milsymbol.js"><\/script>
   <script id="tile-configs" type="application/json">${scriptJson(tileConfigs)}<\/script>
@@ -6001,18 +6332,13 @@
 
     tileConfigs.forEach((cfg, index) => {
       const savedTile = (saved.tileLayers || []).find((tile) => tile.id === cfg.id) || {};
-      const layer = L.tileLayer(cfg.url, {
-        attribution: cfg.attr,
-        opacity: savedTile.opacity ?? cfg.opacity ?? 1,
-        minZoom: cfg.minZoom ?? 0,
-        maxZoom: cfg.maxZoom ?? 19,
-        zIndex: tileConfigs.length - index,
-        className: cfg.className || "",
-        crossOrigin: cfg.crossOrigin === undefined ? true : cfg.crossOrigin
-      });
+      const layer = createBackgroundLayer(cfg, index, savedTile);
+      if (!layer) return;
       tiles.set(cfg.id, layer);
       if (savedTile.visible ?? cfg.checked) layer.addTo(map);
+      setBackgroundLayerOpacity(layer, savedTile.opacity ?? cfg.opacity ?? 1);
     });
+    applyBackgroundLayerOrder();
 
     renderControls();
     setupPanelToggle();
@@ -6034,10 +6360,15 @@
       base.innerHTML = "";
       tileConfigs.forEach((cfg) => {
         const layer = tiles.get(cfg.id);
+        if (!layer) return;
         const row = document.createElement("label");
-        row.innerHTML = '<input type="checkbox" ' + (map.hasLayer(layer) ? "checked" : "") + '> <span>' + escapeHtml(cfg.name) + '</span><input type="range" min="0" max="1" step="0.05" value="' + layer.options.opacity + '">';
-        row.querySelector("input[type=checkbox]").addEventListener("change", (event) => event.target.checked ? layer.addTo(map) : map.removeLayer(layer));
-        row.querySelector("input[type=range]").addEventListener("input", (event) => layer.setOpacity(Number(event.target.value)));
+        row.innerHTML = '<input type="checkbox" ' + (map.hasLayer(layer) ? "checked" : "") + '> <span>' + escapeHtml(cfg.name) + '</span><input type="range" min="0" max="1" step="0.05" value="' + backgroundLayerOpacity(layer, cfg) + '">';
+        row.querySelector("input[type=checkbox]").addEventListener("change", (event) => {
+          event.target.checked ? layer.addTo(map) : map.removeLayer(layer);
+          setBackgroundLayerOpacity(layer, backgroundLayerOpacity(layer, cfg));
+          applyBackgroundLayerOrder();
+        });
+        row.querySelector("input[type=range]").addEventListener("input", (event) => setBackgroundLayerOpacity(layer, Number(event.target.value)));
         base.appendChild(row);
       });
       const draw = document.getElementById("drawControls");
@@ -6050,6 +6381,57 @@
           renderMap();
         });
         draw.appendChild(row);
+      });
+    }
+
+    function createBackgroundLayer(cfg, index, savedTile) {
+      const opacity = savedTile.opacity ?? cfg.opacity ?? 1;
+      if (cfg.kind === "maplibre") {
+        if (!window.maplibregl || !L.maplibreGL) return null;
+        return L.maplibreGL({
+          style: cfg.style,
+          opacity,
+          attributionControl: { customAttribution: cfg.attr || "" },
+          interactive: false,
+          pane: "tilePane",
+          preserveDrawingBuffer: true
+        });
+      }
+      return L.tileLayer(cfg.url, {
+        attribution: cfg.attr,
+        opacity,
+        minZoom: cfg.minZoom ?? 0,
+        maxZoom: cfg.maxZoom ?? 19,
+        zIndex: tileConfigs.length - index,
+        className: cfg.className || "",
+        crossOrigin: cfg.crossOrigin === undefined ? true : cfg.crossOrigin
+      });
+    }
+
+    function backgroundLayerOpacity(layer, cfg) {
+      const value = layer?.options?.opacity ?? cfg?.opacity ?? 1;
+      return Number.isFinite(Number(value)) ? Number(value) : 1;
+    }
+
+    function setBackgroundLayerOpacity(layer, opacity) {
+      const value = Math.max(0, Math.min(1, Number(opacity)));
+      layer.options.opacity = value;
+      if (typeof layer.setOpacity === "function") {
+        layer.setOpacity(value);
+      } else {
+        const container = layer.getContainer?.();
+        if (container) container.style.opacity = value;
+      }
+    }
+
+    function applyBackgroundLayerOrder() {
+      tileConfigs.forEach((cfg, index) => {
+        const layer = tiles.get(cfg.id);
+        if (!layer) return;
+        const zIndex = tileConfigs.length - index;
+        if (typeof layer.setZIndex === "function") layer.setZIndex(zIndex);
+        const container = layer.getContainer?.();
+        if (container) container.style.zIndex = zIndex;
       });
     }
 
@@ -6513,6 +6895,7 @@
         mapTitleStyle: normalizeTitleStyle(state.mapTitleStyle),
         coordinateSystem: state.coordinateSystem,
         distanceUnit: state.distanceUnit,
+        exportAreaRatio: normalizeExportAreaRatio(state.exportAreaRatio),
         unitIconScale: state.unitIconScale,
         pointIconScale: state.pointIconScale,
         view: { center: map.getCenter(), zoom: map.getZoom() },
@@ -6628,6 +7011,7 @@
       updateMapTitleOverlay();
       state.coordinateSystem = saved.coordinateSystem || "dd";
       state.distanceUnit = normalizeDistanceUnit(saved.distanceUnit || saved.properties?.distanceUnit);
+      state.exportAreaRatio = normalizeExportAreaRatio(saved.exportAreaRatio ?? saved.properties?.exportAreaRatio);
       state.unitIconScale = Number(saved.unitIconScale || 1);
       state.pointIconScale = Number(saved.pointIconScale || 1);
       syncSettingsControls();
@@ -6738,6 +7122,7 @@
         }
         if (geojson.properties?.coordinateSystem) state.coordinateSystem = geojson.properties.coordinateSystem;
         if (geojson.properties?.distanceUnit) state.distanceUnit = normalizeDistanceUnit(geojson.properties.distanceUnit);
+        state.exportAreaRatio = normalizeExportAreaRatio(geojson.properties?.exportAreaRatio);
         if (geojson.properties?.unitIconScale) state.unitIconScale = Number(geojson.properties.unitIconScale) || 1;
         if (geojson.properties?.pointIconScale) state.pointIconScale = Number(geojson.properties.pointIconScale) || 1;
         applyTileLayerState(geojson.properties?.tileLayers || []);
@@ -7053,8 +7438,8 @@
     el("coordUnit").addEventListener("click", () => drawFromCoords("unit"));
     el("coordLine").addEventListener("click", () => drawFromCoords("line"));
     el("coordCircle").addEventListener("click", () => drawFromCoords("circle"));
-    el("coordExportArea").addEventListener("click", () => drawFromCoords("exportArea"));
     el("coordPolygon").addEventListener("click", () => drawFromCoords("polygon"));
+    el("exportAreaRatio").addEventListener("change", (event) => setExportAreaRatio(event.target.value));
     el("editCoordinates").addEventListener("click", toggleCoordinateEditing);
     el("coordinateOutput").addEventListener("input", (event) => resizeCoordinateOutput(event.target));
     el("copyCoordinates").addEventListener("click", copySelectedCoordinates);
@@ -7251,6 +7636,7 @@
     map.on("click", () => selectObject(null));
     map.on("zoomend", refreshLabelsAndMeasurements);
     map.on("zoomend", syncMapZoomControl);
+    map.on("zoomend moveend", updateExportAreaPixelUi);
     map.on("zoomend moveend", scheduleSave);
 
     renderTileControls();
@@ -7270,6 +7656,7 @@
     syncRightPane();
     updateUndoButton();
     updateSaveStatus();
+    updateExportAreaButton();
     syncMapZoomControl();
   </script>
 </body>

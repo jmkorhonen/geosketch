@@ -2,9 +2,9 @@
   "type": "FeatureCollection",
   "properties": {
     "app": "GeoSketch",
-    "appVersion": "v1.05",
+    "appVersion": "v1.1",
     "title": "GeoSketch Sample Map",
-    "mapNotes": "Sample map for GeoSketch v1.05. Repository: https://github.com/jmkorhonen/geosketch",
+    "mapNotes": "Sample map for GeoSketch. Repository: https://github.com/jmkorhonen/geosketch",
     "showMapTitle": true,
     "mapTitleStyle": {
       "size": 18,
@@ -21,6 +21,10 @@
     },
     "coordinateSystem": "dd",
     "distanceUnit": "metric",
+    "exportCredit": true,
+    "exportDate": true,
+    "exportAttribution": true,
+    "exportAreaRatio": "free",
     "unitIconScale": 1,
     "pointIconScale": 1,
     "view": {
@@ -32,27 +36,33 @@
     },
     "tileLayers": [
       {
+        "id": "openfreemap-liberty",
+        "visible": false,
+        "opacity": 1,
+        "order": 0
+      },
+      {
         "id": "osm",
         "visible": true,
         "opacity": 1,
-        "order": 0
+        "order": 1
       },
       {
         "id": "topo",
         "visible": false,
         "opacity": 0.75,
-        "order": 1
+        "order": 2
       },
       {
         "id": "esri",
         "visible": false,
         "opacity": 1,
-        "order": 2
+        "order": 3
       }
     ],
-    "attribution": "Background map attribution: OpenStreetMap contributors, CARTO, OpenTopoMap, SRTM, and Esri as applicable to visible layers. User-loaded data may have separate licenses.",
+    "attribution": "Background map attribution: OpenStreetMap contributors, CARTO, OpenTopoMap, SRTM, Esri, OpenMapTiles, and OpenFreeMap as applicable to visible layers. User-loaded data may have separate licenses.",
     "projectionNote": "GeoSketch uses WGS84 coordinates and geodesic Turf/Leaflet calculations for sketching, measurement, buffers, and range circles. Outputs are planning/OSINT visualisations, not survey-grade products.",
-    "savedAt": "2026-05-18T00:00:00.000Z",
+    "savedAt": "2026-05-20T00:00:00.000Z",
     "drawLayers": [
       {
         "id": "sample-observations",
