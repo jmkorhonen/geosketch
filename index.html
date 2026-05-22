@@ -291,6 +291,18 @@
       mix-blend-mode: normal !important;
     }
 
+    #map.foreground-export .leaflet-tile-pane,
+    #map.foreground-export .leaflet-overlay-pane,
+    #map.foreground-export .leaflet-shadow-pane,
+    #map.foreground-export .leaflet-control-container,
+    #map.foreground-export .leaflet-pane > svg {
+      visibility: hidden !important;
+    }
+
+    #map.foreground-export {
+      background: transparent !important;
+    }
+
     .brand {
       display: flex;
       align-items: center;
@@ -720,6 +732,22 @@
       gap: 6px;
     }
 
+    .control-group,
+    .file-group {
+      display: grid;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .control-group-title {
+      margin-top: 2px;
+      font-size: 10px;
+      line-height: 1.2;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
     .button-link {
       display: inline-flex;
       align-items: center;
@@ -1059,56 +1087,68 @@
 
       <div class="section">
         <h2>Files</h2>
-        <div class="grid-2">
-          <button id="saveGeojson" title="Save the whole GeoSketch project as a GeoJSON file">Save project as GeoJSON</button>
-          <button id="saveGeojsonAs" title="Choose a custom filename for the project GeoJSON">Save As</button>
+        <div class="file-group">
+          <div class="control-group-title">Project</div>
+          <div class="grid-2">
+            <button id="saveGeojson" title="Save the whole GeoSketch project as a GeoJSON file">Save project as GeoJSON</button>
+            <button id="saveGeojsonAs" title="Choose a custom filename for the project GeoJSON">Save As</button>
+          </div>
+          <label>Load project from GeoJSON
+            <input id="loadFile" type="file" accept=".geojson,.json,application/geo+json,application/json">
+          </label>
         </div>
-        <div class="grid-2">
-          <button id="saveSelectedLayers" class="wide" title="Export visible/checked layers as separate GeoJSON files">Save selected layers as GeoJSON</button>
+        <div class="file-group">
+          <div class="control-group-title">Data export/import</div>
+          <div class="grid-2">
+            <button id="saveSelectedLayers" class="wide" title="Export visible/checked layers as separate GeoJSON files">Save selected layers as GeoJSON</button>
+          </div>
+          <div class="grid-2">
+            <button id="saveExcel" class="wide" title="Export object table to Excel">Export as Excel</button>
+          </div>
+          <div class="grid-2">
+            <button id="saveHtmlMap" class="wide" title="Export an interactive HTML copy of the map">Export HTML map</button>
+          </div>
+          <label>Load GeoJSON as layer/template
+            <input id="loadLayerFile" type="file" accept=".geojson,.json,application/geo+json,application/json">
+          </label>
         </div>
-        <div class="grid-2">
-          <button id="saveExcel" title="Export object table to Excel">Export as Excel</button>
-          <button id="saveScreenshot" title="Export the current visible map as a PNG image">Save visible PNG</button>
+        <div class="file-group">
+          <div class="control-group-title">PNG export</div>
+          <div class="grid-2">
+            <button id="saveScreenshot" class="wide" title="Export the current visible map as a PNG image">Save visible map as PNG</button>
+            <button data-draw="ExportArea" class="wide" title="Draw a rectangular PNG export area. The area object will be created in the currently active layer.">Define export area</button>
+          </div>
+          <label>Export area format
+            <select id="exportAreaRatio" title="Aspect ratio for newly drawn export areas">
+              <option value="free">Free</option>
+              <option value="1:1">□ 1:1 square</option>
+              <option value="4:3">▭ 4:3 landscape</option>
+              <option value="3:4">▯ 3:4 portrait</option>
+              <option value="16:9">▭ 16:9 widescreen</option>
+              <option value="9:16">▯ 9:16 vertical</option>
+              <option value="a4p">▯ A4 portrait</option>
+              <option value="a4l">▭ A4 landscape</option>
+            </select>
+          </label>
+          <details id="exportAreaChooser" class="compact-details">
+            <summary class="tiny">All defined export areas</summary>
+            <div id="exportAreaPickerList" class="export-area-picker"></div>
+          </details>
+          <div class="grid-2">
+            <button id="saveExportArea" class="wide" title="Select an export area before exporting an area PNG" disabled>Save area as PNG</button>
+          </div>
         </div>
-        <div class="grid-2">
-          <button id="saveHtmlMap" class="wide" title="Export an interactive HTML copy of the map">Export HTML map</button>
+        <div class="file-group">
+          <div class="control-group-title">Session</div>
+          <div class="grid-2">
+            <button id="newMapBtn" class="danger" title="Clear this project and start a new map">New</button>
+            <button id="undoBtn" disabled title="Undo the last edit">Undo</button>
+          </div>
+          <div class="grid-2">
+            <button id="restoreAutosave" title="Restore the browser autosave for this tool">Restore Autosave</button>
+            <button id="runProjectChecks" title="Run basic project export and geometry checks">Run Checks</button>
+          </div>
         </div>
-        <div class="grid-2">
-          <button data-draw="ExportArea" class="wide" title="Draw a rectangular PNG export area. The area object will be created in the currently active layer.">Define export area</button>
-        </div>
-        <label>Export area format
-          <select id="exportAreaRatio" title="Aspect ratio for newly drawn export areas">
-            <option value="free">Free</option>
-            <option value="1:1">□ 1:1 square</option>
-            <option value="4:3">▭ 4:3 landscape</option>
-            <option value="3:4">▯ 3:4 portrait</option>
-            <option value="16:9">▭ 16:9 widescreen</option>
-            <option value="9:16">▯ 9:16 vertical</option>
-            <option value="a4p">▯ A4 portrait</option>
-            <option value="a4l">▭ A4 landscape</option>
-          </select>
-        </label>
-        <details id="exportAreaChooser" class="compact-details">
-          <summary class="tiny">All defined export areas</summary>
-          <div id="exportAreaPickerList" class="export-area-picker"></div>
-        </details>
-        <div class="grid-2">
-          <button id="saveExportArea" class="wide" title="Select an export area before exporting an area PNG" disabled>Save area as PNG</button>
-        </div>
-        <div class="grid-2">
-          <button id="newMapBtn" class="danger" title="Clear this project and start a new map">New</button>
-          <button id="undoBtn" disabled title="Undo the last edit">Undo</button>
-        </div>
-        <div class="grid-2">
-          <button id="restoreAutosave" title="Restore the browser autosave for this tool">Restore Autosave</button>
-          <button id="runProjectChecks" title="Run basic project export and geometry checks">Run Checks</button>
-        </div>
-        <label>Load project from GeoJSON
-          <input id="loadFile" type="file" accept=".geojson,.json,application/geo+json,application/json">
-        </label>
-        <label>Load GeoJSON as layer/template
-          <input id="loadLayerFile" type="file" accept=".geojson,.json,application/geo+json,application/json">
-        </label>
       </div>
 
       <details id="settingsSection" class="section">
@@ -1133,6 +1173,9 @@
             <option value="nauticalmiles">Nautical miles</option>
           </select>
         </label>
+        <label class="check-row" title="Adds a small GeoSketch credit to PNG exports and interactive HTML maps. In HTML exports, GeoSketch is a clickable link to the live site."><input id="exportCredit" type="checkbox" checked> Show GeoSketch credit in exports</label>
+        <label class="check-row" title="Adds the current export date in YYYY-MM-DD format next to the export attribution/credit."><input id="exportDate" type="checkbox" checked> Show export date in exports</label>
+        <label class="check-row" title="Includes Leaflet and background map provider attribution in PNG exports. Keep this on when sharing maps that use third-party background layers."><input id="exportAttribution" type="checkbox" checked> Include map attribution in PNG exports</label>
       </details>
 
       <details id="helpSection" class="section">
@@ -1153,7 +1196,7 @@
           <br><br>
           <strong>Map notes.</strong> Use the notes below the map title for author details, sources, caveats, and links. They are included in interactive HTML exports.
           <br><br>
-          <strong>Export areas.</strong> Use Files > Define export area to draw a rectangular PNG crop. The format selector can constrain new export areas to common ratios. Use Save visible PNG for the current viewport, or select an export area and use Save area as PNG for a crop.
+          <strong>Export areas.</strong> Use Files > Define export area to draw a rectangular PNG crop. The format selector can constrain new export areas to common ratios. Use Save visible map as PNG for the current viewport, or select an export area and use Save area as PNG for a crop.
           <br><br>
           <strong>Coordinates.</strong> Search, coordinate input, and coordinate editing accept decimal degrees, DMS, and MGRS. The Settings panel controls how coordinates are displayed and copied.
           <br><br>
@@ -1197,13 +1240,40 @@
         <label id="labelControl">Label
           <textarea id="labelInput" rows="2" placeholder="Example: OP Alpha"></textarea>
         </label>
+        <label id="showLabelControl" class="check-row"><input id="showLabel" type="checkbox"> <span id="showLabelText">Show label</span></label>
+        <details id="labelStyleControls">
+          <summary class="tiny">Edit label style</summary>
+          <div class="text-style-grid">
+            <label>Size<input id="labelTextSize" type="number" min="8" max="72" value="11"></label>
+            <label>Text<input id="labelTextColor" type="color" value="#000000"></label>
+            <label class="check-row"><input id="labelTextBold" type="checkbox"> Bold</label>
+            <label class="check-row"><input id="labelTextItalic" type="checkbox"> Italic</label>
+            <label class="check-row"><input id="labelShadow" type="checkbox"> Shadow</label>
+            <label class="check-row"><input id="labelTextOutline" type="checkbox" checked> White text outline</label>
+            <label>Box fill<input id="labelBoxFill" type="color" value="#ffffff"></label>
+            <label>Fill opacity<input id="labelBoxFillOpacity" type="range" min="0" max="1" step="0.05" value="0"></label>
+            <label>Box line<input id="labelBoxLine" type="color" value="#ff0000"></label>
+            <label>Line weight<input id="labelBoxWeight" type="number" min="0" max="8" value="0"></label>
+            <label>Line style<select id="labelBoxDash"><option value="">Solid</option><option value="8 8">Dashed</option><option value="2 8">Dotted</option><option value="12 6 2 6">Dash-dot</option></select></label>
+            <label>Preset<select id="labelPosition"><option value="above">Above</option><option value="below">Below</option><option value="right">Right</option><option value="left">Left</option><option value="center">Center</option></select></label>
+            <label>X offset<input id="labelOffsetX" type="number" min="-400" max="400" step="1" value="0"></label>
+            <label>Y offset<input id="labelOffsetY" type="number" min="-400" max="400" step="1" value="-12"></label>
+            <label class="check-row"><input id="labelScaleWithIcon" type="checkbox" checked> Scale with icon size</label>
+          </div>
+        </details>
         <label id="unitNameControl">Name
           <input id="unitNameInput" placeholder="Example: Alpha Company">
         </label>
         <label id="higherFormationControl">Higher formation
           <input id="higherFormationInput" placeholder="Example: 1st Battalion">
         </label>
-        <label id="showLabelControl" class="check-row"><input id="showLabel" type="checkbox"> <span id="showLabelText">Show label</span></label>
+        <div class="control-group">
+          <div class="control-group-title">Edit</div>
+          <div class="grid-2">
+            <button id="editToggle" title="Toggle edit point/shape editing mode">Edit points</button>
+            <button id="moveToggle" title="Toggle drag mode">Move</button>
+          </div>
+        </div>
         <label>Notes
           <textarea id="notesInput" rows="3" placeholder="Example: Source, confidence, and assumptions"></textarea>
         </label>
@@ -1218,16 +1288,26 @@
           <textarea id="measurementOutput" class="coords-box coords-output" readonly></textarea>
         </label>
         <label id="measureToggleLabel" class="check-row"><input id="showMeasurements" type="checkbox"> <span id="measureToggleText">Show measurements</span></label>
-        <div class="action-grid">
-          <button id="editToggle" title="Toggle edit point/shape editing mode">Edit points</button>
-          <button id="moveToggle" title="Toggle drag mode">Move</button>
-          <button id="deleteSelected" class="danger" title="Delete selected object">Delete</button>
-          <button id="copyObjectGeojson" title="Copy the selected object as GeoJSON">Copy GeoJSON</button>
-          <button id="copyObjectBtn" title="Copy the selected object for pasting">Copy Object</button>
-          <button id="pasteObjectBtn" title="Paste the copied object at the last cursor position">Paste Object</button>
-          <button id="duplicateObjectBtn" title="Duplicate the selected object in the same position">Duplicate</button>
-          <button id="frontBtn" title="Move the selected object above other drawings">Bring Front</button>
-          <button id="backBtn" title="Move the selected object behind other drawings">Send Back</button>
+        <div class="control-group">
+          <div class="control-group-title">Copy</div>
+          <div class="action-grid">
+            <button id="copyObjectBtn" title="Copy the selected object for pasting">Copy Object</button>
+            <button id="pasteObjectBtn" title="Paste the copied object at the last cursor position">Paste Object</button>
+            <button id="duplicateObjectBtn" title="Duplicate the selected object in the same position">Duplicate</button>
+          </div>
+          <div class="grid-2">
+            <button id="copyObjectGeojson" class="wide" title="Copy the selected object as GeoJSON">Copy GeoJSON</button>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="control-group-title">Order / Delete</div>
+          <div class="grid-2">
+            <button id="frontBtn" title="Move the selected object above other drawings">Bring Front</button>
+            <button id="backBtn" title="Move the selected object behind other drawings">Send Back</button>
+          </div>
+          <div class="grid-2">
+            <button id="deleteSelected" class="danger wide" title="Delete selected object">Delete</button>
+          </div>
         </div>
         <details id="iconControls">
           <summary class="tiny">Point icon / APP-6</summary>
@@ -1294,55 +1374,38 @@
             <div id="app6StatusText" class="tiny wide"></div>
           </div>
         </details>
-        <div id="textStyleControls" class="text-style-grid">
-          <label>Text size
-            <input id="textSize" type="number" min="8" max="72" value="13">
-          </label>
-          <label>Text colour
-            <input id="textColor" type="color" value="#161616">
-          </label>
-          <label class="check-row"><input id="textBold" type="checkbox"> Bold</label>
-          <label class="check-row"><input id="textItalic" type="checkbox"> Italic</label>
-          <label class="check-row"><input id="textShadow" type="checkbox" checked> Shadow</label>
-          <label>Box fill
-            <input id="textBoxFill" type="color" value="#fff7d8">
-          </label>
-          <label>Fill opacity
-            <input id="textBoxFillOpacity" type="range" min="0" max="1" step="0.05" value="0.92">
-          </label>
-          <label>Box line
-            <input id="textBoxLine" type="color" value="#161616">
-          </label>
-          <label>Line weight
-            <input id="textBoxWeight" type="number" min="0" max="12" value="1">
-          </label>
-          <label>Line style
-            <select id="textBoxDash">
-              <option value="">Solid</option>
-              <option value="8 8">Dashed</option>
-              <option value="2 8">Dotted</option>
-              <option value="12 6 2 6">Dash-dot</option>
-            </select>
-          </label>
-        </div>
-        <details id="labelStyleControls">
-          <summary class="tiny">Edit label style</summary>
+        <details id="textStyleControls">
+          <summary class="tiny">Edit text box style</summary>
           <div class="text-style-grid">
-            <label>Size<input id="labelTextSize" type="number" min="8" max="72" value="11"></label>
-            <label>Text<input id="labelTextColor" type="color" value="#000000"></label>
-            <label class="check-row"><input id="labelTextBold" type="checkbox"> Bold</label>
-            <label class="check-row"><input id="labelTextItalic" type="checkbox"> Italic</label>
-            <label class="check-row"><input id="labelShadow" type="checkbox"> Shadow</label>
-            <label class="check-row"><input id="labelTextOutline" type="checkbox" checked> White text outline</label>
-            <label>Box fill<input id="labelBoxFill" type="color" value="#ffffff"></label>
-            <label>Fill opacity<input id="labelBoxFillOpacity" type="range" min="0" max="1" step="0.05" value="0"></label>
-            <label>Box line<input id="labelBoxLine" type="color" value="#ff0000"></label>
-            <label>Line weight<input id="labelBoxWeight" type="number" min="0" max="8" value="0"></label>
-            <label>Line style<select id="labelBoxDash"><option value="">Solid</option><option value="8 8">Dashed</option><option value="2 8">Dotted</option><option value="12 6 2 6">Dash-dot</option></select></label>
-            <label>Preset<select id="labelPosition"><option value="above">Above</option><option value="below">Below</option><option value="right">Right</option><option value="left">Left</option><option value="center">Center</option></select></label>
-            <label>X offset<input id="labelOffsetX" type="number" min="-400" max="400" step="1" value="0"></label>
-            <label>Y offset<input id="labelOffsetY" type="number" min="-400" max="400" step="1" value="-12"></label>
-            <label class="check-row"><input id="labelScaleWithIcon" type="checkbox" checked> Scale with icon size</label>
+            <label>Text size
+              <input id="textSize" type="number" min="8" max="72" value="13">
+            </label>
+            <label>Text colour
+              <input id="textColor" type="color" value="#161616">
+            </label>
+            <label class="check-row"><input id="textBold" type="checkbox"> Bold</label>
+            <label class="check-row"><input id="textItalic" type="checkbox"> Italic</label>
+            <label class="check-row"><input id="textShadow" type="checkbox" checked> Shadow</label>
+            <label>Box fill
+              <input id="textBoxFill" type="color" value="#fff7d8">
+            </label>
+            <label>Fill opacity
+              <input id="textBoxFillOpacity" type="range" min="0" max="1" step="0.05" value="0.92">
+            </label>
+            <label>Box line
+              <input id="textBoxLine" type="color" value="#161616">
+            </label>
+            <label>Line weight
+              <input id="textBoxWeight" type="number" min="0" max="12" value="1">
+            </label>
+            <label>Line style
+              <select id="textBoxDash">
+                <option value="">Solid</option>
+                <option value="8 8">Dashed</option>
+                <option value="2 8">Dotted</option>
+                <option value="12 6 2 6">Dash-dot</option>
+              </select>
+            </label>
           </div>
         </details>
         <div id="generalStyleSlot"></div>
@@ -1380,7 +1443,9 @@
             <span id="fillPatternPreview" class="pattern-preview" aria-hidden="true"></span>
             <select id="fillPattern">
               <option value="">None / solid fill</option>
-              <option value="diagonal">Diagonal hatch</option>
+              <option value="diagonal">Diagonal hatch /</option>
+              <option value="diagonal-left">Diagonal hatch \</option>
+              <option value="diagonal-cross">Diagonal crosshatch</option>
               <option value="cross">Crosshatch</option>
               <option value="dots">Dots</option>
             </select>
@@ -1482,6 +1547,7 @@
   <script>
     const APP_NAME = "GeoSketch";
     const APP_VERSION = "v1.1";
+    const GEOSKETCH_URL = "https://jmkorhonen.github.io/geosketch/";
     const ATTRIBUTION_NOTE = "Background map attribution: OpenStreetMap contributors, CARTO, OpenTopoMap, SRTM, Esri, OpenMapTiles, and OpenFreeMap as applicable to visible layers. User-loaded data may have separate licenses.";
     const PROJECTION_NOTE = "GeoSketch uses WGS84 coordinates and geodesic Turf/Leaflet calculations for sketching, measurement, buffers, and range circles. Outputs are planning/OSINT visualisations, not survey-grade products.";
     const AUTOSAVE_KEY = "geosketch-autosave-v1";
@@ -1796,6 +1862,9 @@
       coordinateSystem: "dd",
       distanceUnit: "metric",
       exportAreaRatio: "free",
+      exportCredit: true,
+      exportDate: true,
+      exportAttribution: true,
       unitIconScale: 1,
       pointIconScale: 1,
       nextId: 1,
@@ -1903,6 +1972,31 @@
 
     L.PM.setOptIn(false);
     map.pm.addControls({ position: "topleft", drawControls: false, editControls: false, optionsControls: false });
+
+    function exportDateStamp() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function attributionPrefixHtml(settings = state) {
+      const parts = [];
+      const credit = attributionCreditHtml(settings);
+      if (credit) parts.push(credit);
+      parts.push('<a href="https://leafletjs.com" title="A JavaScript library for interactive maps">Leaflet</a>');
+      return parts.join(" | ");
+    }
+
+    function attributionCreditHtml(settings = state) {
+      const parts = [];
+      if (settings.exportCredit !== false) parts.push(`<a href="${GEOSKETCH_URL}" target="_blank" rel="noopener">GeoSketch</a>`);
+      if (settings.exportDate !== false) parts.push(exportDateStamp());
+      return parts.join(" | ");
+    }
+
+    function updateAttributionPrefix() {
+      map.attributionControl?.setPrefix(attributionPrefixHtml());
+    }
+
+    updateAttributionPrefix();
 
     const tileConfigs = [
       {
@@ -2093,32 +2187,94 @@
       if (!clean) return fallback;
       return clean.toLowerCase().endsWith(`.${extension}`) ? clean : `${clean}.${extension}`;
     }
-    function ensurePatterns() {
-      const svg = document.querySelector(".leaflet-overlay-pane svg");
-      if (!svg || patternDefs.has(svg)) return;
-      const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-      defs.innerHTML = `
-        <pattern id="pattern-diagonal" width="8" height="8" patternUnits="userSpaceOnUse">
-          <path d="M-2,8 L8,-2 M2,10 L10,2" stroke="currentColor" stroke-width="1.6"/>
-        </pattern>
-        <pattern id="pattern-cross" width="8" height="8" patternUnits="userSpaceOnUse">
-          <path d="M0,4 H8 M4,0 V8" stroke="currentColor" stroke-width="1.3"/>
-        </pattern>
-        <pattern id="pattern-dots" width="8" height="8" patternUnits="userSpaceOnUse">
-          <circle cx="4" cy="4" r="1.5" fill="currentColor"/>
-        </pattern>`;
-      svg.prepend(defs);
-      patternDefs.set(svg, defs);
+    function clamp01(value, fallback = 1) {
+      const number = Number(value);
+      if (!Number.isFinite(number)) return fallback;
+      return Math.max(0, Math.min(1, number));
+    }
+
+    function safePatternColor(value, fallback = "#ffcc4d") {
+      const color = String(value || "").trim();
+      return /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(color) ? color : fallback;
+    }
+
+    function normalizedPatternName(pattern) {
+      return ["diagonal", "diagonal-right", "diagonal-left", "diagonal-cross", "cross", "dots"].includes(pattern) ? pattern : "";
+    }
+
+    function patternTileSize(pattern) {
+      return pattern === "cross" || pattern === "dots" ? 10 : 16;
+    }
+
+    function diagonalPatternPath(pattern, size) {
+      const pad = size;
+      const right = `M${-pad},${size + pad} L${size + pad},${-pad} M${-pad},${pad} L${pad},${-pad} M0,${size + pad} L${size + pad},0`;
+      const left = `M${-pad},${-pad} L${size + pad},${size + pad} M${-pad},0 L${size},${size + pad} M0,${-pad} L${size + pad},${size}`;
+      if (pattern === "diagonal" || pattern === "diagonal-right") return right;
+      if (pattern === "diagonal-left") return left;
+      if (pattern === "diagonal-cross") return `${right} ${left}`;
+      return "";
+    }
+
+    function patternIdForStyle(style = {}) {
+      const pattern = normalizedPatternName(style.pattern);
+      if (!pattern) return "";
+      const stroke = safePatternColor(style.color || style.fillColor).slice(1).toLowerCase();
+      const fill = safePatternColor(style.fillColor || style.color).slice(1).toLowerCase();
+      const opacity = Math.round(clamp01(style.opacity ?? 1) * 100);
+      const fillOpacity = Math.round(clamp01(style.fillOpacity ?? 0.25, 0.25) * 100);
+      return `pattern-${pattern}-${stroke}-${fill}-${opacity}-${fillOpacity}`;
+    }
+
+    function ensurePatternForStyle(style = {}, svg = document.querySelector(".leaflet-pane > svg")) {
+      const id = patternIdForStyle(style);
+      if (!svg || !id) return "";
+      let defs = patternDefs.get(svg);
+      if (!defs) {
+        defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+        defs.setAttribute("data-geosketch-patterns", "true");
+        svg.prepend(defs);
+        patternDefs.set(svg, defs);
+      }
+      if (defs.querySelector(`#${id}`)) return id;
+      const pattern = document.createElementNS("http://www.w3.org/2000/svg", "pattern");
+      const size = patternTileSize(style.pattern);
+      pattern.setAttribute("id", id);
+      pattern.setAttribute("width", String(size));
+      pattern.setAttribute("height", String(size));
+      pattern.setAttribute("patternUnits", "userSpaceOnUse");
+      const fillColor = safePatternColor(style.fillColor || style.color);
+      const strokeColor = safePatternColor(style.color || style.fillColor);
+      const fillOpacity = clamp01(style.fillOpacity ?? 0.25, 0.25);
+      const strokeOpacity = clamp01(style.opacity ?? 1);
+      pattern.innerHTML = `<rect width="${size}" height="${size}" fill="${fillColor}" fill-opacity="${fillOpacity}"></rect>`;
+      if (style.pattern === "diagonal" || style.pattern === "diagonal-right" || style.pattern === "diagonal-left" || style.pattern === "diagonal-cross") {
+        const path = diagonalPatternPath(style.pattern, size);
+        const width = style.pattern === "diagonal-cross" ? 0.95 : 1.05;
+        pattern.innerHTML += `<path d="${path}" stroke="${strokeColor}" stroke-opacity="${strokeOpacity}" stroke-width="${width}" stroke-linecap="square"></path>`;
+      } else if (style.pattern === "cross") {
+        pattern.innerHTML += `<path d="M0,5 H10 M5,0 V10" stroke="${strokeColor}" stroke-opacity="${strokeOpacity}" stroke-width="1"></path>`;
+      } else if (style.pattern === "dots") {
+        pattern.innerHTML += `<circle cx="5" cy="5" r="1.7" fill="${strokeColor}" fill-opacity="${strokeOpacity}"></circle>`;
+      }
+      defs.appendChild(pattern);
+      return id;
     }
 
     function patternPreviewBackground(pattern, color = "#7ed0a6", fillColor = "#7ed0a6", fillOpacity = 0.18) {
       const stroke = color || fillColor || "#7ed0a6";
       const fill = hexToRgba(fillColor || stroke, fillOpacity);
-      if (pattern === "diagonal") {
-        return `background-color:${fill};background-image:repeating-linear-gradient(135deg, transparent 0 5px, ${stroke} 5px 7px);`;
+      if (pattern === "diagonal" || pattern === "diagonal-right") {
+        return `background-color:${fill};background-image:repeating-linear-gradient(135deg, transparent 0 10px, ${stroke} 10px 11px);`;
+      }
+      if (pattern === "diagonal-left") {
+        return `background-color:${fill};background-image:repeating-linear-gradient(45deg, transparent 0 10px, ${stroke} 10px 11px);`;
+      }
+      if (pattern === "diagonal-cross") {
+        return `background-color:${fill};background-image:repeating-linear-gradient(135deg, transparent 0 10px, ${stroke} 10px 11px),repeating-linear-gradient(45deg, transparent 0 10px, ${stroke} 10px 11px);`;
       }
       if (pattern === "cross") {
-        return `background-color:${fill};background-image:linear-gradient(${stroke} 1px, transparent 1px),linear-gradient(90deg, ${stroke} 1px, transparent 1px);`;
+        return `background-color:${fill};background-image:linear-gradient(${stroke} 1px, transparent 1px),linear-gradient(90deg, ${stroke} 1px, transparent 1px);background-size:10px 10px;`;
       }
       if (pattern === "dots") {
         return `background-color:${fill};background-image:radial-gradient(${stroke} 1.8px, transparent 2px);`;
@@ -2905,11 +3061,18 @@
     }
 
     function applyPattern(obj) {
-      if (!obj.layer._path || !obj.style.pattern) return;
-      ensurePatterns();
-      obj.layer._path.setAttribute("fill", `url(#pattern-${obj.style.pattern})`);
-      obj.layer._path.style.color = obj.style.fillColor;
-      obj.layer._path.style.fillOpacity = obj.style.fillOpacity;
+      if (!obj.layer._path) return;
+      if (!obj.style.pattern) {
+        obj.layer._path.setAttribute("fill", obj.style.fillColor || obj.style.color || "#ffcc4d");
+        obj.layer._path.setAttribute("fill-opacity", String(clamp01(obj.style.fillOpacity ?? 0.25, 0.25)));
+        obj.layer._path.style.fillOpacity = "";
+        return;
+      }
+      const patternId = ensurePatternForStyle(obj.style, obj.layer._path.ownerSVGElement);
+      if (!patternId) return;
+      obj.layer._path.setAttribute("fill", `url(#${patternId})`);
+      obj.layer._path.setAttribute("fill-opacity", "1");
+      obj.layer._path.style.fillOpacity = 1;
     }
 
     function createObject(kind, layer, extra = {}) {
@@ -3662,12 +3825,16 @@
       if (el("coordinateSystem")) el("coordinateSystem").value = state.coordinateSystem || "dd";
       if (el("distanceUnit")) el("distanceUnit").value = normalizeDistanceUnit(state.distanceUnit);
       if (el("exportAreaRatio")) el("exportAreaRatio").value = normalizeExportAreaRatio(state.exportAreaRatio);
+      if (el("exportCredit")) el("exportCredit").checked = state.exportCredit !== false;
+      if (el("exportDate")) el("exportDate").checked = state.exportDate !== false;
+      if (el("exportAttribution")) el("exportAttribution").checked = state.exportAttribution !== false;
       if (el("bufferUnit")) el("bufferUnit").value = distanceUnitToBufferUnit(state.distanceUnit);
       if (el("unitScale")) el("unitScale").value = Math.round((state.unitIconScale || 1) * 100);
       if (el("pointScale")) el("pointScale").value = Math.round((state.pointIconScale || 1) * 100);
       if (el("unitScaleValue")) el("unitScaleValue").textContent = `${Math.round((state.unitIconScale || 1) * 100)}%`;
       if (el("pointScaleValue")) el("pointScaleValue").textContent = `${Math.round((state.pointIconScale || 1) * 100)}%`;
       updateCursorReadout();
+      updateAttributionPrefix();
     }
 
     function setCoordinateSystem(value) {
@@ -3686,6 +3853,13 @@
       updateCoordinatePanel();
       updateMeasurementPanel();
       refreshLabelsAndMeasurements();
+      syncSettingsControls();
+      scheduleSave();
+    }
+
+    function setExportSetting(key, checked) {
+      pushUndo(key, { coalesceMs: 1000 });
+      state[key] = Boolean(checked);
       syncSettingsControls();
       scheduleSave();
     }
@@ -4156,6 +4330,9 @@
         const downButton = buttons[2];
         const deleteButton = buttons[3];
         const items = group.querySelector(".object-layer-items");
+        const onlyLayer = state.drawLayers.size <= 1;
+        deleteButton.disabled = onlyLayer;
+        deleteButton.title = onlyLayer ? "At least one drawing layer is required" : "Delete layer";
         head.addEventListener("click", () => setActiveLayer(drawLayer.id));
         layerVisible.addEventListener("click", (event) => event.stopPropagation());
         layerVisible.addEventListener("change", () => {
@@ -4202,6 +4379,7 @@
         });
         deleteButton.addEventListener("click", (event) => {
           event.stopPropagation();
+          if (deleteButton.disabled) return;
           deleteDrawLayer(drawLayer.id);
         });
         groupObjects.forEach((obj) => items.appendChild(makeObjectRow(obj)));
@@ -4325,6 +4503,7 @@
     function deleteDrawLayer(id) {
       const layer = state.drawLayers.get(id);
       if (!layer) return;
+      if (state.drawLayers.size <= 1) return status("At least one drawing layer is required.");
       const layerObjects = Array.from(state.objects.values()).filter((obj) => obj.drawLayerId === id);
       const message = layerObjects.length
         ? `Delete layer "${layer.name}" and its ${layerObjects.length} objects?`
@@ -4460,7 +4639,7 @@
         obj.hitLayer = null;
       }
       if (isDrawingActive()) return;
-      if ((state.editOn || state.dragOn) && obj.id === state.selectedId) return;
+      if (state.editOn || state.dragOn) return;
       if (isPointLike(obj) || obj.kind === "text") return;
       const options = {
         pane: "objects",
@@ -4655,26 +4834,53 @@
       if (!obj || state.editOn) return;
       clearMoveGuide();
       const start = objectCenter(obj);
-      state.moveGuide = L.polyline([start, start], {
+      const line = L.polyline([start, start], {
         pane: "labels",
         interactive: false,
-        color: "#ffffff",
-        opacity: 0.95,
-        weight: 2,
-        dashArray: "6 6"
+        color: "#7ed0a6",
+        opacity: 0.85,
+        weight: Math.max(5, (obj.style?.weight || 3) + 2),
+        dashArray: "8 8"
       }).addTo(map);
+      state.moveGuide = { start, line, label: null };
     }
 
     function updateMoveGuide(obj) {
       if (!state.moveGuide || !obj) return;
-      const points = state.moveGuide.getLatLngs();
+      const points = state.moveGuide.line.getLatLngs();
       if (!points.length) return;
-      state.moveGuide.setLatLngs([points[0], objectCenter(obj)]);
+      const start = points[0];
+      const end = objectCenter(obj);
+      state.moveGuide.line.setLatLngs([start, end]);
+      const distance = start.distanceTo(end);
+      const bearing = bearingDegrees(start, end);
+      const text = `${formatDistance(distance)} · ${formatBearing(bearing)}`;
+      const midpoint = L.latLng((start.lat + end.lat) / 2, (start.lng + end.lng) / 2);
+      if (!state.moveGuide.label) {
+        state.moveGuide.label = makeMoveGuideLabel(midpoint, text).addTo(map);
+      } else {
+        state.moveGuide.label.setLatLng(midpoint);
+        state.moveGuide.label.setIcon(moveGuideLabelIcon(text));
+      }
+    }
+
+    function makeMoveGuideLabel(latlng, text) {
+      return L.marker(latlng, {
+        pane: "labels",
+        interactive: false,
+        icon: moveGuideLabelIcon(text)
+      });
+    }
+
+    function moveGuideLabelIcon(text) {
+      const html = `<div class="measurement-label" style="background:rgba(16,20,24,.82);border:1px solid rgba(126,208,166,.75);box-shadow:0 2px 8px rgba(0,0,0,.28);">${escapeHtml(text)}</div>`;
+      return L.divIcon({ className: "leaflet-div-icon", html, iconSize: null, iconAnchor: [0, 0] });
     }
 
     function clearMoveGuide() {
       if (!state.moveGuide) return;
-      map.removeLayer(state.moveGuide);
+      map.removeLayer(state.moveGuide.line || state.moveGuide);
+      if (state.moveGuide.label) map.removeLayer(state.moveGuide.label);
       state.moveGuide = null;
     }
 
@@ -4745,12 +4951,13 @@
 
     function applyBufferPattern(layer, spec) {
       if (!spec.style?.pattern) return;
-      ensurePatterns();
       layer.eachLayer((part) => {
         if (!part._path) return;
-        part._path.setAttribute("fill", `url(#pattern-${spec.style.pattern})`);
-        part._path.style.color = spec.style.fillColor;
-        part._path.style.fillOpacity = spec.style.fillOpacity;
+        const patternId = ensurePatternForStyle(spec.style, part._path.ownerSVGElement);
+        if (!patternId) return;
+        part._path.setAttribute("fill", `url(#${patternId})`);
+        part._path.setAttribute("fill-opacity", "1");
+        part._path.style.fillOpacity = 1;
       });
     }
 
@@ -4838,7 +5045,9 @@
               <span class="pattern-preview" style="${patternPreviewBackground(buffer.style.pattern, buffer.style.color, buffer.style.fillColor, buffer.style.fillOpacity)}" aria-hidden="true"></span>
               <select data-buf="pattern">
                 <option value="" ${!buffer.style.pattern ? "selected" : ""}>None / solid fill</option>
-                <option value="diagonal" ${buffer.style.pattern === "diagonal" ? "selected" : ""}>Diagonal hatch</option>
+                <option value="diagonal" ${buffer.style.pattern === "diagonal" || buffer.style.pattern === "diagonal-right" ? "selected" : ""}>Diagonal hatch /</option>
+                <option value="diagonal-left" ${buffer.style.pattern === "diagonal-left" ? "selected" : ""}>Diagonal hatch \</option>
+                <option value="diagonal-cross" ${buffer.style.pattern === "diagonal-cross" ? "selected" : ""}>Diagonal crosshatch</option>
                 <option value="cross" ${buffer.style.pattern === "cross" ? "selected" : ""}>Crosshatch</option>
                 <option value="dots" ${buffer.style.pattern === "dots" ? "selected" : ""}>Dots</option>
               </select>
@@ -5137,6 +5346,9 @@
       setMapNotes("Sample map for GeoSketch. Repository: https://github.com/jmkorhonen/geosketch", false);
       setShowMapTitle(true, false);
       state.exportAreaRatio = "free";
+      state.exportCredit = true;
+      state.exportDate = true;
+      state.exportAttribution = true;
       state.drawLayers.clear();
       const obsLayerId = uid("layer");
       const unitLayerId = uid("layer");
@@ -5509,12 +5721,15 @@
       el("editToggle").classList.toggle("active", state.editOn);
       el("moveToggle").classList.toggle("active", state.dragOn);
       stopEditMeasurement();
+      const interactionActive = Boolean(selected && (state.editOn || state.dragOn));
       for (const obj of state.objects.values()) {
         if (obj.layer.pm) {
           obj.layer.pm.disable();
           obj.layer.pm.disableLayerDrag?.();
         }
         obj.layer.dragging?.disable();
+        setLayerClickThrough(obj.layer, interactionActive && obj.id !== selected.id);
+        if (obj.hitLayer) setLayerClickThrough(obj.hitLayer, interactionActive && obj.id !== selected.id);
         updateHitLayer(obj);
       }
       if (!selected) {
@@ -5764,6 +5979,9 @@
           coordinateSystem: state.coordinateSystem,
           distanceUnit: state.distanceUnit,
           exportAreaRatio: normalizeExportAreaRatio(state.exportAreaRatio),
+          exportCredit: state.exportCredit !== false,
+          exportDate: state.exportDate !== false,
+          exportAttribution: state.exportAttribution !== false,
           unitIconScale: state.unitIconScale,
           pointIconScale: state.pointIconScale,
           view: { center: map.getCenter(), zoom: map.getZoom() },
@@ -5838,7 +6056,7 @@
       status(`Saved Excel export as ${filename}.`);
     }
 
-    async function renderMapPngBlob(clip = null) {
+    async function renderMapPngBlob(clip = null, options = {}) {
       const node = el("map");
       let blob;
       if (window.html2canvas) {
@@ -5851,10 +6069,13 @@
           scale: 1,
           scrollX: 0,
           scrollY: 0,
-          ignoreElements: (element) => Boolean(element.closest?.(".leaflet-overlay-pane"))
+          ignoreElements: shouldIgnorePngElement
         });
         const outputCanvas = clip ? cropCanvas(canvas, clip) : canvas;
-        drawVectorCanvasOverlay(outputCanvas, clip);
+        await drawLeafletSvgOverlay(outputCanvas, clip);
+        drawCanvasCenterMarkers(outputCanvas, clip);
+        if (options.redrawForeground) await drawForegroundDomOverlay(outputCanvas, clip);
+        if (clip && options.redrawAttribution !== false) drawCroppedPngAttribution(outputCanvas);
         blob = await canvasToPngBlob(outputCanvas);
         if (!blob) throw new Error("PNG renderer unavailable.");
         return blob;
@@ -5869,6 +6090,15 @@
       if (!blob) throw new Error("PNG renderer unavailable.");
       if (!clip) return blob;
       return cropPngBlob(blob, clip);
+    }
+
+    function shouldIgnorePngElement(element) {
+      if (element.classList?.contains("center-dot")) return true;
+      const tag = String(element.tagName || "").toLowerCase();
+      const svg = tag === "svg" ? element : element.closest?.("svg");
+      if (!svg) return false;
+      const parent = svg.parentElement;
+      return Boolean(parent?.classList?.contains("leaflet-pane"));
     }
 
     function canvasToPngBlob(canvas) {
@@ -5887,14 +6117,70 @@
       return canvas;
     }
 
-    async function drawLeafletSvgOverlay(canvas) {
+    function currentPngAttributionText() {
+      const node = el("map").querySelector(".leaflet-control-attribution");
+      if (!node) return "";
+      const style = window.getComputedStyle ? getComputedStyle(node) : null;
+      if (style && style.display === "none") return "";
+      return (node.textContent || "").replace(/\s+/g, " ").trim();
+    }
+
+    function fitCanvasText(ctx, text, maxWidth) {
+      if (ctx.measureText(text).width <= maxWidth) return text;
+      const ellipsis = "...";
+      let trimmed = text;
+      while (trimmed.length > 1 && ctx.measureText(`${trimmed}${ellipsis}`).width > maxWidth) {
+        trimmed = trimmed.slice(0, -1);
+      }
+      return `${trimmed.trimEnd()}${ellipsis}`;
+    }
+
+    function drawCroppedPngAttribution(canvas) {
+      const text = currentPngAttributionText();
+      if (!text) return;
+      const ctx = canvas.getContext("2d");
+      const fontSize = Math.max(7, Math.min(9, Math.floor(canvas.width / 95)));
+      const paddingX = 4;
+      const paddingY = 2;
+      const maxTextWidth = Math.max(40, canvas.width - paddingX * 4);
+      ctx.save();
+      ctx.font = `${fontSize}px Arial, sans-serif`;
+      ctx.textBaseline = "alphabetic";
+      const fitted = fitCanvasText(ctx, text, maxTextWidth);
+      const textWidth = Math.ceil(ctx.measureText(fitted).width);
+      const boxWidth = Math.min(canvas.width, textWidth + paddingX * 2);
+      const boxHeight = fontSize + paddingY * 2 + 2;
+      const x = Math.max(0, canvas.width - boxWidth);
+      const y = Math.max(0, canvas.height - boxHeight);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.82)";
+      ctx.fillRect(x, y, boxWidth, boxHeight);
+      ctx.fillStyle = "#111";
+      ctx.fillText(fitted, x + paddingX, y + paddingY + fontSize);
+      ctx.restore();
+    }
+
+    async function drawLeafletSvgOverlay(canvas, clip = null) {
       const node = el("map");
       const mapRect = node.getBoundingClientRect();
       const ctx = canvas.getContext("2d");
-      const svgs = Array.from(node.querySelectorAll(".leaflet-overlay-pane svg"));
+      const svgs = Array.from(node.querySelectorAll(".leaflet-pane > svg"));
       for (const svg of svgs) {
         const rect = svg.getBoundingClientRect();
         if (rect.width < 1 || rect.height < 1) continue;
+        const paneRect = svg.parentElement?.getBoundingClientRect();
+        const styleLeft = parseFloat(svg.style.left);
+        const styleTop = parseFloat(svg.style.top);
+        const transformOffset = leafletTranslateOffset(svg.style.transform);
+        const x = Number.isFinite(styleLeft) && paneRect
+          ? paneRect.left - mapRect.left + styleLeft
+          : transformOffset && paneRect
+            ? paneRect.left - mapRect.left + transformOffset.x
+            : rect.left - mapRect.left;
+        const y = Number.isFinite(styleTop) && paneRect
+          ? paneRect.top - mapRect.top + styleTop
+          : transformOffset && paneRect
+            ? paneRect.top - mapRect.top + transformOffset.y
+            : rect.top - mapRect.top;
         const clone = svg.cloneNode(true);
         clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
         clone.setAttribute("width", rect.width);
@@ -5903,6 +6189,10 @@
         clone.style.position = "static";
         clone.style.left = "0";
         clone.style.top = "0";
+        const patternDefs = document.querySelector("defs[data-geosketch-patterns]");
+        if (patternDefs && !clone.querySelector("defs[data-geosketch-patterns]") && clone.querySelector('[fill^="url(#"]')) {
+          clone.prepend(patternDefs.cloneNode(true));
+        }
         clone.querySelectorAll("path").forEach((path) => {
           if (!path.getAttribute("fill")) path.setAttribute("fill", "none");
         });
@@ -5915,11 +6205,54 @@
             image.onload = resolve;
             image.onerror = reject;
           });
-          ctx.drawImage(image, rect.left - mapRect.left, rect.top - mapRect.top, rect.width, rect.height);
+          ctx.drawImage(image, x - (clip?.x || 0), y - (clip?.y || 0), rect.width, rect.height);
         } finally {
           URL.revokeObjectURL(url);
         }
       }
+    }
+
+    async function drawForegroundDomOverlay(canvas, clip = null) {
+      if (!window.html2canvas) return;
+      const node = el("map");
+      node.classList.add("foreground-export");
+      try {
+        await waitForMapFrame();
+        const foreground = await html2canvas(node, {
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: null,
+          width: node.clientWidth,
+          height: node.clientHeight,
+          scale: 1,
+          scrollX: 0,
+          scrollY: 0,
+          ignoreElements: shouldIgnorePngElement
+        });
+        const source = clip ? cropCanvas(foreground, clip) : foreground;
+        canvas.getContext("2d").drawImage(source, 0, 0);
+      } finally {
+        node.classList.remove("foreground-export");
+      }
+    }
+
+    function leafletTranslateOffset(transform) {
+      const text = String(transform || "");
+      const match = text.match(/translate3?d?\(\s*([-0-9.]+)px,\s*([-0-9.]+)px/i);
+      if (!match) return null;
+      const x = Number(match[1]);
+      const y = Number(match[2]);
+      return Number.isFinite(x) && Number.isFinite(y) ? { x, y } : null;
+    }
+
+    function drawCanvasCenterMarkers(canvas, clip = null) {
+      const ctx = canvas.getContext("2d");
+      ctx.save();
+      if (clip) ctx.translate(-clip.x, -clip.y);
+      Array.from(state.objects.values())
+        .filter((obj) => obj.kind === "circle" && isObjectVisible(obj))
+        .forEach((obj) => drawCanvasCenterMarker(ctx, obj.layer.getLatLng()));
+      ctx.restore();
     }
 
     function drawVectorCanvasOverlay(canvas, clip = null) {
@@ -5973,6 +6306,24 @@
       ctx.restore();
     }
 
+    function drawCanvasCenterMarker(ctx, latlng) {
+      const point = map.latLngToContainerPoint(latlng);
+      ctx.save();
+      ctx.beginPath();
+      ctx.fillStyle = "rgba(126, 208, 166, 0.7)";
+      ctx.arc(point.x, point.y, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.fillStyle = "#111820";
+      ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.fillStyle = "#ffffff";
+      ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
     function drawGeoJsonFeature(ctx, feature, style) {
       if (!feature) return;
       if (feature.type === "FeatureCollection") {
@@ -5997,7 +6348,7 @@
       applyCanvasStyle(ctx, style);
       ctx.beginPath();
       (rings || []).forEach((ring) => addCoordinateRingToCanvasPath(ctx, ring));
-      if ((style.fillOpacity ?? 0.25) > 0) ctx.fill("evenodd");
+      if ((style.fillOpacity ?? 0.25) > 0 || style.pattern) ctx.fill("evenodd");
       if ((style.weight ?? 3) > 0) ctx.stroke();
       ctx.restore();
     }
@@ -6019,7 +6370,7 @@
         else ctx.lineTo(point.x, point.y);
       });
       if (closePath) ctx.closePath();
-      if (closePath && (style.fillOpacity ?? 0.25) > 0) ctx.fill();
+      if (closePath && ((style.fillOpacity ?? 0.25) > 0 || style.pattern)) ctx.fill();
       if ((style.weight ?? 3) > 0) ctx.stroke();
       ctx.restore();
     }
@@ -6035,12 +6386,69 @@
 
     function applyCanvasStyle(ctx, style = {}) {
       ctx.strokeStyle = hexToRgba(style.color || "#ffcc4d", style.opacity ?? 1);
-      ctx.fillStyle = hexToRgba(style.fillColor || style.color || "#ffcc4d", style.fillOpacity ?? 0.25);
+      ctx.fillStyle = canvasPatternForStyle(ctx, style) || hexToRgba(style.fillColor || style.color || "#ffcc4d", style.fillOpacity ?? 0.25);
       ctx.lineWidth = Math.max(0, Number(style.weight ?? 3));
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
       const dash = String(style.dashArray || "").trim().split(/\s+/).map(Number).filter((value) => Number.isFinite(value) && value > 0);
       ctx.setLineDash(dash);
+    }
+
+    function canvasPatternForStyle(ctx, style = {}) {
+      if (!normalizedPatternName(style.pattern)) return null;
+      const size = patternTileSize(style.pattern);
+      const tile = document.createElement("canvas");
+      tile.width = size;
+      tile.height = size;
+      const tileCtx = tile.getContext("2d");
+      tileCtx.fillStyle = hexToRgba(style.fillColor || style.color || "#ffcc4d", style.fillOpacity ?? 0.25);
+      tileCtx.fillRect(0, 0, tile.width, tile.height);
+      tileCtx.strokeStyle = hexToRgba(style.color || style.fillColor || "#ffcc4d", style.opacity ?? 1);
+      tileCtx.fillStyle = tileCtx.strokeStyle;
+      tileCtx.lineWidth = style.pattern === "cross" ? 1 : 1.1;
+      tileCtx.lineCap = "square";
+      if (style.pattern === "diagonal" || style.pattern === "diagonal-right") {
+        drawCanvasDiagonalHatch(tileCtx, size, "right");
+      } else if (style.pattern === "diagonal-left") {
+        drawCanvasDiagonalHatch(tileCtx, size, "left");
+      } else if (style.pattern === "diagonal-cross") {
+        tileCtx.lineWidth = 0.95;
+        drawCanvasDiagonalHatch(tileCtx, size, "right");
+        drawCanvasDiagonalHatch(tileCtx, size, "left");
+      } else if (style.pattern === "cross") {
+        tileCtx.beginPath();
+        tileCtx.moveTo(0, 5);
+        tileCtx.lineTo(10, 5);
+        tileCtx.moveTo(5, 0);
+        tileCtx.lineTo(5, 10);
+        tileCtx.stroke();
+      } else if (style.pattern === "dots") {
+        tileCtx.beginPath();
+        tileCtx.arc(5, 5, 1.7, 0, Math.PI * 2);
+        tileCtx.fill();
+      }
+      return ctx.createPattern(tile, "repeat");
+    }
+
+    function drawCanvasDiagonalHatch(ctx, size, direction) {
+      const pad = size;
+      ctx.beginPath();
+      if (direction === "right") {
+        ctx.moveTo(-pad, size + pad);
+        ctx.lineTo(size + pad, -pad);
+        ctx.moveTo(-pad, pad);
+        ctx.lineTo(pad, -pad);
+        ctx.moveTo(0, size + pad);
+        ctx.lineTo(size + pad, 0);
+      } else {
+        ctx.moveTo(-pad, -pad);
+        ctx.lineTo(size + pad, size + pad);
+        ctx.moveTo(-pad, 0);
+        ctx.lineTo(size, size + pad);
+        ctx.moveTo(0, -pad);
+        ctx.lineTo(size + pad, size);
+      }
+      ctx.stroke();
     }
 
     async function cropPngBlob(blob, clip) {
@@ -6057,6 +6465,7 @@
         canvas.height = Math.max(1, Math.round(clip.height));
         const ctx = canvas.getContext("2d");
         ctx.drawImage(image, clip.x, clip.y, clip.width, clip.height, 0, 0, canvas.width, canvas.height);
+        drawCroppedPngAttribution(canvas);
         return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
       } finally {
         URL.revokeObjectURL(url);
@@ -6066,13 +6475,28 @@
     async function withMapExportRender(work) {
       const hiddenNodes = Array.from(document.querySelectorAll(".no-export"));
       const node = el("map");
+      const attributionNode = node.querySelector(".leaflet-control-attribution");
+      const attributionHtml = attributionNode?.innerHTML || "";
+      const attributionDisplay = attributionNode?.style.display || "";
       try {
         hiddenNodes.forEach((node) => { node.dataset.exportDisplay = node.style.display || ""; node.style.display = "none"; });
         node.classList.add("export-render");
+        updateAttributionPrefix();
+        if (state.exportAttribution === false && attributionNode) {
+          const credit = attributionCreditHtml();
+          if (credit) attributionNode.innerHTML = credit;
+          else attributionNode.style.display = "none";
+        }
+        refreshLabelsAndMeasurements();
         await new Promise((resolve) => requestAnimationFrame(resolve));
         return await work();
       } finally {
         node.classList.remove("export-render");
+        if (attributionNode) {
+          attributionNode.innerHTML = attributionHtml;
+          attributionNode.style.display = attributionDisplay;
+        }
+        updateAttributionPrefix();
         hiddenNodes.forEach((node) => { node.style.display = node.dataset.exportDisplay || ""; delete node.dataset.exportDisplay; });
       }
     }
@@ -6091,14 +6515,29 @@
       const blocked = pngExportBlockedReason();
       if (blocked) return status(blocked);
       status("Rendering visible map PNG…");
+      const visibleBounds = map.getBounds();
+      const originalView = { center: map.getCenter(), zoom: map.getZoom() };
+      const wasRestoring = state.restoring;
       try {
-        const blob = await withMapExportRender(() => renderMapPngBlob());
+        state.restoring = true;
+        const blob = await withMapExportRender(async () => {
+          map.fitBounds(visibleBounds, { animate: false, padding: [0, 0] });
+          await waitForMapFrame();
+          await waitForTilesToSettle();
+          const clip = clipForBounds(visibleBounds);
+          if (clip.width < 2 || clip.height < 2) throw new Error("Visible map area is outside the rendered map view.");
+          return renderMapPngBlob(clip, { redrawAttribution: false, redrawForeground: true });
+        });
         const filename = safeMapFilename("png");
         downloadBlob(filename, blob);
         showFileSaveConfirmation(filename, "Visible PNG saved");
         status(`Saved visible map PNG as ${filename}.`);
       } catch (error) {
         status(`PNG export failed: ${error.message}`);
+      } finally {
+        map.setView(originalView.center, originalView.zoom, { animate: false });
+        updateSelectionHalo();
+        state.restoring = wasRestoring;
       }
     }
 
@@ -6321,6 +6760,7 @@
     const tileConfigs = JSON.parse(document.getElementById("tile-configs").textContent);
     const saved = JSON.parse(document.getElementById("map-state").textContent);
     const map = L.map("map", { zoomSnap: 0.25, zoomDelta: 1, wheelPxPerZoomLevel: 180 }).setView(saved.view?.center || [60.1699, 24.9384], saved.view?.zoom || 12);
+    map.attributionControl.setPrefix(attributionPrefixHtml(saved));
     const objectGroup = L.layerGroup().addTo(map);
     const bufferGroup = L.layerGroup().addTo(map);
     const labels = L.layerGroup().addTo(map);
@@ -6329,6 +6769,14 @@
     const endpoints = L.layerGroup().addTo(map);
     const tiles = new Map();
     const drawLayerVisibility = new Map((saved.drawLayers || []).map((layer) => [layer.id, layer.visible !== false]));
+
+    function attributionPrefixHtml(settings) {
+      const parts = [];
+      if (settings.exportCredit !== false) parts.push('<a href="https://jmkorhonen.github.io/geosketch/" target="_blank" rel="noopener">GeoSketch</a>');
+      if (settings.exportDate !== false) parts.push(new Date().toISOString().slice(0, 10));
+      parts.push('<a href="https://leafletjs.com" title="A JavaScript library for interactive maps">Leaflet</a>');
+      return parts.join(" | ");
+    }
 
     tileConfigs.forEach((cfg, index) => {
       const savedTile = (saved.tileLayers || []).find((tile) => tile.id === cfg.id) || {};
@@ -6822,18 +7270,82 @@
 
     function applyPattern(layer, style) {
       if (!style?.pattern) return;
-      const svg = document.querySelector(".leaflet-overlay-pane svg");
-      if (!svg) return;
-      if (!svg.querySelector("#pattern-diagonal")) {
-        const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-        defs.innerHTML = '<pattern id="pattern-diagonal" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M-2,8 L8,-2 M2,10 L10,2" stroke="currentColor" stroke-width="1.6"/></pattern><pattern id="pattern-cross" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M0,4 H8 M4,0 V8" stroke="currentColor" stroke-width="1.3"/></pattern><pattern id="pattern-dots" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.5" fill="currentColor"/></pattern>';
-        svg.prepend(defs);
-      }
       if (layer.eachLayer) layer.eachLayer((part) => applyPattern(part, style));
       if (layer._path) {
-        layer._path.setAttribute("fill", "url(#pattern-" + style.pattern + ")");
-        layer._path.style.color = style.fillColor;
+        const patternId = ensurePatternForStyle(style, layer._path.ownerSVGElement);
+        if (!patternId) return;
+        layer._path.setAttribute("fill", "url(#" + patternId + ")");
+        layer._path.setAttribute("fill-opacity", "1");
+        layer._path.style.fillOpacity = 1;
       }
+    }
+
+    function normalizedPatternName(pattern) {
+      return ["diagonal", "diagonal-right", "diagonal-left", "diagonal-cross", "cross", "dots"].includes(pattern) ? pattern : "";
+    }
+
+    function patternTileSize(pattern) {
+      return pattern === "cross" || pattern === "dots" ? 10 : 16;
+    }
+
+    function diagonalPatternPath(pattern, size) {
+      const pad = size;
+      const right = "M" + (-pad) + "," + (size + pad) + " L" + (size + pad) + "," + (-pad) + " M" + (-pad) + "," + pad + " L" + pad + "," + (-pad) + " M0," + (size + pad) + " L" + (size + pad) + ",0";
+      const left = "M" + (-pad) + "," + (-pad) + " L" + (size + pad) + "," + (size + pad) + " M" + (-pad) + ",0 L" + size + "," + (size + pad) + " M0," + (-pad) + " L" + (size + pad) + "," + size;
+      if (pattern === "diagonal" || pattern === "diagonal-right") return right;
+      if (pattern === "diagonal-left") return left;
+      if (pattern === "diagonal-cross") return right + " " + left;
+      return "";
+    }
+
+    function clamp01(value, fallback) {
+      const number = Number(value);
+      if (!Number.isFinite(number)) return fallback === undefined ? 1 : fallback;
+      return Math.max(0, Math.min(1, number));
+    }
+
+    function safePatternColor(value, fallback) {
+      const color = String(value || "").trim();
+      return /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(color) ? color : (fallback || "#ffcc4d");
+    }
+
+    function patternIdForStyle(style) {
+      const pattern = normalizedPatternName(style?.pattern);
+      if (!pattern) return "";
+      const stroke = safePatternColor(style.color || style.fillColor).slice(1).toLowerCase();
+      const fill = safePatternColor(style.fillColor || style.color).slice(1).toLowerCase();
+      const opacity = Math.round(clamp01(style.opacity ?? 1) * 100);
+      const fillOpacity = Math.round(clamp01(style.fillOpacity ?? 0.25, 0.25) * 100);
+      return "pattern-" + pattern + "-" + stroke + "-" + fill + "-" + opacity + "-" + fillOpacity;
+    }
+
+    function ensurePatternForStyle(style, svg) {
+      svg = svg || document.querySelector(".leaflet-pane > svg");
+      const id = patternIdForStyle(style);
+      if (!svg || !id) return "";
+      let defs = svg.querySelector("defs[data-geosketch-patterns]");
+      if (!defs) {
+        defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+        defs.setAttribute("data-geosketch-patterns", "true");
+        svg.prepend(defs);
+      }
+      if (defs.querySelector("#" + id)) return id;
+      const pattern = document.createElementNS("http://www.w3.org/2000/svg", "pattern");
+      const size = patternTileSize(style.pattern);
+      pattern.setAttribute("id", id);
+      pattern.setAttribute("width", String(size));
+      pattern.setAttribute("height", String(size));
+      pattern.setAttribute("patternUnits", "userSpaceOnUse");
+      const fillColor = safePatternColor(style.fillColor || style.color);
+      const strokeColor = safePatternColor(style.color || style.fillColor);
+      const fillOpacity = clamp01(style.fillOpacity ?? 0.25, 0.25);
+      const strokeOpacity = clamp01(style.opacity ?? 1);
+      pattern.innerHTML = '<rect width="' + size + '" height="' + size + '" fill="' + fillColor + '" fill-opacity="' + fillOpacity + '"></rect>';
+      if (style.pattern === "diagonal" || style.pattern === "diagonal-right" || style.pattern === "diagonal-left" || style.pattern === "diagonal-cross") pattern.innerHTML += '<path d="' + diagonalPatternPath(style.pattern, size) + '" stroke="' + strokeColor + '" stroke-opacity="' + strokeOpacity + '" stroke-width="' + (style.pattern === "diagonal-cross" ? 0.95 : 1.05) + '" stroke-linecap="square"></path>';
+      if (style.pattern === "cross") pattern.innerHTML += '<path d="M0,5 H10 M5,0 V10" stroke="' + strokeColor + '" stroke-opacity="' + strokeOpacity + '" stroke-width="1"></path>';
+      if (style.pattern === "dots") pattern.innerHTML += '<circle cx="5" cy="5" r="1.7" fill="' + strokeColor + '" fill-opacity="' + strokeOpacity + '"></circle>';
+      defs.appendChild(pattern);
+      return id;
     }
 
     function turfUnits(unit) { return unit || "meters"; }
@@ -6896,6 +7408,9 @@
         coordinateSystem: state.coordinateSystem,
         distanceUnit: state.distanceUnit,
         exportAreaRatio: normalizeExportAreaRatio(state.exportAreaRatio),
+        exportCredit: state.exportCredit !== false,
+        exportDate: state.exportDate !== false,
+        exportAttribution: state.exportAttribution !== false,
         unitIconScale: state.unitIconScale,
         pointIconScale: state.pointIconScale,
         view: { center: map.getCenter(), zoom: map.getZoom() },
@@ -7012,6 +7527,9 @@
       state.coordinateSystem = saved.coordinateSystem || "dd";
       state.distanceUnit = normalizeDistanceUnit(saved.distanceUnit || saved.properties?.distanceUnit);
       state.exportAreaRatio = normalizeExportAreaRatio(saved.exportAreaRatio ?? saved.properties?.exportAreaRatio);
+      state.exportCredit = saved.exportCredit ?? saved.properties?.exportCredit ?? true;
+      state.exportDate = saved.exportDate ?? saved.properties?.exportDate ?? true;
+      state.exportAttribution = saved.exportAttribution ?? saved.properties?.exportAttribution ?? true;
       state.unitIconScale = Number(saved.unitIconScale || 1);
       state.pointIconScale = Number(saved.pointIconScale || 1);
       syncSettingsControls();
@@ -7123,6 +7641,9 @@
         if (geojson.properties?.coordinateSystem) state.coordinateSystem = geojson.properties.coordinateSystem;
         if (geojson.properties?.distanceUnit) state.distanceUnit = normalizeDistanceUnit(geojson.properties.distanceUnit);
         state.exportAreaRatio = normalizeExportAreaRatio(geojson.properties?.exportAreaRatio);
+        state.exportCredit = geojson.properties?.exportCredit ?? true;
+        state.exportDate = geojson.properties?.exportDate ?? true;
+        state.exportAttribution = geojson.properties?.exportAttribution ?? true;
         if (geojson.properties?.unitIconScale) state.unitIconScale = Number(geojson.properties.unitIconScale) || 1;
         if (geojson.properties?.pointIconScale) state.pointIconScale = Number(geojson.properties.pointIconScale) || 1;
         applyTileLayerState(geojson.properties?.tileLayers || []);
@@ -7349,12 +7870,16 @@
       setMapTitle("", false);
       setMapNotes("", false);
       setShowMapTitle(false, false);
+      state.exportCredit = true;
+      state.exportDate = true;
+      state.exportAttribution = true;
       state.drawLayers.clear();
       state.activeLayerId = null;
       state.nextId = 1;
       state.zCounter = 10;
       addDefaultDrawLayer();
       renderDrawLayers();
+      syncSettingsControls();
       renderObjectList();
       selectObject(null);
       localStorage.removeItem(AUTOSAVE_KEY);
@@ -7508,6 +8033,9 @@
     });
     el("coordinateSystem").addEventListener("change", (event) => setCoordinateSystem(event.target.value));
     el("distanceUnit").addEventListener("change", (event) => setDistanceUnit(event.target.value));
+    el("exportCredit").addEventListener("change", (event) => setExportSetting("exportCredit", event.target.checked));
+    el("exportDate").addEventListener("change", (event) => setExportSetting("exportDate", event.target.checked));
+    el("exportAttribution").addEventListener("change", (event) => setExportSetting("exportAttribution", event.target.checked));
     el("mapZoom").addEventListener("input", (event) => map.setZoom(Number(event.target.value), { animate: false }));
     el("unitScale").addEventListener("input", (event) => setGlobalIconScale("unit", event.target.value));
     el("pointScale").addEventListener("input", (event) => setGlobalIconScale("point", event.target.value));
