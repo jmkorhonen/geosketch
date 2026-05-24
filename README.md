@@ -13,7 +13,7 @@ Live version: [https://jmkorhonen.github.io/geosketch/](https://jmkorhonen.githu
 
 GeoSketch is a lightweight browser tool for field-style sketching and visual analysis. It should be treated as a planning and OSINT visualisation aid rather than a survey-grade GIS package.
 
-Current version: `v1.1`
+Current version: `v1.2`
 
 ## Requirements
 
@@ -44,11 +44,31 @@ The same demo is also available as `samples/geosketch-sample.geojson` for testin
 GeoSketch supports selectable background layers with opacity and stack-order controls. Layers higher in the list draw above layers below them, so a street or topographic layer can be made translucent over satellite imagery.
 
 - OpenStreetMap/CARTO raster tiles
-- OpenFreeMap Liberty vector tiles through MapLibre GL
+- Vector overlays (OpenFreeMap) through MapLibre GL
 - OpenTopoMap
 - Esri satellite imagery
 
 Tile availability depends on the provider, network conditions, browser restrictions, and the provider's access policies.
+
+### Filter Vector Overlays
+
+GeoSketch can filter OpenFreeMap vector map detail into vector overlay groups. This is most useful when **Vector overlays (OpenFreeMap)** is enabled and placed as a translucent overlay above satellite imagery or a raster background map.
+
+Initial reference groups include:
+
+- base land detail
+- water
+- roads
+- rail
+- places
+- borders
+- land chokepoints such as bridges, tunnels, crossings, and fords
+- airports and ports
+- other map detail
+
+The controls include quick presets for the full vector map, roads and places, and transport-focused overlays. Filter rows show a compact legend for the current render style, are saved in GeoJSON projects, and are carried into interactive HTML exports.
+
+Filter Vector Overlays also includes optional highlighting for railways, land chokepoints, airports, and ports, plus map backdrop colour and vector land-opacity controls to make vector detail more legible over satellite imagery or dark map canvases. Vector overlays are live/HTML-export only and do not render in PNG exports.
 
 ### Layers
 
@@ -189,7 +209,7 @@ Buffer distances in Excel exports are reported in metres for consistency with sa
 
 Use **Save visible PNG** to export the current map viewport. Use **Define export area** and **Export area format** in the Files section to draw a rectangular crop guide, then use **Save [area name] (width x height px) as PNG** to export it. The displayed pixel size is the expected PNG output size after GeoSketch automatically fits the map to that export area. If more than one export area exists, select the area from the map, Layers list, or the Files section export-area drawer first; GeoSketch keeps the button disabled until the intended crop is explicit. Export area guide rectangles are not burned into the cropped PNG. Settings can add a "Created with GeoSketch" credit and export date to PNGs, and can hide PNG map attribution when a particular output needs a cleaner frame.
 
-PNG export can be used with raster background maps, or with no background map for an object-only export against the dark map canvas. Raster layer opacity is preserved. Vector backgrounds such as OpenFreeMap are available for live viewing and interactive HTML export, but are not included in PNG export because browser-side WebGL capture is not reliable enough for release-quality map output.
+PNG export can be used with raster background maps, or with no background map for an object-only export against the map backdrop. Raster layer opacity is preserved. Vector overlays such as OpenFreeMap are available for live viewing and interactive HTML export, but are not included in PNG export because browser-side WebGL capture is not reliable enough for release-quality map output.
 
 Browser security rules and tile provider CORS settings can affect PNG output.
 
@@ -231,7 +251,7 @@ Avoid entering sensitive operational information into external search services o
 
 - The app is a single HTML file, so very large projects may become slow.
 - Browser PNG export can be affected by CORS restrictions on map tiles.
-- Vector background maps use MapLibre GL through a Leaflet bridge; they add WebGL/CDN requirements and are intentionally excluded from PNG export.
+- Vector overlays use MapLibre GL through a Leaflet bridge; they add WebGL/CDN requirements and are intentionally excluded from PNG export.
 - GeoJSON exports include GeoSketch-specific styling metadata that other GIS tools may ignore.
 - APP-6 symbol support is intentionally practical and UI-driven, not a full doctrinal validation engine.
 - Measurements are appropriate for sketching and planning, not survey-grade work.
@@ -292,3 +312,8 @@ Other files in this workspace may belong to earlier experiments or adjacent tool
 - Added live export-area PNG dimension labels, more compact attribution, and area-export button text that names the selected crop.
 - Finalized the v1.1 export-area flow so multiple export areas require an explicit selection before PNG export.
 - Moved export-area creation and format controls into the Files workflow and added a compact export-area selector drawer.
+- Started v1.1.1 development with OpenFreeMap reference-layer filters for roads, rail, places, borders, water, chokepoints, airports, and ports.
+- Continued v1.1.2 development with stricter reference-layer classification, visible rail/chokepoint/transport highlights, and OpenFreeMap backdrop colour/opacity controls.
+- Continued v1.1.3 development by separating the real map backdrop from OpenFreeMap land opacity, dropping ferry routes from chokepoints, and improving rail/airport/port highlight filters.
+- Continued v1.1.4 development with reference-layer legends, clearer Vector overlays naming/help, and distinct generated airport/port overlay icons.
+- Released v1.2 with Filter Vector Overlays naming, updated help/README text, and roomier airport/port overlay icon rings.

@@ -563,7 +563,7 @@
       flex: 0 0 auto;
     }
 
-    .tile-row, .object-row, .draw-layer-row, .buffer-row {
+    .tile-row, .reference-row, .object-row, .draw-layer-row, .buffer-row {
       display: grid;
       grid-template-columns: auto 1fr auto;
       align-items: center;
@@ -575,6 +575,7 @@
     }
 
     .side.left .tile-row,
+    .side.left .reference-row,
     .side.left .object-row,
     .side.left .draw-layer-row,
     .side.left .buffer-row,
@@ -591,11 +592,55 @@
       grid-template-columns: auto 1fr auto auto auto;
     }
 
+    .reference-row {
+      grid-template-columns: auto 1fr;
+    }
+
+    .reference-legend {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 3px;
+      color: #9fb1bf;
+      font-size: 10px;
+    }
+
+    .reference-swatch {
+      position: relative;
+      width: 30px;
+      height: 15px;
+      flex: 0 0 auto;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 3px;
+      background: #182129;
+      overflow: hidden;
+    }
+
+    .reference-swatch::before,
+    .reference-swatch::after {
+      content: "";
+      position: absolute;
+    }
+
+    .reference-swatch.base { background: rgba(126, 160, 110, .35); }
+    .reference-swatch.water { background: rgba(82, 170, 220, .42); }
+    .reference-swatch.roads::before { left: 2px; right: 2px; top: 6px; height: 3px; border-radius: 3px; background: #f0bc70; }
+    .reference-swatch.rail::before { left: 2px; right: 2px; top: 6px; border-top: 3px solid #ff3b30; }
+    .reference-swatch.rail::after { left: 2px; right: 2px; top: 6px; border-top: 1px dashed #111820; }
+    .reference-swatch.places::before { width: 6px; height: 6px; left: 6px; top: 4px; border-radius: 50%; background: #e8edf2; box-shadow: 11px 2px 0 #c7d6e4; }
+    .reference-swatch.borders::before { left: 2px; right: 2px; top: 6px; border-top: 2px dashed #d58cff; }
+    .reference-swatch.chokepoints::before { left: 2px; right: 2px; top: 6px; border-top: 4px solid #00e5ff; }
+    .reference-swatch.chokepoints::after { width: 8px; height: 8px; left: 10px; top: 3px; border: 2px solid #00e5ff; border-radius: 50%; background: #111820; }
+    .reference-swatch.transport::before { width: 11px; height: 11px; left: 3px; top: 1px; border: 2px solid #111820; border-radius: 50%; background: #ffcc4d; box-shadow: 14px 0 0 #ffcc4d; }
+    .reference-swatch.transport::after { left: 6px; top: 2px; color: #111820; content: "A"; font-size: 9px; font-weight: 900; line-height: 1; text-shadow: 14px 0 0 #111820; }
+    .reference-swatch.other::before { inset: 3px; border: 1px solid #9fb1bf; border-radius: 2px; }
+
     .tile-row .tile-meta {
       min-width: 0;
     }
 
-    .tile-row .tile-meta strong {
+    .tile-row .tile-meta strong,
+    .reference-row .tile-meta strong {
       display: block;
       line-height: 1.2;
     }
@@ -1001,7 +1046,7 @@
     <button id="rightTab" class="collapse-tab" title="Collapse right panel"></button>
     <aside class="side left">
       <div class="brand">
-        <h1>GeoSketch <span class="version">v1.1</span></h1>
+        <h1>GeoSketch <span class="version">v1.2</span></h1>
         <button id="resetViewBtn" title="Zoom to all objects">⌖</button>
       </div>
       <label class="map-title-field">Map title
@@ -1083,6 +1128,26 @@
         <summary><h2>Background Map</h2></summary>
         <p class="tiny">Top layers draw above lower layers. Use opacity to place a map layer over imagery.</p>
         <div id="tileLayers"></div>
+      </details>
+
+      <details id="referenceLayerSection" class="section">
+        <summary><h2>Filter Vector Overlays</h2></summary>
+        <p class="tiny">Filter the Vector overlays (OpenFreeMap) layer, especially when using it over satellite imagery. Vector overlays are live/HTML-export only and do not render in PNG exports.</p>
+        <div class="grid-2">
+          <button id="referencePresetFull" title="Show the full OpenFreeMap vector overlay">Full map</button>
+          <button id="referencePresetRoads" title="Show roads, places, and borders over other map layers">Roads + places</button>
+          <button id="referencePresetTransport" title="Show roads, rail, transport nodes, chokepoints, places, and borders">Transport</button>
+        </div>
+        <label class="check-row" title="Make railways, bridges, tunnels, ports, and airports stand out more clearly when OpenFreeMap is visible."><input id="referenceHighlights" type="checkbox" checked> Highlight reference features</label>
+        <div class="grid-2">
+          <label>Map backdrop
+            <input id="referenceBackdropColor" type="color" value="#0f1419" title="Colour shown behind map tiles when layers are hidden or transparent. Also tints the OpenFreeMap background layer.">
+          </label>
+          <label>Vector land opacity
+            <input id="referenceBackdropOpacity" type="range" min="0" max="1" step="0.05" value="0.15" title="Opacity of OpenFreeMap background/land layers. Lower values help satellite imagery or the map backdrop show through.">
+          </label>
+        </div>
+        <div id="referenceLayerList"></div>
       </details>
 
       <div class="section">
@@ -1197,6 +1262,8 @@
           <strong>Map notes.</strong> Use the notes below the map title for author details, sources, caveats, and links. They are included in interactive HTML exports.
           <br><br>
           <strong>Export areas.</strong> Use Files > Define export area to draw a rectangular PNG crop. The format selector can constrain new export areas to common ratios. Use Save visible map as PNG for the current viewport, or select an export area and use Save area as PNG for a crop.
+          <br><br>
+          <strong>Vector overlays.</strong> Enable Vector overlays (OpenFreeMap) in Background Map, then use Filter Vector Overlays to show or hide roads, rail, places, borders, water, chokepoints, airports, ports, and other vector details. These overlays are visible in the app and interactive HTML exports, but are not included in PNG exports.
           <br><br>
           <strong>Coordinates.</strong> Search, coordinate input, and coordinate editing accept decimal degrees, DMS, and MGRS. The Settings panel controls how coordinates are displayed and copied.
           <br><br>
@@ -1546,7 +1613,7 @@
   <script src="https://cdn.jsdelivr.net/npm/milsymbol@3/dist/milsymbol.js"></script>
   <script>
     const APP_NAME = "GeoSketch";
-    const APP_VERSION = "v1.1";
+    const APP_VERSION = "v1.2";
     const GEOSKETCH_URL = "https://jmkorhonen.github.io/geosketch/";
     const ATTRIBUTION_NOTE = "Background map attribution: OpenStreetMap contributors, CARTO, OpenTopoMap, SRTM, Esri, OpenMapTiles, and OpenFreeMap as applicable to visible layers. User-loaded data may have separate licenses.";
     const PROJECTION_NOTE = "GeoSketch uses WGS84 coordinates and geodesic Turf/Leaflet calculations for sketching, measurement, buffers, and range circles. Outputs are planning/OSINT visualisations, not survey-grade products.";
@@ -1865,6 +1932,10 @@
       exportCredit: true,
       exportDate: true,
       exportAttribution: true,
+      referenceLayers: {},
+      referenceHighlights: true,
+      referenceBackdropColor: "#0f1419",
+      referenceBackdropOpacity: 0.15,
       unitIconScale: 1,
       pointIconScale: 1,
       nextId: 1,
@@ -1998,14 +2069,28 @@
 
     updateAttributionPrefix();
 
+    function applyMapBackdrop() {
+      const color = safeMapBackdropColor(state.referenceBackdropColor);
+      const container = map.getContainer();
+      container.style.backgroundColor = color;
+      const tilePane = map.getPane("tilePane");
+      if (tilePane) tilePane.style.backgroundColor = color;
+    }
+
+    function safeMapBackdropColor(value) {
+      const color = String(value || "").trim();
+      return /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(color) ? color : "#0f1419";
+    }
+
     const tileConfigs = [
       {
         id: "openfreemap-liberty",
-        name: "OpenFreeMap Liberty",
-        role: "base",
+        name: "Vector overlays (OpenFreeMap)",
+        role: "overlay",
         kind: "maplibre",
         style: "https://tiles.openfreemap.org/styles/liberty",
         attr: "&copy; OpenStreetMap contributors &copy; OpenMapTiles | OpenFreeMap",
+        description: "OpenFreeMap Liberty vector tiles rendered with MapLibre. Useful as filterable overlays over imagery. Live view and HTML export only; vector layers do not render in PNG exports.",
         checked: false,
         opacity: 1
       },
@@ -2038,7 +2123,83 @@
       }
     ];
 
+    const referenceLayerConfigs = [
+      {
+        id: "base",
+        name: "Base land",
+        description: "Landcover, landuse, buildings, and other base-map fills.",
+        checked: true,
+        include: ["background", "landcover", "landuse", "landuse-residential", "building", "park", "wood", "forest", "green", "hillshade"],
+        exclude: ["water", "road", "rail", "boundary"]
+      },
+      {
+        id: "water",
+        name: "Water",
+        description: "Rivers, lakes, coastline, canals, and water labels.",
+        checked: true,
+        include: ["water", "waterway", "river", "stream", "canal", "lake", "ocean", "marine", "coast", "bay"]
+      },
+      {
+        id: "roads",
+        name: "Roads",
+        description: "Roads, streets, paths, tracks, and road labels.",
+        checked: true,
+        include: ["road", "street", "highway", "motorway", "trunk", "primary", "secondary", "tertiary", "minor", "service", "path", "track", "transportation"],
+        exclude: ["rail", "railway", "tram", "subway", "aeroway", "airport", "runway", "taxiway", "apron", "helipad", "ferry", "bridge", "tunnel"]
+      },
+      {
+        id: "rail",
+        name: "Rail",
+        description: "Railways, tramways, subway lines, and rail stations.",
+        checked: true,
+        include: ["rail", "railway", "train", "tram", "subway"],
+        exclude: ["aerialway", "road"]
+      },
+      {
+        id: "places",
+        name: "Places",
+        description: "Settlement, district, and point-of-interest labels.",
+        checked: true,
+        include: ["place", "settlement", "city", "town", "village", "hamlet", "suburb", "neighbourhood", "neighborhood", "poi", "label"],
+        exclude: ["road", "rail", "water", "boundary", "aeroway"]
+      },
+      {
+        id: "borders",
+        name: "Borders",
+        description: "Administrative boundaries and border labels.",
+        checked: true,
+        include: ["boundary", "border", "admin", "country", "state", "province", "region"]
+      },
+      {
+        id: "chokepoints",
+        name: "Chokepoints",
+        description: "Bridges, tunnels, fords, and similar land-movement constraints.",
+        checked: true,
+        include: ["bridge", "tunnel", "brunnel", "ford", "crossing", "barrier", "gate"],
+        exclude: ["ferry", "route"]
+      },
+      {
+        id: "transport",
+        name: "Airports + ports",
+        description: "Airports, ports, harbours, piers, docks, and ferry terminals.",
+        checked: true,
+        include: ["aeroway", "airport", "aerodrome", "runway", "taxiway", "apron", "helipad", "port", "harbour", "harbor", "pier", "dock", "ferry_terminal"],
+        exclude: ["road", "highway", "street", "rail", "transportation_name"]
+      },
+      {
+        id: "other",
+        name: "Other map detail",
+        description: "OpenFreeMap layers that do not match a named reference group.",
+        checked: true,
+        other: true
+      }
+    ];
+
     const tiles = new Map();
+    referenceLayerConfigs.forEach((cfg) => {
+      state.referenceLayers[cfg.id] = cfg.checked !== false;
+    });
+    applyMapBackdrop();
     tileConfigs.forEach((cfg, index) => {
       const layer = createBackgroundLayer(cfg, index);
       if (!layer) return;
@@ -2372,7 +2533,7 @@
       const opacity = savedTile.opacity ?? cfg.opacity ?? 1;
       if (cfg.kind === "maplibre") {
         if (!window.maplibregl || !L.maplibreGL) return null;
-        return L.maplibreGL({
+        const layer = L.maplibreGL({
           style: cfg.style,
           opacity,
           attributionControl: { customAttribution: cfg.attr || "" },
@@ -2380,6 +2541,10 @@
           pane: "tilePane",
           preserveDrawingBuffer: true
         });
+        layer.on?.("add", () => {
+          scheduleReferenceLayerApply();
+        });
+        return layer;
       }
       return L.tileLayer(cfg.url, {
         attribution: cfg.attr,
@@ -2416,6 +2581,7 @@
         if (!layer) return;
         const row = document.createElement("div");
         row.className = "tile-row";
+        row.title = cfg.description || "";
         const opacity = backgroundLayerOpacity(layer, cfg);
         row.innerHTML = `
           <input type="checkbox" ${map.hasLayer(layer) ? "checked" : ""} aria-label="${cfg.name}">
@@ -2434,6 +2600,7 @@
           check.checked ? layer.addTo(map) : map.removeLayer(layer);
           setBackgroundLayerOpacity(layer, backgroundLayerOpacity(layer, cfg));
           applyTileLayerOrder();
+          applyReferenceLayers();
           scheduleSave();
         });
         range.addEventListener("input", () => {
@@ -2448,6 +2615,410 @@
         buttons[1].addEventListener("click", () => moveTileLayer(cfg.id, 1));
         wrap.appendChild(row);
       });
+    }
+
+    function renderReferenceLayerControls() {
+      const wrap = el("referenceLayerList");
+      if (!wrap) return;
+      wrap.innerHTML = "";
+      referenceLayerConfigs.forEach((cfg) => {
+        const row = document.createElement("label");
+        row.className = "reference-row";
+        row.title = cfg.description;
+        row.innerHTML = `
+          <input type="checkbox" ${referenceLayerEnabled(cfg.id) ? "checked" : ""}>
+          <span class="tile-meta">
+            <strong>${escapeHtml(cfg.name)}</strong>
+            <span class="tiny">${escapeHtml(cfg.description)}</span>
+            <span class="reference-legend">${referenceLegendHtml(cfg)}</span>
+          </span>
+        `;
+        row.querySelector("input").addEventListener("change", (event) => {
+          pushUndo("reference-layer", { coalesceMs: 1000 });
+          state.referenceLayers[cfg.id] = event.target.checked;
+          applyReferenceLayers();
+          scheduleSave();
+        });
+        wrap.appendChild(row);
+      });
+    }
+
+    function referenceLegendHtml(cfg) {
+      const labels = {
+        base: "land/background fills",
+        water: "water fills and lines",
+        roads: "road lines",
+        rail: "red rail highlight",
+        places: "place/POI labels",
+        borders: "boundary lines",
+        chokepoints: "cyan bridge/tunnel highlight",
+        transport: "airport and port symbols",
+        other: "other vector detail"
+      };
+      return `<span class="reference-swatch ${escapeHtml(cfg.id)}" aria-hidden="true"></span><span>${escapeHtml(labels[cfg.id] || cfg.name)}</span>`;
+    }
+
+    function referenceLayerEnabled(id) {
+      const cfg = referenceLayerConfigs.find((item) => item.id === id);
+      return state.referenceLayers?.[id] ?? (cfg?.checked !== false);
+    }
+
+    function setReferenceStyleSetting(key, value) {
+      pushUndo("reference-style", { coalesceMs: 1000 });
+      if (key === "referenceHighlights") state.referenceHighlights = Boolean(value);
+      if (key === "referenceBackdropColor") {
+        state.referenceBackdropColor = safeMapBackdropColor(value);
+        applyMapBackdrop();
+      }
+      if (key === "referenceBackdropOpacity") state.referenceBackdropOpacity = clamp01(value, 0.15);
+      applyReferenceLayers();
+      scheduleSave();
+    }
+
+    function setReferenceLayerPreset(ids) {
+      pushUndo("reference-layer-preset");
+      const enabled = new Set(ids);
+      referenceLayerConfigs.forEach((cfg) => {
+        state.referenceLayers[cfg.id] = enabled.has(cfg.id);
+      });
+      renderReferenceLayerControls();
+      applyReferenceLayers();
+      scheduleSave();
+    }
+
+    function scheduleReferenceLayerApply() {
+      requestAnimationFrame(() => applyReferenceLayers());
+    }
+
+    function applyReferenceLayers() {
+      for (const layer of tiles.values()) {
+        if (typeof layer.getMaplibreMap !== "function") continue;
+        const maplibreMap = layer.getMaplibreMap();
+        if (!maplibreMap?.getStyle) continue;
+        try {
+          const style = maplibreMap.getStyle();
+          if (!style?.layers?.length) {
+            maplibreMap.once?.("styledata", () => applyReferenceLayers());
+            maplibreMap.once?.("load", () => applyReferenceLayers());
+            continue;
+          }
+          style.layers.forEach((styleLayer) => {
+            if (!styleLayer?.id) return;
+            const groups = referenceGroupsForStyleLayer(styleLayer);
+            const visible = groups.length
+              ? groups.some((cfg) => referenceLayerEnabled(cfg.id))
+              : referenceLayerEnabled("other");
+            if (maplibreMap.getLayer(styleLayer.id)) {
+              maplibreMap.setLayoutProperty(styleLayer.id, "visibility", visible ? "visible" : "none");
+              applyReferenceLayerStyling(maplibreMap, styleLayer, groups);
+            }
+          });
+          syncReferenceHighlightLayers(maplibreMap);
+        } catch (error) {
+          maplibreMap.once?.("styledata", () => applyReferenceLayers());
+          maplibreMap.once?.("load", () => applyReferenceLayers());
+          console.warn("Reference layer filter failed", error);
+        }
+      }
+    }
+
+    function referenceGroupsForStyleLayer(styleLayer) {
+      return referenceLayerConfigs.filter((cfg) => referenceLayerMatchesStyle(cfg, styleLayer));
+    }
+
+    function referenceLayerMatchesStyle(cfg, styleLayer) {
+      if (cfg.other) return false;
+      const id = String(styleLayer.id || "").toLowerCase();
+      const sourceLayer = String(styleLayer["source-layer"] || "").toLowerCase();
+      const type = String(styleLayer.type || "").toLowerCase();
+      const text = `${id} ${sourceLayer} ${type}`;
+      const has = (words) => words.some((word) => text.includes(word));
+      if (cfg.id === "base") return ["background", "landcover", "landuse", "building"].includes(sourceLayer) || id.includes("background");
+      if (cfg.id === "water") return ["water", "waterway"].includes(sourceLayer) || has(["water", "river", "stream", "canal", "lake", "ocean", "coast"]);
+      if (cfg.id === "roads") {
+        if (sourceLayer !== "transportation" && sourceLayer !== "transportation_name") return false;
+        return has(["road", "street", "highway", "motorway", "trunk", "primary", "secondary", "tertiary", "minor", "service", "track", "path", "transportation"]) &&
+          !has(["rail", "tram", "subway", "ferry", "pier"]);
+      }
+      if (cfg.id === "rail") return sourceLayer === "transportation" && has(["rail", "tram", "subway", "train", "transit"]);
+      if (cfg.id === "places") return ["place", "poi"].includes(sourceLayer) || has(["place", "settlement", "city", "town", "village", "hamlet", "suburb", "neighbourhood", "neighborhood", "poi", "label"]);
+      if (cfg.id === "borders") return sourceLayer === "boundary" || has(["boundary", "border", "admin"]);
+      if (cfg.id === "chokepoints") return sourceLayer === "transportation" && has(["bridge", "tunnel", "brunnel", "ford"]) && !has(["ferry", "route"]);
+      if (cfg.id === "transport") {
+        if (["aeroway", "aerodrome_label"].includes(sourceLayer)) return true;
+        if (sourceLayer === "poi") return has(["airport", "aerodrome", "harbour", "harbor", "port", "dock", "ferry_terminal", "terminal"]);
+        return sourceLayer === "transportation" && has(["pier", "dock", "ferry_terminal"]) && !has(["road", "highway", "street", "rail"]);
+      }
+      const excluded = cfg.exclude?.some((keyword) => text.includes(keyword));
+      const included = cfg.include?.some((keyword) => text.includes(keyword));
+      return included && !excluded;
+    }
+
+    function applyReferenceLayerStyling(maplibreMap, styleLayer, groups) {
+      if (styleLayer.type === "background") {
+        if (maplibreMap.getLayer(styleLayer.id)) {
+          maplibreMap.setPaintProperty(styleLayer.id, "background-color", safeMapBackdropColor(state.referenceBackdropColor));
+          maplibreMap.setPaintProperty(styleLayer.id, "background-opacity", clamp01(state.referenceBackdropOpacity, 0.15));
+        }
+      }
+    }
+
+    function syncReferenceHighlightLayers(maplibreMap) {
+      const sourceId = firstVectorSourceId(maplibreMap);
+      if (!sourceId) return;
+      const showRail = state.referenceHighlights && referenceLayerEnabled("rail");
+      const showChokes = state.referenceHighlights && referenceLayerEnabled("chokepoints");
+      const showTransport = state.referenceHighlights && referenceLayerEnabled("transport");
+      ensureReferenceLineLayer(maplibreMap, "geosketch-rail-highlight", sourceId, "transportation", railFilter(), showRail, "#ff3b30", 4);
+      ensureReferenceLineLayer(maplibreMap, "geosketch-chokepoint-highlight", sourceId, "transportation", chokepointFilter(), showChokes, "#00e5ff", 5);
+      hideReferenceLayer(maplibreMap, "geosketch-chokepoint-marker");
+      ensureReferenceLineLayer(maplibreMap, "geosketch-pier-highlight", sourceId, "transportation", pierFilter(), showTransport, "#ffcc4d", 4);
+      ensureReferenceLineLayer(maplibreMap, "geosketch-aeroway-line-highlight", sourceId, "aeroway", ["all"], showTransport, "#ffcc4d", 4);
+      ensureReferenceFillLayer(maplibreMap, "geosketch-aeroway-fill-highlight", sourceId, "aeroway", ["all"], showTransport, "#ffcc4d");
+      hideReferenceLayer(maplibreMap, "geosketch-port-marker");
+      hideReferenceLayer(maplibreMap, "geosketch-airport-marker");
+      ensureReferenceIconSymbolLayer(maplibreMap, "geosketch-port-icon-marker", sourceId, "poi", portPoiFilter(), showTransport, "geosketch-anchor-icon");
+      ensureReferenceIconSymbolLayer(maplibreMap, "geosketch-airport-icon-marker", sourceId, "aerodrome_label", ["all"], showTransport, "geosketch-airplane-icon");
+    }
+
+    function firstVectorSourceId(maplibreMap) {
+      const sources = maplibreMap.getStyle()?.sources || {};
+      return Object.keys(sources).find((id) => sources[id]?.type === "vector") || null;
+    }
+
+    function ensureReferenceLineLayer(maplibreMap, id, source, sourceLayer, filter, visible, color, width) {
+      if (!maplibreMap.getLayer(id)) {
+        try {
+          maplibreMap.addLayer({
+            id,
+            type: "line",
+            source,
+            "source-layer": sourceLayer,
+            filter,
+            minzoom: 0,
+            layout: { visibility: visible ? "visible" : "none" },
+            paint: {
+              "line-color": color,
+              "line-opacity": 0.95,
+              "line-width": ["interpolate", ["linear"], ["zoom"], 4, Math.max(1.4, width - 2.2), 8, Math.max(2.2, width - 1), 12, width, 15, width + 2]
+            }
+          });
+        } catch (error) {
+          console.warn(`Reference highlight layer ${id} failed`, error);
+          return;
+        }
+      }
+      maplibreMap.setFilter?.(id, filter);
+      maplibreMap.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
+    }
+
+    function ensureReferenceFillLayer(maplibreMap, id, source, sourceLayer, filter, visible, color) {
+      if (!maplibreMap.getLayer(id)) {
+        try {
+          maplibreMap.addLayer({
+            id,
+            type: "fill",
+            source,
+            "source-layer": sourceLayer,
+            filter,
+            minzoom: 0,
+            layout: { visibility: visible ? "visible" : "none" },
+            paint: {
+              "fill-color": color,
+              "fill-opacity": 0.34,
+              "fill-outline-color": color
+            }
+          });
+        } catch (error) {
+          console.warn(`Reference fill layer ${id} failed`, error);
+          return;
+        }
+      }
+      maplibreMap.setFilter?.(id, filter);
+      maplibreMap.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
+    }
+
+    function ensureReferenceCircleLayer(maplibreMap, id, source, sourceLayer, filter, visible, color) {
+      if (!maplibreMap.getLayer(id)) {
+        try {
+          maplibreMap.addLayer({
+            id,
+            type: "circle",
+            source,
+            "source-layer": sourceLayer,
+            filter,
+            minzoom: 0,
+            layout: { visibility: visible ? "visible" : "none" },
+            paint: {
+              "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 4, 9, 7, 13, 11],
+              "circle-color": color,
+              "circle-opacity": 0.88,
+              "circle-stroke-color": "#111820",
+              "circle-stroke-opacity": 0.95,
+              "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 4, 1.5, 12, 3]
+            }
+          });
+        } catch (error) {
+          console.warn(`Reference circle layer ${id} failed`, error);
+          return;
+        }
+      }
+      maplibreMap.setFilter?.(id, filter);
+      maplibreMap.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
+    }
+
+    function hideReferenceLayer(maplibreMap, id) {
+      if (maplibreMap.getLayer(id)) maplibreMap.setLayoutProperty(id, "visibility", "none");
+    }
+
+    function ensureReferenceIconSymbolLayer(maplibreMap, id, source, sourceLayer, filter, visible, iconName) {
+      ensureReferenceIconImage(maplibreMap, iconName);
+      if (!maplibreMap.getLayer(id)) {
+        try {
+          maplibreMap.addLayer({
+            id,
+            type: "symbol",
+            source,
+            "source-layer": sourceLayer,
+            filter,
+            minzoom: 0,
+            layout: {
+              visibility: visible ? "visible" : "none",
+              "icon-image": iconName,
+              "icon-size": ["interpolate", ["linear"], ["zoom"], 4, 0.38, 9, 0.55, 13, 0.75],
+              "icon-allow-overlap": true,
+              "icon-ignore-placement": true
+            }
+          });
+        } catch (error) {
+          console.warn(`Reference icon layer ${id} failed`, error);
+          return;
+        }
+      }
+      maplibreMap.setFilter?.(id, filter);
+      maplibreMap.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
+    }
+
+    function ensureReferenceIconImage(maplibreMap, iconName) {
+      if (maplibreMap.hasImage?.(iconName)) return;
+      const canvas = document.createElement("canvas");
+      canvas.width = 64;
+      canvas.height = 64;
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, 64, 64);
+      ctx.fillStyle = "#ffcc4d";
+      ctx.strokeStyle = "#111820";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(32, 32, 29, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.strokeStyle = "#111820";
+      ctx.fillStyle = "#111820";
+      ctx.lineWidth = 4;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      if (iconName.includes("airplane")) drawReferenceAirplaneIcon(ctx);
+      else drawReferenceAnchorIcon(ctx);
+      try {
+        maplibreMap.addImage(iconName, ctx.getImageData(0, 0, 64, 64), { pixelRatio: 2 });
+      } catch (error) {
+        console.warn(`Reference icon image ${iconName} failed`, error);
+      }
+    }
+
+    function drawReferenceAirplaneIcon(ctx) {
+      ctx.beginPath();
+      ctx.moveTo(32, 12);
+      ctx.lineTo(37, 32);
+      ctx.lineTo(54, 39);
+      ctx.lineTo(54, 45);
+      ctx.lineTo(36, 42);
+      ctx.lineTo(34, 54);
+      ctx.lineTo(42, 59);
+      ctx.lineTo(42, 62);
+      ctx.lineTo(32, 58);
+      ctx.lineTo(22, 62);
+      ctx.lineTo(22, 59);
+      ctx.lineTo(30, 54);
+      ctx.lineTo(28, 42);
+      ctx.lineTo(10, 45);
+      ctx.lineTo(10, 39);
+      ctx.lineTo(27, 32);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function drawReferenceAnchorIcon(ctx) {
+      ctx.beginPath();
+      ctx.arc(32, 18, 5, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(32, 23);
+      ctx.lineTo(32, 48);
+      ctx.moveTo(20, 32);
+      ctx.lineTo(44, 32);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(32, 39, 16, 0.1 * Math.PI, 0.9 * Math.PI);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(16, 39);
+      ctx.lineTo(10, 37);
+      ctx.lineTo(13, 46);
+      ctx.moveTo(48, 39);
+      ctx.lineTo(54, 37);
+      ctx.lineTo(51, 46);
+      ctx.stroke();
+    }
+
+    function ensureReferenceSymbolLayer(maplibreMap, id, source, sourceLayer, filter, visible, symbol, color, placement = "point") {
+      if (!maplibreMap.getLayer(id)) {
+        try {
+          maplibreMap.addLayer({
+            id,
+            type: "symbol",
+            source,
+            "source-layer": sourceLayer,
+            filter,
+            minzoom: 0,
+            layout: {
+              visibility: visible ? "visible" : "none",
+              "symbol-placement": placement,
+              "text-field": symbol,
+              "text-size": ["interpolate", ["linear"], ["zoom"], 8, 12, 12, 16, 15, 22],
+              "text-allow-overlap": true,
+              "text-ignore-placement": true
+            },
+            paint: {
+              "text-color": color,
+              "text-halo-color": "#111820",
+              "text-halo-width": 2
+            }
+          });
+        } catch (error) {
+          console.warn(`Reference symbol layer ${id} failed`, error);
+          return;
+        }
+      }
+      maplibreMap.setFilter?.(id, filter);
+      maplibreMap.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
+    }
+
+    function railFilter() {
+      return ["any", ["==", ["get", "class"], "rail"], ["==", ["get", "class"], "transit"], ["==", ["get", "subclass"], "rail"], ["==", ["get", "subclass"], "tram"], ["==", ["get", "subclass"], "subway"]];
+    }
+
+    function chokepointFilter() {
+      return ["any", ["==", ["get", "brunnel"], "bridge"], ["==", ["get", "brunnel"], "tunnel"], ["==", ["get", "brunnel"], "ford"]];
+    }
+
+    function pierFilter() {
+      return ["any", ["==", ["get", "class"], "pier"], ["==", ["get", "subclass"], "pier"]];
+    }
+
+    function portPoiFilter() {
+      return ["any", ["==", ["get", "class"], "harbor"], ["==", ["get", "class"], "harbour"], ["==", ["get", "class"], "port"], ["==", ["get", "class"], "dock"], ["==", ["get", "class"], "ferry_terminal"], ["==", ["get", "subclass"], "harbor"], ["==", ["get", "subclass"], "harbour"], ["==", ["get", "subclass"], "port"], ["==", ["get", "subclass"], "dock"], ["==", ["get", "subclass"], "ferry_terminal"]];
     }
 
     function layerRoleLabel(cfg) {
@@ -2493,6 +3064,17 @@
       }));
     }
 
+    function referenceLayerState() {
+      return Object.fromEntries(referenceLayerConfigs.map((cfg) => [cfg.id, referenceLayerEnabled(cfg.id)]));
+    }
+
+    function restoreReferenceLayerState(saved = {}) {
+      referenceLayerConfigs.forEach((cfg) => {
+        state.referenceLayers[cfg.id] = saved[cfg.id] ?? (cfg.checked !== false);
+      });
+      renderReferenceLayerControls();
+    }
+
     function applyTileLayerState(savedLayers = []) {
       restoreTileLayerOrder(savedLayers);
       const savedById = new Map(savedLayers.map((cfg) => [cfg.id, cfg]));
@@ -2506,6 +3088,7 @@
         if (!visible && map.hasLayer(layer)) map.removeLayer(layer);
       });
       applyTileLayerOrder();
+      applyReferenceLayers();
     }
 
     function updateActiveLayerSummary() {
@@ -3828,6 +4411,9 @@
       if (el("exportCredit")) el("exportCredit").checked = state.exportCredit !== false;
       if (el("exportDate")) el("exportDate").checked = state.exportDate !== false;
       if (el("exportAttribution")) el("exportAttribution").checked = state.exportAttribution !== false;
+      if (el("referenceHighlights")) el("referenceHighlights").checked = state.referenceHighlights !== false;
+      if (el("referenceBackdropColor")) el("referenceBackdropColor").value = safeMapBackdropColor(state.referenceBackdropColor);
+      if (el("referenceBackdropOpacity")) el("referenceBackdropOpacity").value = clamp01(state.referenceBackdropOpacity, 0.15);
       if (el("bufferUnit")) el("bufferUnit").value = distanceUnitToBufferUnit(state.distanceUnit);
       if (el("unitScale")) el("unitScale").value = Math.round((state.unitIconScale || 1) * 100);
       if (el("pointScale")) el("pointScale").value = Math.round((state.pointIconScale || 1) * 100);
@@ -5349,6 +5935,7 @@
       state.exportCredit = true;
       state.exportDate = true;
       state.exportAttribution = true;
+      restoreReferenceLayerState();
       state.drawLayers.clear();
       const obsLayerId = uid("layer");
       const unitLayerId = uid("layer");
@@ -5982,6 +6569,10 @@
           exportCredit: state.exportCredit !== false,
           exportDate: state.exportDate !== false,
           exportAttribution: state.exportAttribution !== false,
+          referenceLayers: referenceLayerState(),
+          referenceHighlights: state.referenceHighlights !== false,
+          referenceBackdropColor: safeMapBackdropColor(state.referenceBackdropColor),
+          referenceBackdropOpacity: clamp01(state.referenceBackdropOpacity, 0.15),
           unitIconScale: state.unitIconScale,
           pointIconScale: state.pointIconScale,
           view: { center: map.getCenter(), zoom: map.getZoom() },
@@ -6691,7 +7282,7 @@
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
   <style>
     :root { --panel-width: min(292px, calc(100vw - 28px)); }
-    html, body, #map { height: 100%; margin: 0; }
+    html, body, #map { height: 100%; margin: 0; background: ${safeMapBackdropColor(exportedState.referenceBackdropColor)}; }
     body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #101418; color: #e7edf4; }
     #panel { position: absolute; z-index: 1000; top: 0; left: 0; box-sizing: border-box; width: var(--panel-width); height: 100%; overflow: auto; background: rgba(23,29,35,.96); border: 1px solid #303b47; border-left: 0; border-radius: 0 8px 8px 0; padding: 10px; box-shadow: 0 8px 28px rgba(0,0,0,.32); transform: translateX(calc(-100% - 1px)); transition: transform .18s ease; }
     body.export-panel-open #panel { transform: translateX(0); }
@@ -6753,13 +7344,16 @@
   <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"><\/script>
   <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.3/leaflet-maplibre-gl.js"><\/script>
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"><\/script>
-  <script src="https://cdn.jsdelivr.net/npm/milsymbol@3/dist/milsymbol.js"><\/script>
-  <script id="tile-configs" type="application/json">${scriptJson(tileConfigs)}<\/script>
-  <script id="map-state" type="application/json">${scriptJson(exportedState)}<\/script>
-  <script>
-    const tileConfigs = JSON.parse(document.getElementById("tile-configs").textContent);
-    const saved = JSON.parse(document.getElementById("map-state").textContent);
+      <script src="https://cdn.jsdelivr.net/npm/milsymbol@3/dist/milsymbol.js"><\/script>
+      <script id="tile-configs" type="application/json">${scriptJson(tileConfigs)}<\/script>
+      <script id="reference-layer-configs" type="application/json">${scriptJson(referenceLayerConfigs)}<\/script>
+      <script id="map-state" type="application/json">${scriptJson(exportedState)}<\/script>
+      <script>
+        const tileConfigs = JSON.parse(document.getElementById("tile-configs").textContent);
+        const referenceLayerConfigs = JSON.parse(document.getElementById("reference-layer-configs").textContent);
+        const saved = JSON.parse(document.getElementById("map-state").textContent);
     const map = L.map("map", { zoomSnap: 0.25, zoomDelta: 1, wheelPxPerZoomLevel: 180 }).setView(saved.view?.center || [60.1699, 24.9384], saved.view?.zoom || 12);
+    map.getContainer().style.backgroundColor = safeMapBackdropColor(saved.referenceBackdropColor);
     map.attributionControl.setPrefix(attributionPrefixHtml(saved));
     const objectGroup = L.layerGroup().addTo(map);
     const bufferGroup = L.layerGroup().addTo(map);
@@ -6787,6 +7381,7 @@
       setBackgroundLayerOpacity(layer, savedTile.opacity ?? cfg.opacity ?? 1);
     });
     applyBackgroundLayerOrder();
+    applyReferenceLayers();
 
     renderControls();
     setupPanelToggle();
@@ -6815,6 +7410,7 @@
           event.target.checked ? layer.addTo(map) : map.removeLayer(layer);
           setBackgroundLayerOpacity(layer, backgroundLayerOpacity(layer, cfg));
           applyBackgroundLayerOrder();
+          applyReferenceLayers();
         });
         row.querySelector("input[type=range]").addEventListener("input", (event) => setBackgroundLayerOpacity(layer, Number(event.target.value)));
         base.appendChild(row);
@@ -6836,7 +7432,7 @@
       const opacity = savedTile.opacity ?? cfg.opacity ?? 1;
       if (cfg.kind === "maplibre") {
         if (!window.maplibregl || !L.maplibreGL) return null;
-        return L.maplibreGL({
+        const layer = L.maplibreGL({
           style: cfg.style,
           opacity,
           attributionControl: { customAttribution: cfg.attr || "" },
@@ -6844,6 +7440,8 @@
           pane: "tilePane",
           preserveDrawingBuffer: true
         });
+        layer.on?.("add", () => requestAnimationFrame(() => applyReferenceLayers()));
+        return layer;
       }
       return L.tileLayer(cfg.url, {
         attribution: cfg.attr,
@@ -6881,6 +7479,74 @@
         const container = layer.getContainer?.();
         if (container) container.style.zIndex = zIndex;
       });
+    }
+
+    function referenceLayerEnabled(id) {
+      const cfg = referenceLayerConfigs.find((item) => item.id === id);
+      return saved.referenceLayers?.[id] ?? (cfg?.checked !== false);
+    }
+
+    function applyReferenceLayers() {
+      for (const layer of tiles.values()) {
+        if (typeof layer.getMaplibreMap !== "function") continue;
+        const maplibreMap = layer.getMaplibreMap();
+        if (!maplibreMap?.getStyle) continue;
+        try {
+          const style = maplibreMap.getStyle();
+          if (!style?.layers?.length) {
+            maplibreMap.once?.("styledata", () => applyReferenceLayers());
+            maplibreMap.once?.("load", () => applyReferenceLayers());
+            continue;
+          }
+          style.layers.forEach((styleLayer) => {
+            if (!styleLayer?.id || !maplibreMap.getLayer(styleLayer.id)) return;
+            const groups = referenceGroupsForStyleLayer(styleLayer);
+            const visible = groups.length ? groups.some((cfg) => referenceLayerEnabled(cfg.id)) : referenceLayerEnabled("other");
+            maplibreMap.setLayoutProperty(styleLayer.id, "visibility", visible ? "visible" : "none");
+            if (styleLayer.type === "background") {
+              maplibreMap.setPaintProperty(styleLayer.id, "background-color", safeMapBackdropColor(saved.referenceBackdropColor));
+              maplibreMap.setPaintProperty(styleLayer.id, "background-opacity", clamp01(saved.referenceBackdropOpacity, 0.15));
+            }
+          });
+        } catch (error) {
+          maplibreMap.once?.("styledata", () => applyReferenceLayers());
+          maplibreMap.once?.("load", () => applyReferenceLayers());
+          console.warn("Reference layer filter failed", error);
+        }
+      }
+    }
+
+    function referenceGroupsForStyleLayer(styleLayer) {
+      const text = (styleLayer.id + " " + (styleLayer["source-layer"] || "") + " " + (styleLayer.type || "")).toLowerCase();
+      return referenceLayerConfigs.filter((cfg) => referenceLayerMatchesStyle(cfg, styleLayer));
+    }
+
+    function referenceLayerMatchesStyle(cfg, styleLayer) {
+      if (cfg.other) return false;
+      const id = String(styleLayer.id || "").toLowerCase();
+      const sourceLayer = String(styleLayer["source-layer"] || "").toLowerCase();
+      const type = String(styleLayer.type || "").toLowerCase();
+      const text = id + " " + sourceLayer + " " + type;
+      const has = (words) => words.some((word) => text.includes(word));
+      if (cfg.id === "base") return ["background", "landcover", "landuse", "building"].includes(sourceLayer) || id.includes("background");
+      if (cfg.id === "water") return ["water", "waterway"].includes(sourceLayer) || has(["water", "river", "stream", "canal", "lake", "ocean", "coast"]);
+      if (cfg.id === "roads") {
+        if (sourceLayer !== "transportation" && sourceLayer !== "transportation_name") return false;
+        return has(["road", "street", "highway", "motorway", "trunk", "primary", "secondary", "tertiary", "minor", "service", "track", "path", "transportation"]) &&
+          !has(["rail", "tram", "subway", "ferry", "pier"]);
+      }
+      if (cfg.id === "rail") return sourceLayer === "transportation" && has(["rail", "tram", "subway", "train", "transit"]);
+      if (cfg.id === "places") return ["place", "poi"].includes(sourceLayer) || has(["place", "settlement", "city", "town", "village", "hamlet", "suburb", "neighbourhood", "neighborhood", "poi", "label"]);
+      if (cfg.id === "borders") return sourceLayer === "boundary" || has(["boundary", "border", "admin"]);
+      if (cfg.id === "chokepoints") return sourceLayer === "transportation" && has(["bridge", "tunnel", "brunnel", "ford"]) && !has(["ferry", "route"]);
+      if (cfg.id === "transport") {
+        if (["aeroway", "aerodrome_label"].includes(sourceLayer)) return true;
+        if (sourceLayer === "poi") return has(["airport", "aerodrome", "harbour", "harbor", "port", "dock", "ferry_terminal", "terminal"]);
+        return sourceLayer === "transportation" && has(["pier", "dock", "ferry_terminal"]) && !has(["road", "highway", "street", "rail"]);
+      }
+      const excluded = cfg.exclude?.some((keyword) => text.includes(keyword));
+      const included = cfg.include?.some((keyword) => text.includes(keyword));
+      return included && !excluded;
     }
 
     function renderMap() {
@@ -7304,6 +7970,11 @@
       return Math.max(0, Math.min(1, number));
     }
 
+    function safeMapBackdropColor(value) {
+      const color = String(value || "").trim();
+      return /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(color) ? color : "#0f1419";
+    }
+
     function safePatternColor(value, fallback) {
       const color = String(value || "").trim();
       return /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(color) ? color : (fallback || "#ffcc4d");
@@ -7411,6 +8082,10 @@
         exportCredit: state.exportCredit !== false,
         exportDate: state.exportDate !== false,
         exportAttribution: state.exportAttribution !== false,
+        referenceLayers: referenceLayerState(),
+        referenceHighlights: state.referenceHighlights !== false,
+        referenceBackdropColor: safeMapBackdropColor(state.referenceBackdropColor),
+        referenceBackdropOpacity: clamp01(state.referenceBackdropOpacity, 0.15),
         unitIconScale: state.unitIconScale,
         pointIconScale: state.pointIconScale,
         view: { center: map.getCenter(), zoom: map.getZoom() },
@@ -7530,6 +8205,11 @@
       state.exportCredit = saved.exportCredit ?? saved.properties?.exportCredit ?? true;
       state.exportDate = saved.exportDate ?? saved.properties?.exportDate ?? true;
       state.exportAttribution = saved.exportAttribution ?? saved.properties?.exportAttribution ?? true;
+      restoreReferenceLayerState(saved.referenceLayers || saved.properties?.referenceLayers || {});
+      state.referenceHighlights = saved.referenceHighlights ?? saved.properties?.referenceHighlights ?? true;
+      state.referenceBackdropColor = safeMapBackdropColor(saved.referenceBackdropColor || saved.properties?.referenceBackdropColor);
+      state.referenceBackdropOpacity = clamp01(saved.referenceBackdropOpacity ?? saved.properties?.referenceBackdropOpacity, 0.15);
+      applyMapBackdrop();
       state.unitIconScale = Number(saved.unitIconScale || 1);
       state.pointIconScale = Number(saved.pointIconScale || 1);
       syncSettingsControls();
@@ -7539,6 +8219,7 @@
       state.activeLayerId = saved.activeLayerId || saved.drawLayers?.[0]?.id || null;
       if (!state.drawLayers.size) addDefaultDrawLayer();
       applyTileLayerState(saved.tileLayers || saved.properties?.tileLayers || []);
+      applyReferenceLayers();
       (saved.objects || []).forEach((item) => {
         const layer = layerFromSaved(item);
         if (!layer) return;
@@ -7582,6 +8263,7 @@
       });
       if (saved.view?.center) map.setView(saved.view.center, saved.view.zoom || 12);
       renderTileControls();
+      renderReferenceLayerControls();
       renderDrawLayers();
       renderObjectList();
       renderBufferList();
@@ -7644,6 +8326,11 @@
         state.exportCredit = geojson.properties?.exportCredit ?? true;
         state.exportDate = geojson.properties?.exportDate ?? true;
         state.exportAttribution = geojson.properties?.exportAttribution ?? true;
+        restoreReferenceLayerState(geojson.properties?.referenceLayers || {});
+        state.referenceHighlights = geojson.properties?.referenceHighlights ?? true;
+        state.referenceBackdropColor = safeMapBackdropColor(geojson.properties?.referenceBackdropColor);
+        state.referenceBackdropOpacity = clamp01(geojson.properties?.referenceBackdropOpacity, 0.15);
+        applyMapBackdrop();
         if (geojson.properties?.unitIconScale) state.unitIconScale = Number(geojson.properties.unitIconScale) || 1;
         if (geojson.properties?.pointIconScale) state.pointIconScale = Number(geojson.properties.pointIconScale) || 1;
         applyTileLayerState(geojson.properties?.tileLayers || []);
@@ -7873,6 +8560,11 @@
       state.exportCredit = true;
       state.exportDate = true;
       state.exportAttribution = true;
+      state.referenceHighlights = true;
+      state.referenceBackdropColor = "#0f1419";
+      state.referenceBackdropOpacity = 0.15;
+      applyMapBackdrop();
+      restoreReferenceLayerState({});
       state.drawLayers.clear();
       state.activeLayerId = null;
       state.nextId = 1;
@@ -7965,6 +8657,12 @@
     el("coordCircle").addEventListener("click", () => drawFromCoords("circle"));
     el("coordPolygon").addEventListener("click", () => drawFromCoords("polygon"));
     el("exportAreaRatio").addEventListener("change", (event) => setExportAreaRatio(event.target.value));
+    el("referencePresetFull").addEventListener("click", () => setReferenceLayerPreset(referenceLayerConfigs.map((cfg) => cfg.id)));
+    el("referencePresetRoads").addEventListener("click", () => setReferenceLayerPreset(["roads", "places", "borders", "chokepoints"]));
+    el("referencePresetTransport").addEventListener("click", () => setReferenceLayerPreset(["roads", "rail", "transport", "chokepoints", "places", "borders"]));
+    el("referenceHighlights").addEventListener("change", (event) => setReferenceStyleSetting("referenceHighlights", event.target.checked));
+    el("referenceBackdropColor").addEventListener("input", (event) => setReferenceStyleSetting("referenceBackdropColor", event.target.value));
+    el("referenceBackdropOpacity").addEventListener("input", (event) => setReferenceStyleSetting("referenceBackdropOpacity", event.target.value));
     el("editCoordinates").addEventListener("click", toggleCoordinateEditing);
     el("coordinateOutput").addEventListener("input", (event) => resizeCoordinateOutput(event.target));
     el("copyCoordinates").addEventListener("click", copySelectedCoordinates);
@@ -8168,6 +8866,7 @@
     map.on("zoomend moveend", scheduleSave);
 
     renderTileControls();
+    renderReferenceLayerControls();
     addDefaultDrawLayer();
     populateApp6Controls();
     setApp6Controls(state.activeIcon);
