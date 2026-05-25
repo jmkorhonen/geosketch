@@ -771,6 +771,42 @@
       overflow: auto;
     }
 
+    .vertex-handle {
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      border: 2px solid #38bdf8;
+      border-radius: 50%;
+      background: #facc15;
+      box-shadow: 0 0 0 2px rgba(0,0,0,.75), 0 2px 8px rgba(0,0,0,.5);
+      color: #111820;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1;
+      cursor: pointer;
+      pointer-events: auto;
+      user-select: none;
+    }
+
+    .vertex-handle.is-selected {
+      width: 22px;
+      height: 22px;
+      border-color: #f8fafc;
+      background: #38bdf8;
+    }
+
+    .vertex-handle.is-add {
+      border-style: dashed;
+      background: #111820;
+      color: #facc15;
+    }
+
+    .vertex-handle-icon {
+      background: transparent;
+      border: 0;
+    }
+
     .action-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -1046,7 +1082,7 @@
     <button id="rightTab" class="collapse-tab" title="Collapse right panel"></button>
     <aside class="side left">
       <div class="brand">
-        <h1>GeoSketch <span class="version">v1.2</span></h1>
+        <h1>GeoSketch <span class="version">v1.2.5</span></h1>
         <button id="resetViewBtn" title="Zoom to all objects">⌖</button>
       </div>
       <label class="map-title-field">Map title
@@ -1088,9 +1124,9 @@
         <div class="grid-3">
           <button data-draw="Marker" title="Draw point">Point</button>
           <button data-draw="Unit" title="Place APP-6 unit symbol">Unit</button>
-          <button data-draw="Line" title="Draw line. Press Enter to finish.">Line</button>
-          <button data-draw="Polygon" title="Draw polygon. Press Enter to close and finish.">Polygon</button>
-          <button data-draw="Circle" title="Draw circle. Press Enter to finish.">Circle</button>
+          <button data-draw="Line" title="Draw line. Double-click or press Enter to finish.">Line</button>
+          <button data-draw="Polygon" title="Draw polygon. Click the first point or press Enter to close and finish.">Polygon</button>
+          <button data-draw="Circle" title="Draw circle. Click again or press Enter to finish.">Circle</button>
           <button data-draw="Text" title="Add text annotation">Text box</button>
         </div>
         <details>
@@ -1181,7 +1217,7 @@
           <div class="control-group-title">PNG export</div>
           <div class="grid-2">
             <button id="saveScreenshot" class="wide" title="Export the current visible map as a PNG image">Save visible map as PNG</button>
-            <button data-draw="ExportArea" class="wide" title="Draw a rectangular PNG export area. The area object will be created in the currently active layer.">Define export area</button>
+            <button data-draw="ExportArea" class="wide" title="Draw a rectangular PNG export area. Click again or press Enter to finish. The area object will be created in the currently active layer.">Define export area</button>
           </div>
           <label>Export area format
             <select id="exportAreaRatio" title="Aspect ratio for newly drawn export areas">
@@ -1271,7 +1307,7 @@
           <br><br>
           <strong>Attribution.</strong> Background maps retain their source attribution in the map and exported interactive HTML. Respect OpenStreetMap, OpenTopoMap, Esri, CARTO, and any loaded data licenses.
           <br><br>
-          <strong>Shortcuts.</strong> Draw with 1 point, 2 line, 3 polygon, 4 circle, 5 text box, 6 unit. Use S for search, E edit points/shapes, M move, Enter finish drawing, Delete remove, Ctrl+Z undo, Ctrl+S save GeoJSON, Ctrl+C copy object, Ctrl+V paste object at cursor, C copy object coordinates, Shift+C copy cursor coordinates.
+          <strong>Shortcuts.</strong> Draw with 1 point, 2 line, 3 polygon, 4 circle, 5 text box, 6 unit. Use S for search, E edit points/shapes, M move, Enter finish drawing, Delete remove, Ctrl+Z undo, Ctrl+S save GeoJSON, Ctrl+C copy object, Ctrl+V paste object at cursor, C copy object coordinates, Shift+C copy cursor coordinates. In Edit points mode, click a line or polygon point to select it, click a segment to add a point, use plus handles or Add Start/End Point to extend lines, and use Delete Point, Del, or Backspace to delete the selected point.
         </div>
       </details>
     </aside>
@@ -1334,6 +1370,9 @@
         <label id="higherFormationControl">Higher formation
           <input id="higherFormationInput" placeholder="Example: 1st Battalion">
         </label>
+        <label>Notes
+          <textarea id="notesInput" rows="3" placeholder="Example: Source, confidence, and assumptions"></textarea>
+        </label>
         <div class="control-group">
           <div class="control-group-title">Edit</div>
           <div class="grid-2">
@@ -1341,20 +1380,26 @@
             <button id="moveToggle" title="Toggle drag mode">Move</button>
           </div>
         </div>
-        <label>Notes
-          <textarea id="notesInput" rows="3" placeholder="Example: Source, confidence, and assumptions"></textarea>
-        </label>
-        <label>Coordinates
-          <textarea id="coordinateOutput" class="coords-box coords-output" readonly></textarea>
-        </label>
-        <div id="coordinateActions" class="grid-2">
-          <button id="editCoordinates" title="Edit the selected object's coordinates">Edit Coordinates</button>
-          <button id="copyCoordinates" title="Copy the selected object's coordinates">Copy Coordinates</button>
-        </div>
-        <label id="measurementBoxControl">Measurements
-          <textarea id="measurementOutput" class="coords-box coords-output" readonly></textarea>
-        </label>
-        <label id="measureToggleLabel" class="check-row"><input id="showMeasurements" type="checkbox"> <span id="measureToggleText">Show measurements</span></label>
+        <details id="coordinateSection" class="compact-details">
+          <summary class="tiny">Coordinates</summary>
+          <label>Coordinates
+            <textarea id="coordinateOutput" class="coords-box coords-output" readonly></textarea>
+          </label>
+          <div id="coordinateActions" class="grid-2">
+            <button id="editCoordinates" title="Edit the selected object's coordinates">Edit Coordinates</button>
+            <button id="copyCoordinates" title="Copy the selected object's coordinates">Copy Coordinates</button>
+            <button id="addLineStartPoint" title="Add a new vertex before the current first point of this line" disabled>Add Start Point</button>
+            <button id="addLineEndPoint" title="Add a new vertex after the current last point of this line" disabled>Add End Point</button>
+            <button id="deleteVertexBtn" class="danger wide" title="In Edit points mode, select a point to delete it" disabled>Delete Point</button>
+          </div>
+        </details>
+        <details id="measurementSection" class="compact-details">
+          <summary class="tiny">Measurements</summary>
+          <label id="measurementBoxControl">Measurements
+            <textarea id="measurementOutput" class="coords-box coords-output" readonly></textarea>
+          </label>
+          <label id="measureToggleLabel" class="check-row"><input id="showMeasurements" type="checkbox"> <span id="measureToggleText">Show measurements</span></label>
+        </details>
         <div class="control-group">
           <div class="control-group-title">Copy</div>
           <div class="action-grid">
@@ -1488,7 +1533,7 @@
           <label id="strokeOpacityLabel">Line opacity
             <input id="strokeOpacity" type="range" min="0" max="1" step="0.05" value="1">
           </label>
-          <label id="fillOpacityLabel">Fill opacity
+          <label id="fillOpacityLabel" title="Set to 0 for no fill. Lines default to no fill.">Fill opacity
             <input id="fillOpacity" type="range" min="0" max="1" step="0.05" value="0.25">
           </label>
         </div>
@@ -1613,7 +1658,8 @@
   <script src="https://cdn.jsdelivr.net/npm/milsymbol@3/dist/milsymbol.js"></script>
   <script>
     const APP_NAME = "GeoSketch";
-    const APP_VERSION = "v1.2";
+    const APP_VERSION = "v1.2.5";
+    const UNTITLED_FILENAME_BASE = "untitled_geosketch";
     const GEOSKETCH_URL = "https://jmkorhonen.github.io/geosketch/";
     const ATTRIBUTION_NOTE = "Background map attribution: OpenStreetMap contributors, CARTO, OpenTopoMap, SRTM, Esri, OpenMapTiles, and OpenFreeMap as applicable to visible layers. User-loaded data may have separate licenses.";
     const PROJECTION_NOTE = "GeoSketch uses WGS84 coordinates and geodesic Turf/Leaflet calculations for sketching, measurement, buffers, and range circles. Outputs are planning/OSINT visualisations, not survey-grade products.";
@@ -1951,6 +1997,7 @@
       dragOn: false,
       saveTimer: null,
       selectedHalo: null,
+      selectedVertex: null,
       searchMarker: null,
       tempMeasure: null,
       drawingMeasure: null,
@@ -2043,6 +2090,21 @@
 
     L.PM.setOptIn(false);
     map.pm.addControls({ position: "topleft", drawControls: false, editControls: false, optionsControls: false });
+    if (map.pm?.setLang) {
+      map.pm.setLang("geosketch-en", {
+        tooltips: {
+          placeMarker: "Click to place marker",
+          firstVertex: "Click to place first vertex",
+          continueLine: "Click to continue drawing",
+          finishLine: "Click any existing marker, double-click, or press Enter to finish",
+          finishPoly: "Click first marker or press Enter to finish",
+          finishRect: "Click or press Enter to finish",
+          startCircle: "Click to place circle center",
+          finishCircle: "Click or press Enter to finish circle",
+          placeCircleMarker: "Click to place circle marker"
+        }
+      }, "en");
+    }
 
     function exportDateStamp() {
       return new Date().toISOString().slice(0, 10);
@@ -2220,6 +2282,7 @@
     const measurements = L.layerGroup().addTo(map);
     const centers = L.layerGroup().addTo(map);
     const endpoints = L.layerGroup().addTo(map);
+    const vertexSelection = L.layerGroup().addTo(map);
     const bufferGroup = L.layerGroup().addTo(map);
     L.DomEvent.disableClickPropagation(el("mapStatusBar"));
     L.DomEvent.disableScrollPropagation(el("mapStatusBar"));
@@ -2326,12 +2389,16 @@
     }
 
     function safeMapFilename(extension) {
-      const base = (state.mapTitle || APP_NAME)
+      return defaultFilename(extension, state.mapTitle || UNTITLED_FILENAME_BASE);
+    }
+
+    function defaultFilename(extension, baseText) {
+      const base = (baseText || UNTITLED_FILENAME_BASE)
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .replace(/[^A-Za-z0-9]+/g, "_")
         .replace(/^_+|_+$/g, "")
-        .slice(0, 80) || APP_NAME;
+        .slice(0, 80) || UNTITLED_FILENAME_BASE;
       return `${base}.${extension}`;
     }
 
@@ -2347,6 +2414,14 @@
       const fallback = safeMapFilename(extension);
       if (!clean) return fallback;
       return clean.toLowerCase().endsWith(`.${extension}`) ? clean : `${clean}.${extension}`;
+    }
+
+    function exportFilename(extension, suggested = safeMapFilename(extension)) {
+      const normalized = sanitizeFilename(suggested, extension);
+      if (state.mapTitle.trim()) return normalized;
+      const choice = prompt("No map title is set. Enter a filename:", normalized);
+      if (choice === null) return null;
+      return sanitizeFilename(choice || normalized, extension);
     }
     function clamp01(value, fallback = 1) {
       const number = Number(value);
@@ -2465,6 +2540,15 @@
         pattern: el("fillPattern").value || "",
         showMeasurements: el("showMeasurements").checked
       };
+    }
+
+    function objectDefaultStyle(kind) {
+      const style = baseStyle();
+      if (kind === "line") {
+        style.fillOpacity = 0;
+        style.pattern = "";
+      }
+      return style;
     }
 
     function exportAreaStyle(style = {}) {
@@ -3218,6 +3302,7 @@
         });
       }
       updateSelectionHalo();
+      renderVertexSelection();
       refreshLabelsAndMeasurements();
       updateExportAreaButton();
     }
@@ -3671,7 +3756,7 @@
         showLabel: true,
         text: "",
         notes: "",
-        style: baseStyle(),
+        style: objectDefaultStyle(kind),
         drawLayerId: layerForNewObject(),
         z: state.zCounter++,
         visible: true,
@@ -3719,10 +3804,11 @@
       });
       obj.layer.on("pm:dragstart dragstart movestart", () => startMoveGuide(obj));
       obj.layer.on("pm:drag drag move pm:markerdrag", () => updateMoveGuide(obj));
-      obj.layer.on("pm:edit pm:update pm:dragend pm:markerdragend pm:change", () => {
+      obj.layer.on("pm:edit pm:update pm:dragend pm:markerdragend pm:change pm:vertexadded pm:vertexremoved", () => {
         updateHitLayer(obj);
         updateDerived(obj);
         if (obj.kind === "exportArea") updateExportAreaPixelUi();
+        if (obj.id === state.selectedId) renderVertexSelection();
         scheduleSave();
       });
       obj.layer.on("pm:dragend dragend moveend pm:markerdragend", () => clearMoveGuide());
@@ -3744,7 +3830,204 @@
       return state.selectedId ? state.objects.get(state.selectedId) : null;
     }
 
+    function vertexEditableObject(obj) {
+      return obj && ["line", "polygon"].includes(obj.kind) ? obj : null;
+    }
+
+    function objectVertices(obj) {
+      if (!vertexEditableObject(obj)) return [];
+      return obj.kind === "line" ? obj.layer.getLatLngs() : polygonRing(obj);
+    }
+
+    function validSelectedVertex() {
+      const selected = state.selectedVertex;
+      if (!selected) return null;
+      const obj = state.objects.get(selected.objectId);
+      const pts = objectVertices(obj);
+      if (!obj || !pts.length || selected.index < 0 || selected.index >= pts.length) return null;
+      return { obj, index: selected.index, pts };
+    }
+
+    function vertexMinimumCount(obj) {
+      return obj?.kind === "polygon" ? 3 : 2;
+    }
+
+    function clearSelectedVertex() {
+      state.selectedVertex = null;
+      vertexSelection.clearLayers();
+      syncLineEndpointButtons();
+      syncDeleteVertexButton();
+    }
+
+    function selectVertex(obj, index) {
+      if (!vertexEditableObject(obj)) return;
+      const pts = objectVertices(obj);
+      if (index < 0 || index >= pts.length) return;
+      state.selectedVertex = { objectId: obj.id, index };
+      el("coordinateSection").open = true;
+      renderVertexSelection();
+      updateCoordinatePanel();
+      syncDeleteVertexButton();
+      status(`Point ${index + 1} selected. Use Delete Point, Del, or Backspace to remove it.`);
+    }
+
+    function syncDeleteVertexButton() {
+      const button = el("deleteVertexBtn");
+      if (!button) return;
+      const valid = validSelectedVertex();
+      const canDelete = Boolean(valid && !valid.obj.locked && valid.pts.length > vertexMinimumCount(valid.obj));
+      button.disabled = !canDelete;
+      button.title = canDelete
+        ? "Delete the selected point. Del or Backspace also works."
+        : "Turn on Edit points and select a line or polygon point to delete it";
+    }
+
+    function syncLineEndpointButtons() {
+      const obj = selectedObj();
+      const canAdd = Boolean(state.editOn && obj?.kind === "line" && !obj.locked && objectVertices(obj).length >= 2);
+      ["addLineStartPoint", "addLineEndPoint"].forEach((id) => {
+        const button = el(id);
+        if (!button) return;
+        button.hidden = obj?.kind !== "line";
+        button.disabled = !canAdd;
+      });
+    }
+
+    function vertexHandleMarker(latlng, html, className, onClick, title = "Select point") {
+      const marker = L.marker(latlng, {
+        interactive: true,
+        keyboard: false,
+        zIndexOffset: 20000,
+        icon: L.divIcon({
+          className: "vertex-handle-icon",
+          html: `<div class="vertex-handle ${className}" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}">${html}</div>`,
+          iconSize: className.includes("is-selected") ? [22, 22] : [18, 18],
+          iconAnchor: className.includes("is-selected") ? [11, 11] : [9, 9]
+        })
+      });
+      marker.on("click", (event) => {
+        L.DomEvent.stopPropagation(event);
+        onClick();
+      });
+      return marker;
+    }
+
+    function extrapolatedLineEndpoint(obj, atStart) {
+      const pts = objectVertices(obj);
+      if (pts.length < 2) return null;
+      const zoom = map.getZoom();
+      const endpoint = atStart ? pts[0] : pts[pts.length - 1];
+      const neighbor = atStart ? pts[1] : pts[pts.length - 2];
+      const endPoint = map.project(endpoint, zoom);
+      const neighborPoint = map.project(neighbor, zoom);
+      let dx = endPoint.x - neighborPoint.x;
+      let dy = endPoint.y - neighborPoint.y;
+      const length = Math.hypot(dx, dy);
+      if (!length) return endpoint;
+      const offsetPx = 28;
+      return map.unproject(L.point(endPoint.x + (dx / length) * offsetPx, endPoint.y + (dy / length) * offsetPx), zoom);
+    }
+
+    function renderVertexSelection() {
+      vertexSelection.clearLayers();
+      const obj = selectedObj();
+      if (!state.editOn || !vertexEditableObject(obj) || obj.locked || obj.visible === false) {
+        syncLineEndpointButtons();
+        syncDeleteVertexButton();
+        return;
+      }
+      const pts = objectVertices(obj);
+      const selectedIndex = state.selectedVertex?.objectId === obj.id ? state.selectedVertex.index : -1;
+      pts.forEach((point, index) => {
+        const selected = index === selectedIndex;
+        vertexSelection.addLayer(vertexHandleMarker(point, String(index + 1), selected ? "is-selected" : "", () => selectVertex(obj, index), `Select point ${index + 1}`));
+      });
+      if (obj.kind === "line" && pts.length >= 2) {
+        const startPoint = extrapolatedLineEndpoint(obj, true);
+        const endPoint = extrapolatedLineEndpoint(obj, false);
+        if (startPoint) vertexSelection.addLayer(vertexHandleMarker(startPoint, "+", "is-add", () => addLineEndpointPoint("start"), "Add a new vertex before the current first point of this line"));
+        if (endPoint) vertexSelection.addLayer(vertexHandleMarker(endPoint, "+", "is-add", () => addLineEndpointPoint("end"), "Add a new vertex after the current last point of this line"));
+      }
+      syncLineEndpointButtons();
+      syncDeleteVertexButton();
+    }
+
+    function highlightCoordinateLine(index) {
+      const output = el("coordinateOutput");
+      if (!output || !output.value || !output.readOnly) return;
+      const lines = output.value.split(/\n/);
+      if (index < 0 || index >= lines.length) return;
+      let start = 0;
+      for (let i = 0; i < index; i++) start += lines[i].length + 1;
+      const end = start + lines[index].length;
+      output.focus({ preventScroll: true });
+      output.setSelectionRange(start, end);
+    }
+
+    function deleteSelectedVertex() {
+      const valid = validSelectedVertex();
+      if (!valid) return status("Select a point in Edit points mode first.");
+      const { obj, index, pts } = valid;
+      if (obj.locked) return status("Unlock the object before deleting points.");
+      if (pts.length <= vertexMinimumCount(obj)) return status(`${obj.kind === "polygon" ? "Polygons" : "Lines"} need at least ${vertexMinimumCount(obj)} points.`);
+      pushUndo("delete-point");
+      const next = pts.filter((_, i) => i !== index);
+      if (obj.kind === "line") obj.layer.setLatLngs(next);
+      if (obj.kind === "polygon") obj.layer.setLatLngs([next]);
+      state.selectedVertex = { objectId: obj.id, index: Math.min(index, next.length - 1) };
+      refreshGeomanEditHandles(obj);
+      updateHitLayer(obj);
+      updateDerived(obj);
+      renderObjectList();
+      refreshLabelsAndMeasurements();
+      renderVertexSelection();
+      updateCoordinatePanel();
+      updateMeasurementPanel();
+      scheduleSave();
+      status("Point deleted.");
+    }
+
+    function addLineEndpointPoint(which) {
+      const obj = selectedObj();
+      if (obj?.kind !== "line") return status("Select a line first.");
+      if (obj.locked) return status("Unlock the line before adding points.");
+      const pts = objectVertices(obj);
+      if (pts.length < 2) return status("Lines need at least two points before extending endpoints.");
+      const point = extrapolatedLineEndpoint(obj, which === "start");
+      if (!point) return status("Could not add endpoint point.");
+      pushUndo("add-point");
+      const next = which === "start" ? [point, ...pts] : [...pts, point];
+      obj.layer.setLatLngs(next);
+      state.selectedVertex = { objectId: obj.id, index: which === "start" ? 0 : next.length - 1 };
+      refreshGeomanEditHandles(obj);
+      updateHitLayer(obj);
+      updateDerived(obj);
+      renderObjectList();
+      refreshLabelsAndMeasurements();
+      renderVertexSelection();
+      updateCoordinatePanel();
+      updateMeasurementPanel();
+      scheduleSave();
+      status(which === "start" ? "Start point added." : "End point added.");
+    }
+
+    function geomanEditOptions() {
+      return {
+        allowSelfIntersection: false,
+        allowRemoval: true,
+        removeVertexOn: "contextmenu",
+        removeLayerBelowMinVertexCount: false
+      };
+    }
+
+    function refreshGeomanEditHandles(obj) {
+      if (!state.editOn || obj?.id !== state.selectedId || !obj.layer?.pm) return;
+      obj.layer.pm.disable();
+      obj.layer.pm.enable(geomanEditOptions());
+    }
+
     function selectObject(id) {
+      if (state.selectedVertex?.objectId !== id) state.selectedVertex = null;
       state.selectedId = id;
       const obj = selectedObj();
       updateSelectedObjectTitle(obj);
@@ -3876,6 +4159,8 @@
       el("endpointControls").hidden = !hasObj || pointLike || obj?.kind !== "line";
       el("measurementBoxControl").hidden = !hasObj || pointLike || isText;
       el("measureToggleLabel").hidden = !hasObj;
+      el("coordinateSection").hidden = !hasObj;
+      el("measurementSection").hidden = !hasObj || pointLike || isText;
       el("bufferSection").hidden = !hasObj || isText || isExportArea;
       el("objectLayerControl").hidden = !hasObj;
       el("objectLayerStatus").hidden = !hasObj;
@@ -3887,7 +4172,7 @@
       const canEditPoints = hasObj && ["line", "polygon", "circle", "exportArea"].includes(obj.kind);
       el("editToggle").hidden = !canEditPoints;
       el("editToggle").textContent = obj?.kind === "circle" || isExportArea ? "Edit shape" : "Edit points";
-      el("editToggle").title = obj?.kind === "circle" || isExportArea ? "Toggle shape editing" : "Toggle vertex editing for this object";
+      el("editToggle").title = obj?.kind === "circle" || isExportArea ? "Toggle shape editing" : "Toggle vertex editing. Click a point to select it; click a segment to add a point; use plus handles or Add Start/End Point to extend lines; use Delete Point, Del, or Backspace to delete the selected point.";
       el("labelControl").firstChild.textContent = isUnit ? "Unique designation" : isText ? "Text" : "Label";
       el("showLabelText").textContent = isUnit ? "Show unit text" : "Show label";
       el("measureToggleText").textContent = pointLike || isText ? "Show coordinates" : "Show measurements";
@@ -3900,6 +4185,8 @@
       ["editToggle", "moveToggle", "deleteSelected", "frontBtn", "backBtn", "editCoordinates", "addBuffer", "removeBuffers"].forEach((id) => {
         if (el(id)) el(id).disabled = locked || !hasObj;
       });
+      syncLineEndpointButtons();
+      syncDeleteVertexButton();
       updatePointIconPreview();
       updatePatternPreview();
       updateObjectLayerStatus(obj);
@@ -4112,6 +4399,8 @@
       el("editCoordinates").textContent = "Edit Coordinates";
       output.value = obj ? objectCoordinateText(obj) : "";
       resizeCoordinateOutput(output);
+      const selected = validSelectedVertex();
+      if (selected && obj?.id === selected.obj.id) highlightCoordinateLine(selected.index);
     }
 
     function updateMeasurementPanel() {
@@ -4238,7 +4527,9 @@
         obj.layer.setLatLng(parsed.latlng);
         if (parsed.radius) obj.layer.setRadius(parsed.radius);
       }
+      refreshGeomanEditHandles(obj);
       updateDerived(obj);
+      renderVertexSelection();
       renderObjectList();
       scheduleSave();
       status("Coordinates updated.");
@@ -6077,11 +6368,17 @@
       const mapShape = requestedShape === "Line" ? "Line" : requestedShape;
       map.pm.enableDraw(mapShape, {
         snappable: true,
-        pathOptions: { ...(shape === "ExportArea" ? exportAreaStyle() : baseStyle()), pane: "objects" },
+        pathOptions: { ...(shape === "ExportArea" ? exportAreaStyle() : objectDefaultStyle(shape === "Line" ? "line" : shape.toLowerCase())), pane: "objects" },
         markerStyle: { draggable: true, pane: "objects" },
         tooltips: requestedShape !== "Marker"
       });
-      status(`Drawing ${shape === "ExportArea" ? "export area" : shape.toLowerCase()}.`);
+      const finishHint = {
+        Line: "Double-click or press Enter to finish.",
+        Polygon: "Click the first point or press Enter to close and finish.",
+        Circle: "Click again or press Enter to finish.",
+        ExportArea: "Click again or press Enter to finish."
+      }[shape] || "";
+      status(`Drawing ${shape === "ExportArea" ? "export area" : shape.toLowerCase()}. ${finishHint}`.trim());
     }
 
     function finishActiveDrawing() {
@@ -6325,6 +6622,7 @@
         state.dragOn = false;
         el("editToggle").classList.remove("active");
         el("moveToggle").classList.remove("active");
+        clearSelectedVertex();
         return;
       }
       if (selected.locked) {
@@ -6332,12 +6630,19 @@
         state.dragOn = false;
         el("editToggle").classList.remove("active");
         el("moveToggle").classList.remove("active");
+        clearSelectedVertex();
         return;
       }
-      if (state.editOn && selected.layer.pm) {
-        selected.layer.pm.enable({ allowSelfIntersection: false });
+      if (state.editOn) {
+        if (selected.layer.pm) {
+          selected.layer.pm.enable(geomanEditOptions());
+        }
         updateHitLayer(selected);
         startEditMeasurement(selected);
+        renderVertexSelection();
+        if (["line", "polygon"].includes(selected.kind)) status("Edit points: click a point to select it, click a segment to add a point, use plus handles/Add Start/End Point to extend lines, and use Delete Point, Del, or Backspace to delete the selected point.");
+      } else {
+        clearSelectedVertex();
       }
       if (state.dragOn) {
         if (selected.layer.pm) selected.layer.pm.enableLayerDrag?.();
@@ -6350,6 +6655,7 @@
           updateHitLayer(obj);
         }
       }
+      syncDeleteVertexButton();
     }
 
     function removeObject(obj) {
@@ -6509,6 +6815,7 @@
       pushUndo("delete");
       removeObject(obj);
       state.selectedId = null;
+      clearSelectedVertex();
       applyInteractionModes();
       updateCoordinatePanel();
       updateSelectionHalo();
@@ -6589,7 +6896,11 @@
     function exportGeoJSON(filename = null) {
       const resolvedFilename = typeof filename === "string" && filename.trim()
         ? filename
-        : safeMapFilename("geojson");
+        : exportFilename("geojson");
+      if (!resolvedFilename) {
+        status("GeoJSON save cancelled.");
+        return null;
+      }
       download(resolvedFilename, makeGeoJSONText(), "application/geo+json");
       markGeoJsonSaved(resolvedFilename);
       showFileSaveConfirmation(resolvedFilename, "GeoJSON saved");
@@ -6641,7 +6952,8 @@
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.json_to_sheet(rows);
       XLSX.utils.book_append_sheet(wb, ws, "Objects");
-      const filename = safeMapFilename("xlsx");
+      const filename = exportFilename("xlsx");
+      if (!filename) return status("Excel export cancelled.");
       XLSX.writeFile(wb, filename);
       showFileSaveConfirmation(filename, "Excel saved");
       status(`Saved Excel export as ${filename}.`);
@@ -7105,6 +7417,8 @@
     async function exportScreenshot() {
       const blocked = pngExportBlockedReason();
       if (blocked) return status(blocked);
+      const filename = exportFilename("png");
+      if (!filename) return status("PNG export cancelled.");
       status("Rendering visible map PNG…");
       const visibleBounds = map.getBounds();
       const originalView = { center: map.getCenter(), zoom: map.getZoom() };
@@ -7119,7 +7433,6 @@
           if (clip.width < 2 || clip.height < 2) throw new Error("Visible map area is outside the rendered map view.");
           return renderMapPngBlob(clip, { redrawAttribution: false, redrawForeground: true });
         });
-        const filename = safeMapFilename("png");
         downloadBlob(filename, blob);
         showFileSaveConfirmation(filename, "Visible PNG saved");
         status(`Saved visible map PNG as ${filename}.`);
@@ -7241,6 +7554,10 @@
       if (!area) return status("No export area selected.");
       const bounds = exportAreaBounds(area);
       if (!bounds.isValid()) return status("Selected export area has invalid bounds.");
+      const filename = state.mapTitle.trim()
+        ? sanitizeFilename(`${state.mapTitle}_${objectName(area)}`, "png")
+        : exportFilename("png", defaultFilename("png", `${UNTITLED_FILENAME_BASE}_${objectName(area)}`));
+      if (!filename) return status("Area PNG export cancelled.");
       const originalView = { center: map.getCenter(), zoom: map.getZoom() };
       const wasRestoring = state.restoring;
       status(`Rendering ${objectName(area)} as PNG…`);
@@ -7255,7 +7572,6 @@
           const clip = clipForBounds(bounds);
           if (clip.width < 2 || clip.height < 2) throw new Error("Export area is outside the rendered map view.");
           const blob = await renderMapPngBlob(clip);
-          const filename = sanitizeFilename(`${state.mapTitle || APP_NAME}_${objectName(area)}`, "png");
           downloadBlob(filename, blob);
           showFileSaveConfirmation(filename, "Area PNG saved");
           status(`Saved export area PNG as ${filename}.`);
@@ -7271,6 +7587,8 @@
     }
 
     function exportHtmlMap() {
+      const filename = exportFilename("html");
+      if (!filename) return status("HTML map export cancelled.");
       const exportedState = saveStateObject();
       const html = `<!doctype html>
 <html lang="en">
@@ -8044,7 +8362,6 @@
   <\/script>
 </body>
 </html>`;
-      const filename = safeMapFilename("html");
       download(filename, html, "text/html");
       showFileSaveConfirmation(filename, "HTML map saved");
       status(`Saved HTML map as ${filename}.`);
@@ -8296,7 +8613,7 @@
         const geojson = JSON.parse(await readFileText(file));
         const action = await confirmLoadGeoJsonProject(file, geojson);
         if (action === "cancel") return status("GeoJSON load cancelled.");
-        if (action === "save") exportGeoJSON();
+        if (action === "save" && !exportGeoJSON()) return status("GeoJSON load cancelled.");
         applyGeoJsonProject(geojson, action === "keep" ? "keep" : "discard", file.name);
       } catch (error) {
         status(`GeoJSON load failed: ${error.message}`);
@@ -8526,6 +8843,7 @@
       }
       state.objects.clear();
       state.selectedId = null;
+      clearSelectedVertex();
       if (state.selectedHalo) {
         map.removeLayer(state.selectedHalo);
         state.selectedHalo = null;
@@ -8547,7 +8865,7 @@
         if (state.dirty) {
           const action = await confirmNewMapAction();
           if (action === "cancel") return;
-          if (action === "save") exportGeoJSON();
+          if (action === "save" && !exportGeoJSON()) return status("New map cancelled.");
         } else if (!confirm("Clear all drawings and start a new map?")) {
           return;
         }
@@ -8650,6 +8968,9 @@
     el("editToggle").addEventListener("click", toggleEdit);
     el("moveToggle").addEventListener("click", toggleMove);
     el("deleteSelected").addEventListener("click", deleteSelected);
+    el("addLineStartPoint").addEventListener("click", () => addLineEndpointPoint("start"));
+    el("addLineEndPoint").addEventListener("click", () => addLineEndpointPoint("end"));
+    el("deleteVertexBtn").addEventListener("click", deleteSelectedVertex);
     el("lockToggle").addEventListener("click", () => toggleObjectLock());
     el("coordPoint").addEventListener("click", () => drawFromCoords("point"));
     el("coordUnit").addEventListener("click", () => drawFromCoords("unit"));
@@ -8792,8 +9113,10 @@
     });
     document.addEventListener("keydown", (event) => {
       const tag = event.target?.tagName;
-      const typing = tag === "INPUT" || tag === "TEXTAREA" || event.target?.isContentEditable;
+      const readonlyCoordinateOutput = event.target?.id === "coordinateOutput" && event.target?.readOnly;
       const key = event.key.toLowerCase();
+      const coordinateVertexDelete = readonlyCoordinateOutput && (key === "delete" || key === "backspace") && validSelectedVertex();
+      const typing = !coordinateVertexDelete && (tag === "INPUT" || tag === "TEXTAREA" || event.target?.isContentEditable);
       if ((event.ctrlKey || event.metaKey) && key === "z" && !event.shiftKey && !typing) {
         event.preventDefault();
         undoLast();
@@ -8839,6 +9162,11 @@
         return;
       }
       if (key === "delete" || key === "backspace") {
+        if (validSelectedVertex()) {
+          event.preventDefault();
+          deleteSelectedVertex();
+          return;
+        }
         if (selectedObj()) {
           event.preventDefault();
           deleteSelected();

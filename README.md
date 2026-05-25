@@ -13,7 +13,9 @@ Live version: [https://jmkorhonen.github.io/geosketch/](https://jmkorhonen.githu
 
 GeoSketch is a lightweight browser tool for field-style sketching and visual analysis. It should be treated as a planning and OSINT visualisation aid rather than a survey-grade GIS package.
 
-Current version: `v1.2`
+Current release version: `v1.2`
+
+Current development build: `v1.2.5`
 
 ## Requirements
 
@@ -36,6 +38,8 @@ The app stores autosave data in browser `localStorage`, so autosaves are local t
 The **Load Sample** button creates a small example map that demonstrates common object types.
 
 The same demo is also available as `samples/geosketch-sample.geojson` for testing project import/export without using the built-in button.
+
+If no map title is set, GeoSketch uses `untitled_geosketch` as the default export filename and asks for a filename when saving project-level exports.
 
 ## Main Concepts
 
@@ -141,7 +145,9 @@ Use the Add Object buttons or keyboard shortcuts:
 
 When drawing lines and polygons, dynamic measurements are shown while drawing. Polygon measurements include area, perimeter, and individual segment lengths.
 
-Shape styling separates line color, fill color, opacity, line width, line dash, and optional fill patterns. Buffer styling uses the same line/fill pattern controls, but remains attached to the parent object.
+Shape styling separates line color, fill color, opacity, line width, line dash, and optional fill patterns. Fill opacity `0` is treated as no fill, and newly drawn lines default to no fill. Buffer styling uses the same line/fill pattern controls, but remains attached to the parent object.
+
+Edit points mode lets you adjust line, polygon, circle, and export-area geometry. For lines and polygons, click a point to select it, click a segment to add a point, use plus handles or Add Start/End Point to extend lines, and use Delete Point, Del, or Backspace to delete the selected point.
 
 Export areas are rectangular guides for PNG crops. They are managed from the Files section, then edited like other shapes after creation. A format selector can constrain newly drawn export areas to common ratios such as 1:1, 4:3, 16:9, or A4 portrait/landscape.
 
@@ -317,3 +323,8 @@ Other files in this workspace may belong to earlier experiments or adjacent tool
 - Continued v1.1.3 development by separating the real map backdrop from OpenFreeMap land opacity, dropping ferry routes from chokepoints, and improving rail/airport/port highlight filters.
 - Continued v1.1.4 development with reference-layer legends, clearer Vector overlays naming/help, and distinct generated airport/port overlay icons.
 - Released v1.2 with Filter Vector Overlays naming, updated help/README text, and roomier airport/port overlay icon rings.
+- Started v1.2.1 development with no-fill defaults for new lines and documented vertex deletion in Edit points mode.
+- Started v1.2.2 development with untitled-map filename prompts and clearer drawing tooltips for Enter-to-finish tools.
+- Started v1.2.3 development with selected-object coordinates and measurements collapsed by default in the right pane.
+- Started v1.2.4 development with selectable line/polygon points, coordinate-line highlighting, and Delete Point / Del / Backspace point deletion.
+- Started v1.2.5 development with stronger visible vertex handles, explicit line endpoint add controls, and restored "press Enter" drawing tooltips.
