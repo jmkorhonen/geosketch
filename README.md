@@ -6,7 +6,7 @@ Open the HTML file in a modern browser, choose a background map, add objects, sa
 
 Live version: [https://jmkorhonen.github.io/geosketch/](https://jmkorhonen.github.io/geosketch/)
 
-![GeoSketch screenshot](samples/GeoSketch_v1_05_screenshot.png)
+![GeoSketch screenshot](samples/GeoSketch_v1_25_screenshot.png)
 
 
 ## Current Status
