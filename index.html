@@ -265,6 +265,12 @@
       bottom: 26px;
     }
 
+    #map .leaflet-control-attribution {
+      font-size: 10px;
+      line-height: 1.25;
+      padding: 0 4px;
+    }
+
     #map.export-render .leaflet-bottom {
       bottom: 0 !important;
     }
@@ -3893,10 +3899,11 @@
       });
     }
 
-    function vertexHandleMarker(latlng, html, className, onClick, title = "Select point") {
+    function vertexHandleMarker(latlng, html, className, onClick, title = "Select point", options = {}) {
       const marker = L.marker(latlng, {
         interactive: true,
         keyboard: false,
+        draggable: Boolean(options.draggable),
         zIndexOffset: 20000,
         icon: L.divIcon({
           className: "vertex-handle-icon",
@@ -3905,11 +3912,35 @@
           iconAnchor: className.includes("is-selected") ? [11, 11] : [9, 9]
         })
       });
+      if (options.onDragStart) marker.on("dragstart", options.onDragStart);
+      if (options.onDrag) marker.on("drag", () => options.onDrag(marker.getLatLng()));
+      if (options.onDragEnd) marker.on("dragend", () => options.onDragEnd(marker.getLatLng()));
       marker.on("click", (event) => {
         L.DomEvent.stopPropagation(event);
         onClick();
       });
       return marker;
+    }
+
+    function setObjectVertex(obj, index, latlng, finalize = false) {
+      if (!vertexEditableObject(obj)) return;
+      const pts = objectVertices(obj).slice();
+      if (index < 0 || index >= pts.length) return;
+      pts[index] = latlng;
+      if (obj.kind === "line") obj.layer.setLatLngs(pts);
+      if (obj.kind === "polygon") obj.layer.setLatLngs([pts]);
+      state.selectedVertex = { objectId: obj.id, index };
+      updateHitLayer(obj);
+      updateDerived(obj);
+      updateCoordinatePanel();
+      updateMeasurementPanel();
+      refreshLabelsAndMeasurements();
+      if (finalize) {
+        refreshGeomanEditHandles(obj);
+        renderVertexSelection();
+        scheduleSave();
+        status(`Point ${index + 1} moved.`);
+      }
     }
 
     function extrapolatedLineEndpoint(obj, atStart) {
@@ -3940,7 +3971,25 @@
       const selectedIndex = state.selectedVertex?.objectId === obj.id ? state.selectedVertex.index : -1;
       pts.forEach((point, index) => {
         const selected = index === selectedIndex;
-        vertexSelection.addLayer(vertexHandleMarker(point, String(index + 1), selected ? "is-selected" : "", () => selectVertex(obj, index), `Select point ${index + 1}`));
+        vertexSelection.addLayer(vertexHandleMarker(
+          point,
+          String(index + 1),
+          selected ? "is-selected" : "",
+          () => selectVertex(obj, index),
+          `Drag or select point ${index + 1}`,
+          {
+            draggable: true,
+            onDragStart: () => {
+              state.selectedVertex = { objectId: obj.id, index };
+              el("coordinateSection").open = true;
+              updateCoordinatePanel();
+              syncDeleteVertexButton();
+              pushUndo("move-point");
+            },
+            onDrag: (latlng) => setObjectVertex(obj, index, latlng, false),
+            onDragEnd: (latlng) => setObjectVertex(obj, index, latlng, true)
+          }
+        ));
       });
       if (obj.kind === "line" && pts.length >= 2) {
         const startPoint = extrapolatedLineEndpoint(obj, true);
@@ -7632,6 +7681,7 @@
     .popup-note { max-width: 280px; white-space: pre-wrap; }
     .popup-coords { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 11px; white-space: pre-wrap; }
     .leaflet-bottom { bottom: 0 !important; }
+    .leaflet-control-attribution { font-size: 10px; line-height: 1.25; padding: 0 4px; }
   </style>
 </head>
 <body>
