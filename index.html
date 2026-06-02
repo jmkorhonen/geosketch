@@ -248,17 +248,71 @@
 
     .scale-control {
       display: grid;
-      grid-template-columns: auto 70px 34px;
+      grid-template-columns: auto 70px 48px;
       align-items: center;
       gap: 4px;
       color: #c7d0da;
       font-size: 10px;
-      min-width: 122px;
+      min-width: 136px;
     }
 
     .scale-control input {
       height: 16px;
       min-height: 0;
+    }
+
+    .scale-control input[type="number"] {
+      width: 48px;
+      padding: 1px 3px;
+      border-radius: 4px;
+      font-size: 10px;
+      text-align: right;
+    }
+
+    .map-scale-bar {
+      position: absolute;
+      z-index: 905;
+      display: grid;
+      gap: 3px;
+      color: #f8fafc;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.1;
+      pointer-events: none;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 0 2px #000;
+    }
+
+    .map-scale-bar.horizontal {
+      justify-items: center;
+    }
+
+    .map-scale-bar.vertical {
+      grid-template-columns: auto auto;
+      align-items: center;
+    }
+
+    .scale-bar-track {
+      display: flex;
+      border: 2px solid #f8fafc;
+      border-top: 0;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.7), 0 1px 2px rgba(0,0,0,0.7);
+    }
+
+    .vertical .scale-bar-track {
+      flex-direction: column;
+      border: 2px solid #f8fafc;
+      border-right: 0;
+    }
+
+    .scale-bar-segment {
+      flex: 1 1 0;
+      min-width: 1px;
+      min-height: 1px;
+      background: rgba(248,250,252,0.88);
+    }
+
+    .scale-bar-segment:nth-child(even) {
+      background: rgba(17,24,39,0.88);
     }
 
     #map .leaflet-bottom {
@@ -441,8 +495,122 @@
       grid-column: 1 / -1;
     }
 
+    .range-percent {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 58px;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .range-percent input[type="number"] {
+      min-width: 0;
+      padding-inline: 5px;
+      text-align: right;
+    }
+
+    .image-opacity-wide #strokeOpacityLabel {
+      grid-column: 1 / -1;
+    }
+
     .compact-details {
       margin-top: 6px;
+    }
+
+    .georef-point-list {
+      display: grid;
+      gap: 4px;
+      margin-top: 6px;
+    }
+
+    .georef-point-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 6px;
+      align-items: start;
+      padding: 4px 6px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .georef-point-row.is-capturing {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(126,208,166,0.28);
+    }
+
+    .georef-point-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+    }
+
+    .georef-point-fields label {
+      font-size: 10px;
+      gap: 2px;
+    }
+
+    .georef-point-fields input {
+      min-height: 22px;
+      padding: 2px 5px;
+      font-size: 11px;
+    }
+
+    #map.georef-capture,
+    #map.georef-capture .leaflet-container,
+    #map.georef-capture .leaflet-pane,
+    #map.georef-capture .leaflet-interactive {
+      cursor: crosshair !important;
+    }
+
+    .georef-cross-icon {
+      background: transparent;
+      border: 0;
+    }
+
+    .georef-cross {
+      position: relative;
+      width: 42px;
+      height: 42px;
+      color: #7ed0a6;
+      pointer-events: auto;
+    }
+
+    .georef-cross::before,
+    .georef-cross::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      background: currentColor;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.8), 0 0 4px rgba(255,255,255,0.85);
+      transform: translate(-50%, -50%);
+    }
+
+    .georef-cross::before {
+      width: 28px;
+      height: 2px;
+    }
+
+    .georef-cross::after {
+      width: 2px;
+      height: 28px;
+    }
+
+    .georef-cross.is-map {
+      color: #f0bc70;
+    }
+
+    .georef-cross-label {
+      position: absolute;
+      left: 26px;
+      top: 2px;
+      padding: 0 3px;
+      border-radius: 3px;
+      background: rgba(8, 13, 19, 0.82);
+      color: #fff;
+      font: 700 11px/1.2 system-ui, sans-serif;
+      text-shadow: none;
+      white-space: nowrap;
     }
 
     .export-area-picker {
@@ -592,6 +760,13 @@
 
     .tile-row input[type="range"] {
       grid-column: 1 / -1;
+    }
+
+    .tile-opacity-input {
+      width: 54px;
+      min-width: 0;
+      padding-inline: 5px;
+      text-align: right;
     }
 
     .tile-row {
@@ -929,7 +1104,7 @@
 
     .search-result-actions {
       display: grid;
-      grid-template-columns: 1fr auto auto;
+      grid-template-columns: 1fr auto auto auto;
       gap: 5px;
     }
 
@@ -961,6 +1136,11 @@
     }
 
     .leaflet-container.leaflet-grab {
+      cursor: default;
+    }
+
+    #map .leaflet-marker-icon,
+    #map .leaflet-interactive {
       cursor: default;
     }
 
@@ -1044,11 +1224,14 @@
     }
 
     .endpoint-marker {
-      filter: drop-shadow(0 1px 2px #000);
       width: 24px;
       height: 24px;
       display: grid;
       place-items: center;
+    }
+
+    .endpoint-marker.has-shadow {
+      filter: drop-shadow(0 1px 2px #000);
     }
 
     .endpoint-arrow {
@@ -1088,7 +1271,7 @@
     <button id="rightTab" class="collapse-tab" title="Collapse right panel"></button>
     <aside class="side left">
       <div class="brand">
-        <h1>GeoSketch <span class="version">v1.2.5</span></h1>
+        <h1>GeoSketch <span class="version">v1.2.19</span></h1>
         <button id="resetViewBtn" title="Zoom to all objects">⌖</button>
       </div>
       <label class="map-title-field">Map title
@@ -1105,7 +1288,12 @@
           <label class="check-row"><input id="titleBold" type="checkbox" checked> Bold</label>
           <label class="check-row"><input id="titleItalic" type="checkbox"> Italic</label>
           <label>Box fill<input id="titleBoxFill" type="color" value="#ffffff"></label>
-          <label>Fill opacity<input id="titleBoxFillOpacity" type="range" min="0" max="1" step="0.05" value="0"></label>
+          <label>Fill opacity
+            <span class="range-percent">
+              <input id="titleBoxFillOpacity" type="range" min="0" max="1" step="0.05" value="0">
+              <input id="titleBoxFillOpacityPercent" type="number" min="0" max="100" step="1" value="0" aria-label="Title fill opacity percent">
+            </span>
+          </label>
           <label>Box line<input id="titleBoxLine" type="color" value="#ff0000"></label>
           <label>Line weight<input id="titleBoxWeight" type="number" min="0" max="8" value="0"></label>
           <label class="check-row"><input id="titleShadow" type="checkbox"> Shadow</label>
@@ -1134,7 +1322,9 @@
           <button data-draw="Polygon" title="Draw polygon. Click the first point or press Enter to close and finish.">Polygon</button>
           <button data-draw="Circle" title="Draw circle. Click again or press Enter to finish.">Circle</button>
           <button data-draw="Text" title="Add text annotation">Text box</button>
+          <button id="addImageObject" title="Add an image object to the active drawing layer">Image</button>
         </div>
+        <input id="imageObjectFile" type="file" accept="image/*" hidden>
         <details>
           <summary class="tiny">Create from coordinates</summary>
           <label>Input coordinates, one per line. Decimal degrees, DMS, and MGRS are accepted. One point creates a point or unit; two or more create a line; center and edge coordinates create a circle; three or more create a polygon.
@@ -1179,6 +1369,7 @@
           <button id="referencePresetFull" title="Show the full OpenFreeMap vector overlay">Full map</button>
           <button id="referencePresetRoads" title="Show roads, places, and borders over other map layers">Roads + places</button>
           <button id="referencePresetTransport" title="Show roads, rail, transport nodes, chokepoints, places, and borders">Transport</button>
+          <button id="referencePresetNone" title="Clear all OpenFreeMap vector overlay filters">None</button>
         </div>
         <label class="check-row" title="Make railways, bridges, tunnels, ports, and airports stand out more clearly when OpenFreeMap is visible."><input id="referenceHighlights" type="checkbox" checked> Highlight reference features</label>
         <div class="grid-2">
@@ -1186,7 +1377,10 @@
             <input id="referenceBackdropColor" type="color" value="#0f1419" title="Colour shown behind map tiles when layers are hidden or transparent. Also tints the OpenFreeMap background layer.">
           </label>
           <label>Vector land opacity
-            <input id="referenceBackdropOpacity" type="range" min="0" max="1" step="0.05" value="0.15" title="Opacity of OpenFreeMap background/land layers. Lower values help satellite imagery or the map backdrop show through.">
+            <span class="range-percent">
+              <input id="referenceBackdropOpacity" type="range" min="0" max="1" step="0.05" value="0.15" title="Opacity of OpenFreeMap background/land layers. Lower values help satellite imagery or the map backdrop show through.">
+              <input id="referenceBackdropOpacityPercent" type="number" min="0" max="100" step="1" value="15" aria-label="Vector land opacity percent">
+            </span>
           </label>
         </div>
         <div id="referenceLayerList"></div>
@@ -1283,6 +1477,52 @@
         <label class="check-row" title="Adds a small GeoSketch credit to PNG exports and interactive HTML maps. In HTML exports, GeoSketch is a clickable link to the live site."><input id="exportCredit" type="checkbox" checked> Show GeoSketch credit in exports</label>
         <label class="check-row" title="Adds the current export date in YYYY-MM-DD format next to the export attribution/credit."><input id="exportDate" type="checkbox" checked> Show export date in exports</label>
         <label class="check-row" title="Includes Leaflet and background map provider attribution in PNG exports. Keep this on when sharing maps that use third-party background layers."><input id="exportAttribution" type="checkbox" checked> Include map attribution in PNG exports</label>
+        <details class="compact-details">
+          <summary class="tiny">Scale bars</summary>
+          <div class="text-style-grid">
+            <label class="check-row wide"><input id="scaleBarHorizontal" type="checkbox"> Show horizontal scale bar</label>
+            <label>Horizontal position
+              <select id="scaleBarHorizontalPosition">
+                <option value="bottom-left">Bottom left</option>
+                <option value="bottom-center">Bottom centre</option>
+                <option value="bottom-right">Bottom right</option>
+                <option value="top-left">Top left</option>
+                <option value="top-center">Top centre</option>
+                <option value="top-right">Top right</option>
+              </select>
+            </label>
+            <label>Divisions
+              <input id="scaleBarHorizontalDivisions" type="number" min="1" max="10" step="1" value="2">
+            </label>
+            <label>Offset X
+              <input id="scaleBarHorizontalOffsetX" type="number" min="-1000" max="1000" step="1" value="16">
+            </label>
+            <label>Offset Y
+              <input id="scaleBarHorizontalOffsetY" type="number" min="-1000" max="1000" step="1" value="42">
+            </label>
+            <label class="check-row wide"><input id="scaleBarVertical" type="checkbox"> Show vertical scale bar</label>
+            <label>Vertical position
+              <select id="scaleBarVerticalPosition">
+                <option value="bottom-left">Bottom left</option>
+                <option value="bottom-right" selected>Bottom right</option>
+                <option value="top-left">Top left</option>
+                <option value="top-right">Top right</option>
+                <option value="middle-left">Middle left</option>
+                <option value="middle-right">Middle right</option>
+              </select>
+            </label>
+            <label>Divisions
+              <input id="scaleBarVerticalDivisions" type="number" min="1" max="10" step="1" value="2">
+            </label>
+            <label>Offset X
+              <input id="scaleBarVerticalOffsetX" type="number" min="-1000" max="1000" step="1" value="16">
+            </label>
+            <label>Offset Y
+              <input id="scaleBarVerticalOffsetY" type="number" min="-1000" max="1000" step="1" value="40">
+            </label>
+          </div>
+        </details>
+        <button id="resetSettingsDefaults" class="wide" title="Reset Settings and new-object drawing defaults">Reset settings to defaults</button>
       </details>
 
       <details id="helpSection" class="section">
@@ -1299,40 +1539,46 @@
             <a class="button-link" href="https://raw.githubusercontent.com/jmkorhonen/geosketch/main/index.html" target="_blank" rel="noopener" download="index.html">Download HTML</a>
           </div>
           <br>
-          <strong>Quick start.</strong> Choose a background map, add objects from the Add Object tools, then select any object to edit its coordinates, style, buffers, notes, and layer. Use the Layers section to reorder, hide, lock, or select the active drawing layer.
+          <strong>Quick start.</strong> Choose a background map, add objects from the Add Object tools, then select any object to edit its coordinates, style, buffers, notes, and layer. Line, polygon, circle, and export-area drawing can snap to existing object points. Use the Layers section to reorder, hide, lock, or select the active drawing layer.
           <br><br>
           <strong>Map notes.</strong> Use the notes below the map title for author details, sources, caveats, and links. They are included in interactive HTML exports.
           <br><br>
           <strong>Export areas.</strong> Use Files > Define export area to draw a rectangular PNG crop. The format selector can constrain new export areas to common ratios. Use Save visible map as PNG for the current viewport, or select an export area and use Save area as PNG for a crop.
           <br><br>
+          <strong>Images.</strong> Use Add Object > Image to place a local image in the active drawing layer. Select it and use Edit shape to drag corners for resizing, the centre handle for moving, or the rotation handle for rotating. The image georeferencing panel uses editable control point rows: type original image X/Y pixels, type map coordinates, or pick either side from the map in any order before applying an affine warp. Control points are shown as small crosshairs labelled P1/M1, P2/M2, and P3/M3, and the manual warp controls can apply numeric rotation, scale, skew, and offset adjustments.
+          <br><br>
           <strong>Vector overlays.</strong> Enable Vector overlays (OpenFreeMap) in Background Map, then use Filter Vector Overlays to show or hide roads, rail, places, borders, water, chokepoints, airports, ports, and other vector details. These overlays are visible in the app and interactive HTML exports, but are not included in PNG exports.
           <br><br>
           <strong>Coordinates.</strong> Search, coordinate input, and coordinate editing accept decimal degrees, DMS, and MGRS. The Settings panel controls how coordinates are displayed and copied.
+          <br><br>
+          <strong>Settings.</strong> Settings can show horizontal and vertical scale bars, set their positions and divisions, choose display units, adjust export attribution, and reset new-object drawing defaults.
           <br><br>
           <strong>Measurements.</strong> Distances and areas are calculated geodesically with Turf/Leaflet helpers and are intended for field planning and OSINT sketching, not survey-grade engineering. Circles and buffers are generated on the globe rather than as simple screen pixels.
           <br><br>
           <strong>Attribution.</strong> Background maps retain their source attribution in the map and exported interactive HTML. Respect OpenStreetMap, OpenTopoMap, Esri, CARTO, and any loaded data licenses.
           <br><br>
-          <strong>Shortcuts.</strong> Draw with 1 point, 2 line, 3 polygon, 4 circle, 5 text box, 6 unit. Use S for search, E edit points/shapes, M move, Enter finish drawing, Delete remove, Ctrl+Z undo, Ctrl+S save GeoJSON, Ctrl+C copy object, Ctrl+V paste object at cursor, C copy object coordinates, Shift+C copy cursor coordinates. In Edit points mode, click a line or polygon point to select it, click a segment to add a point, use plus handles or Add Start/End Point to extend lines, and use Delete Point, Del, or Backspace to delete the selected point.
+          <strong>Shortcuts.</strong> Draw with 1 point, 2 line, 3 polygon, 4 circle, 5 text box, 6 unit. Use S for search, E edit points/shapes, M move, Enter finish drawing, Esc cancel active input/drawing/editing, Delete remove, Ctrl+Z undo, Ctrl+S save GeoJSON, Ctrl+C copy object, Ctrl+V paste object at cursor, C copy object coordinates, Shift+C copy cursor coordinates. In Edit points mode, click a line or polygon point to select it, click a segment to add a point, use plus handles or Add Start/End Point to extend lines, and use Delete Point, Del, or Backspace to delete the selected point.
         </div>
       </details>
     </aside>
 
     <main id="map">
       <div id="mapTitleOverlay" class="map-title-overlay" hidden></div>
+      <div id="horizontalScaleBar" class="map-scale-bar horizontal" hidden></div>
+      <div id="verticalScaleBar" class="map-scale-bar vertical" hidden></div>
       <div id="mapStatusBar" class="map-status-bar no-export">
         <div id="cursorCoordinates" class="cursor-coordinates">Cursor: move over map</div>
         <label class="scale-control">Zoom
           <input id="mapZoom" type="range" min="2" max="19" step="0.25" value="12">
-          <span id="mapZoomValue">12.00</span>
+          <input id="mapZoomValue" type="number" min="2" max="19" step="0.25" value="12.00" title="Type an exact zoom level">
         </label>
         <label class="scale-control">Units
           <input id="unitScale" type="range" min="50" max="300" step="10" value="100">
-          <span id="unitScaleValue">100%</span>
+          <input id="unitScaleValue" type="number" min="50" max="300" step="10" value="100" title="Type unit symbol size percentage">
         </label>
         <label class="scale-control">Points
           <input id="pointScale" type="range" min="50" max="300" step="10" value="100">
-          <span id="pointScaleValue">100%</span>
+          <input id="pointScaleValue" type="number" min="50" max="300" step="10" value="100" title="Type point icon size percentage">
         </label>
       </div>
     </main>
@@ -1360,13 +1606,18 @@
             <label class="check-row"><input id="labelShadow" type="checkbox"> Shadow</label>
             <label class="check-row"><input id="labelTextOutline" type="checkbox" checked> White text outline</label>
             <label>Box fill<input id="labelBoxFill" type="color" value="#ffffff"></label>
-            <label>Fill opacity<input id="labelBoxFillOpacity" type="range" min="0" max="1" step="0.05" value="0"></label>
+            <label>Fill opacity
+              <span class="range-percent">
+                <input id="labelBoxFillOpacity" type="range" min="0" max="1" step="0.05" value="0">
+                <input id="labelBoxFillOpacityPercent" type="number" min="0" max="100" step="1" value="0" aria-label="Label fill opacity percent">
+              </span>
+            </label>
             <label>Box line<input id="labelBoxLine" type="color" value="#ff0000"></label>
             <label>Line weight<input id="labelBoxWeight" type="number" min="0" max="8" value="0"></label>
             <label>Line style<select id="labelBoxDash"><option value="">Solid</option><option value="8 8">Dashed</option><option value="2 8">Dotted</option><option value="12 6 2 6">Dash-dot</option></select></label>
             <label>Preset<select id="labelPosition"><option value="above">Above</option><option value="below">Below</option><option value="right">Right</option><option value="left">Left</option><option value="center">Center</option></select></label>
             <label>X offset<input id="labelOffsetX" type="number" min="-400" max="400" step="1" value="0"></label>
-            <label>Y offset<input id="labelOffsetY" type="number" min="-400" max="400" step="1" value="-12"></label>
+            <label>Y offset north<input id="labelOffsetY" type="number" min="-400" max="400" step="1" value="12" title="Positive values move the label north/up; negative values move it south/down"></label>
             <label class="check-row"><input id="labelScaleWithIcon" type="checkbox" checked> Scale with icon size</label>
           </div>
         </details>
@@ -1386,6 +1637,38 @@
             <button id="moveToggle" title="Toggle drag mode">Move</button>
           </div>
         </div>
+        <div id="imageOpacitySlot"></div>
+        <details id="imageWarpControls" class="compact-details">
+          <summary class="tiny">Adjust, rotate and warp</summary>
+          <p class="tiny">Move values apply as projected metre offsets from the current image position. Scale, skew, and offset apply when you press Apply adjustment.</p>
+          <div class="text-style-grid">
+            <label>Move X m
+              <input id="imageWarpOffsetX" type="number" step="1" value="0">
+            </label>
+            <label>Move Y m
+              <input id="imageWarpOffsetY" type="number" step="1" value="0">
+            </label>
+            <label class="wide">Rotation (degrees)
+              <input id="imageRotationDegrees" type="number" step="0.1" value="0">
+            </label>
+            <label>Scale X %
+              <input id="imageWarpScaleX" type="number" min="1" max="1000" step="0.1" value="100">
+            </label>
+            <label>Scale Y %
+              <input id="imageWarpScaleY" type="number" min="1" max="1000" step="0.1" value="100">
+            </label>
+            <label>Skew X °
+              <input id="imageWarpSkewX" type="number" min="-80" max="80" step="0.1" value="0">
+            </label>
+            <label>Skew Y °
+              <input id="imageWarpSkewY" type="number" min="-80" max="80" step="0.1" value="0">
+            </label>
+          </div>
+          <div class="grid-2">
+            <button id="imageApplyWarpAdjustment" title="Apply scale, skew, and offset to the current image warp">Apply adjustment</button>
+            <button id="imageResetWarpAdjustment" title="Reset manual warp adjustment fields">Reset fields</button>
+          </div>
+        </details>
         <details id="coordinateSection" class="compact-details">
           <summary class="tiny">Coordinates</summary>
           <label>Coordinates
@@ -1398,6 +1681,18 @@
             <button id="addLineEndPoint" title="Add a new vertex after the current last point of this line" disabled>Add End Point</button>
             <button id="deleteVertexBtn" class="danger wide" title="In Edit points mode, select a point to delete it" disabled>Delete Point</button>
           </div>
+        </details>
+        <details id="imageGeorefControls" class="compact-details">
+          <summary class="tiny">Image georeferencing</summary>
+          <label id="imageKeepAspectControl" class="check-row"><input id="imageKeepAspect" type="checkbox" checked> Keep proportions while resizing</label>
+          <p class="tiny">Add three control point rows. Image points are original image pixels; map points accept the same coordinate formats as other GeoSketch inputs. Use the pick buttons in any order.</p>
+          <div class="grid-2">
+            <button id="imageAddControlPoint" title="Add an empty image georeferencing control point row">Add point row</button>
+            <button id="imageApplyAffine" title="Warp the image from the first three control points" disabled>Apply affine warp</button>
+            <button id="imageClearControlPoints" title="Remove all image control points">Clear points</button>
+            <button id="imageResetAffine" title="Remove the current image warp but keep the image object">Reset warp</button>
+          </div>
+          <div id="imageControlPointList" class="georef-point-list tiny"></div>
         </details>
         <details id="measurementSection" class="compact-details">
           <summary class="tiny">Measurements</summary>
@@ -1508,7 +1803,10 @@
               <input id="textBoxFill" type="color" value="#fff7d8">
             </label>
             <label>Fill opacity
-              <input id="textBoxFillOpacity" type="range" min="0" max="1" step="0.05" value="0.92">
+              <span class="range-percent">
+                <input id="textBoxFillOpacity" type="range" min="0" max="1" step="0.05" value="0.92">
+                <input id="textBoxFillOpacityPercent" type="number" min="0" max="100" step="1" value="92" aria-label="Text box fill opacity percent">
+              </span>
             </label>
             <label>Box line
               <input id="textBoxLine" type="color" value="#161616">
@@ -1537,12 +1835,19 @@
         </div>
         <div id="opacityControls" class="grid-2">
           <label id="strokeOpacityLabel">Line opacity
-            <input id="strokeOpacity" type="range" min="0" max="1" step="0.05" value="1">
+            <span class="range-percent">
+              <input id="strokeOpacity" type="range" min="0" max="1" step="0.05" value="1">
+              <input id="strokeOpacityPercent" type="number" min="0" max="100" step="1" value="100" aria-label="Line opacity percent">
+            </span>
           </label>
           <label id="fillOpacityLabel" title="Set to 0 for no fill. Lines default to no fill.">Fill opacity
-            <input id="fillOpacity" type="range" min="0" max="1" step="0.05" value="0.25">
+            <span class="range-percent">
+              <input id="fillOpacity" type="range" min="0" max="1" step="0.05" value="0.25">
+              <input id="fillOpacityPercent" type="number" min="0" max="100" step="1" value="25" aria-label="Fill opacity percent">
+            </span>
           </label>
         </div>
+        <label id="objectShadowControl" class="check-row" title="Draw a shadow behind the selected object. Labels use their own shadow setting."><input id="objectShadow" type="checkbox"> Shadow</label>
         <div id="lineControls" class="grid-2">
           <label>Line width
             <input id="lineWeight" type="number" min="1" max="24" value="3">
@@ -1664,7 +1969,7 @@
   <script src="https://cdn.jsdelivr.net/npm/milsymbol@3/dist/milsymbol.js"></script>
   <script>
     const APP_NAME = "GeoSketch";
-    const APP_VERSION = "v1.2.5";
+    const APP_VERSION = "v1.2.19";
     const UNTITLED_FILENAME_BASE = "untitled_geosketch";
     const GEOSKETCH_URL = "https://jmkorhonen.github.io/geosketch/";
     const ATTRIBUTION_NOTE = "Background map attribution: OpenStreetMap contributors, CARTO, OpenTopoMap, SRTM, Esri, OpenMapTiles, and OpenFreeMap as applicable to visible layers. User-loaded data may have separate licenses.";
@@ -1672,6 +1977,10 @@
     const AUTOSAVE_KEY = "geosketch-autosave-v1";
     const LEGACY_AUTOSAVE_KEY = "osint-map-sketchpad-autosave-v1";
     const EXPORT_AREA_PNG_PADDING = L.point(24, 24);
+    const DEFAULT_SCALE_BARS = {
+      horizontal: { show: false, position: "bottom-left", offsetX: 16, offsetY: 42, divisions: 2 },
+      vertical: { show: false, position: "bottom-right", offsetX: 16, offsetY: 40, divisions: 2 }
+    };
     const EXPORT_AREA_RATIOS = {
       free: null,
       "1:1": 1,
@@ -1990,6 +2299,7 @@
       referenceBackdropOpacity: 0.15,
       unitIconScale: 1,
       pointIconScale: 1,
+      scaleBars: defaultScaleBars(),
       nextId: 1,
       zCounter: 10,
       activeIcon: FALLBACK_ICONS[0],
@@ -2009,6 +2319,7 @@
       drawingMeasure: null,
       editMeasure: null,
       moveGuide: null,
+      imageGeorefPick: null,
       undoStack: [],
       lastUndoAt: 0,
       lastUndoLabel: "",
@@ -2279,6 +2590,9 @@
 
     const bufferPane = map.createPane("buffers");
     bufferPane.style.zIndex = 410;
+    const selectionPane = map.createPane("selection");
+    selectionPane.style.zIndex = 419;
+    selectionPane.style.pointerEvents = "none";
     const objectPane = map.createPane("objects");
     objectPane.style.zIndex = 420;
     const labelPane = map.createPane("labels");
@@ -2289,6 +2603,13 @@
     const centers = L.layerGroup().addTo(map);
     const endpoints = L.layerGroup().addTo(map);
     const vertexSelection = L.layerGroup().addTo(map);
+    const snapGuides = L.layerGroup().addTo(map);
+    const snapGuideIcon = L.divIcon({
+      className: "leaflet-div-icon",
+      html: '<span style="display:block;width:1px;height:1px;opacity:0;"></span>',
+      iconSize: [1, 1],
+      iconAnchor: [0.5, 0.5]
+    });
     const bufferGroup = L.layerGroup().addTo(map);
     L.DomEvent.disableClickPropagation(el("mapStatusBar"));
     L.DomEvent.disableScrollPropagation(el("mapStatusBar"));
@@ -2379,6 +2700,7 @@
       el("titleColor").value = s.color;
       el("titleBoxFill").value = s.fillColor;
       el("titleBoxFillOpacity").value = s.fillOpacity;
+      if (el("titleBoxFillOpacityPercent")) el("titleBoxFillOpacityPercent").value = percentFromOpacity(s.fillOpacity);
       el("titleBoxLine").value = s.lineColor;
       el("titleBoxWeight").value = s.weight;
       el("titleShadow").checked = Boolean(s.shadow);
@@ -2391,7 +2713,120 @@
       if (!input || !value) return;
       const zoom = map.getZoom();
       input.value = zoom.toFixed(2);
-      value.textContent = zoom.toFixed(2);
+      value.value = zoom.toFixed(2);
+    }
+
+    function scaleBarMetersForPixels(pixels, orientation) {
+      const size = map.getSize();
+      const center = L.point(size.x / 2, size.y / 2);
+      const half = pixels / 2;
+      const a = orientation === "vertical"
+        ? map.containerPointToLatLng([center.x, center.y - half])
+        : map.containerPointToLatLng([center.x - half, center.y]);
+      const b = orientation === "vertical"
+        ? map.containerPointToLatLng([center.x, center.y + half])
+        : map.containerPointToLatLng([center.x + half, center.y]);
+      return a.distanceTo(b);
+    }
+
+    function niceScaleDistance(meters) {
+      if (!Number.isFinite(meters) || meters <= 0) return 0;
+      const exponent = Math.floor(Math.log10(meters));
+      const base = Math.pow(10, exponent);
+      const candidates = [1, 2, 5, 10].map((factor) => factor * base);
+      return candidates.filter((value) => value <= meters).pop() || candidates[0];
+    }
+
+    function formatScaleBarDistance(meters) {
+      const unit = normalizeDistanceUnit(state.distanceUnit);
+      if (unit === "metric") return meters >= 1000 ? `${Math.round(meters / 1000)} km` : `${meters.toFixed(0)} m`;
+      const value = meters / distanceUnitToMeters(unit);
+      const precision = unit === "meters" || value >= 1 ? 0 : 2;
+      return `${value.toFixed(precision)} ${distanceUnitLabel(unit)}`;
+    }
+
+    function positionScaleBar(node, settings) {
+      const pos = settings.position || "bottom-left";
+      const x = Math.round(clampNumber(settings.offsetX, -1000, 1000, 0));
+      const y = Math.round(clampNumber(settings.offsetY, -1000, 1000, 0));
+      node.style.top = "";
+      node.style.right = "";
+      node.style.bottom = "";
+      node.style.left = "";
+      node.style.transform = "";
+      if (pos.startsWith("top")) node.style.top = `${y}px`;
+      else if (pos.startsWith("bottom")) node.style.bottom = `${y}px`;
+      else {
+        node.style.top = `calc(50% + ${y}px)`;
+        node.style.transform = "translateY(-50%)";
+      }
+      if (pos.endsWith("right")) node.style.right = `${x}px`;
+      else if (pos.endsWith("center")) {
+        node.style.left = `calc(50% + ${x}px)`;
+        node.style.transform = [node.style.transform, "translateX(-50%)"].filter(Boolean).join(" ");
+      } else {
+        node.style.left = `${x}px`;
+      }
+    }
+
+    function renderScaleBar(kind) {
+      const node = el(kind === "vertical" ? "verticalScaleBar" : "horizontalScaleBar");
+      const settings = normalizeScaleBars(state.scaleBars)[kind];
+      if (!node) return;
+      node.hidden = !settings.show;
+      if (!settings.show) return;
+      const targetPixels = kind === "vertical" ? 108 : 156;
+      const targetMeters = scaleBarMetersForPixels(targetPixels, kind);
+      const distance = niceScaleDistance(targetMeters);
+      if (!distance) {
+        node.hidden = true;
+        return;
+      }
+      const pixels = Math.max(28, Math.round(targetPixels * (distance / targetMeters)));
+      const divisions = Math.max(1, Math.min(10, Math.round(settings.divisions || 2)));
+      const segments = Array.from({ length: divisions }, () => '<span class="scale-bar-segment"></span>').join("");
+      const dimension = kind === "vertical" ? `height:${pixels}px;width:9px;` : `width:${pixels}px;height:9px;`;
+      node.innerHTML = `<span class="scale-bar-label">${formatScaleBarDistance(distance)}</span><span class="scale-bar-track" style="${dimension}">${segments}</span>`;
+      positionScaleBar(node, settings);
+    }
+
+    function updateScaleBars() {
+      state.scaleBars = normalizeScaleBars(state.scaleBars);
+      renderScaleBar("horizontal");
+      renderScaleBar("vertical");
+    }
+
+    function setScaleBarSetting(kind, key, value) {
+      pushUndo(`scale-bar-${kind}`, { coalesceMs: 1000 });
+      state.scaleBars = normalizeScaleBars(state.scaleBars);
+      const next = { ...state.scaleBars[kind] };
+      if (key === "show") next.show = Boolean(value);
+      if (key === "position") next.position = value;
+      if (key === "offsetX" || key === "offsetY") next[key] = Math.round(clampNumber(value, -1000, 1000, next[key]));
+      if (key === "divisions") next.divisions = Math.round(clampNumber(value, 1, 10, next.divisions));
+      state.scaleBars[kind] = next;
+      syncSettingsControls();
+      updateScaleBars();
+      scheduleSave();
+    }
+
+    function scaleBarControls(kind) {
+      const prefix = kind === "vertical" ? "scaleBarVertical" : "scaleBarHorizontal";
+      return {
+        show: el(prefix),
+        position: el(`${prefix}Position`),
+        divisions: el(`${prefix}Divisions`),
+        offsetX: el(`${prefix}OffsetX`),
+        offsetY: el(`${prefix}OffsetY`)
+      };
+    }
+
+    function commitTypedMapZoom() {
+      const input = el("mapZoomValue");
+      const range = el("mapZoom");
+      const zoom = clampNumber(input?.value, Number(range?.min ?? 2), Number(range?.max ?? 19), map.getZoom());
+      map.setZoom(zoom, { animate: false });
+      syncMapZoomControl();
     }
 
     function safeMapFilename(extension) {
@@ -2433,6 +2868,110 @@
       const number = Number(value);
       if (!Number.isFinite(number)) return fallback;
       return Math.max(0, Math.min(1, number));
+    }
+
+    function clampNumber(value, min, max, fallback) {
+      const number = Number(value);
+      if (!Number.isFinite(number)) return fallback;
+      return Math.max(min, Math.min(max, number));
+    }
+
+    const opacityPercentPairs = [
+      ["strokeOpacity", "strokeOpacityPercent"],
+      ["fillOpacity", "fillOpacityPercent"],
+      ["textBoxFillOpacity", "textBoxFillOpacityPercent"],
+      ["labelBoxFillOpacity", "labelBoxFillOpacityPercent"]
+    ];
+
+    function percentFromOpacity(value) {
+      return Math.round(clamp01(value, 1) * 100);
+    }
+
+    function setOpacityControlValue(rangeId, value) {
+      const range = el(rangeId);
+      if (!range) return;
+      range.value = clamp01(value, Number(range.value || 1));
+      syncOpacityPercentInput(rangeId);
+    }
+
+    function syncOpacityPercentInput(rangeId) {
+      const pair = opacityPercentPairs.find(([range]) => range === rangeId);
+      if (!pair) return;
+      const range = el(pair[0]);
+      const input = el(pair[1]);
+      if (!range || !input) return;
+      input.value = percentFromOpacity(range.value);
+    }
+
+    function syncAllOpacityPercentInputs() {
+      opacityPercentPairs.forEach(([range]) => syncOpacityPercentInput(range));
+    }
+
+    function bindOpacityPercentControls() {
+      opacityPercentPairs.forEach(([rangeId, inputId]) => {
+        const range = el(rangeId);
+        const input = el(inputId);
+        if (!range || !input) return;
+        range.addEventListener("input", () => syncOpacityPercentInput(rangeId));
+        range.addEventListener("change", () => syncOpacityPercentInput(rangeId));
+        const commitPercent = () => {
+          const percent = clampNumber(input.value, 0, 100, percentFromOpacity(range.value));
+          input.value = Math.round(percent);
+          range.value = percent / 100;
+          setSelectedStyle();
+        };
+        input.addEventListener("change", commitPercent);
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            commitPercent();
+          }
+        });
+      });
+    }
+
+    function bindStandaloneOpacityPercent(rangeId, inputId, callback) {
+      const range = el(rangeId);
+      const input = el(inputId);
+      if (!range || !input) return;
+      const sync = () => { input.value = percentFromOpacity(range.value); };
+      const commit = () => {
+        const percent = clampNumber(input.value, 0, 100, percentFromOpacity(range.value));
+        input.value = Math.round(percent);
+        range.value = percent / 100;
+        callback?.(range.value);
+      };
+      range.addEventListener("input", () => {
+        sync();
+        callback?.(range.value);
+      });
+      range.addEventListener("change", sync);
+      input.addEventListener("change", commit);
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          commit();
+        }
+      });
+      sync();
+    }
+
+    function defaultScaleBars() {
+      return JSON.parse(JSON.stringify(DEFAULT_SCALE_BARS));
+    }
+
+    function normalizeScaleBars(value = {}) {
+      const defaults = defaultScaleBars();
+      const positions = new Set(["top-left", "top-center", "top-right", "middle-left", "middle-right", "bottom-left", "bottom-center", "bottom-right"]);
+      ["horizontal", "vertical"].forEach((kind) => {
+        const source = value?.[kind] || {};
+        defaults[kind].show = Boolean(source.show);
+        defaults[kind].position = positions.has(source.position) ? source.position : defaults[kind].position;
+        defaults[kind].offsetX = Math.round(clampNumber(source.offsetX, -1000, 1000, defaults[kind].offsetX));
+        defaults[kind].offsetY = Math.round(clampNumber(source.offsetY, -1000, 1000, defaults[kind].offsetY));
+        defaults[kind].divisions = Math.round(clampNumber(source.divisions, 1, 10, defaults[kind].divisions));
+      });
+      return defaults;
     }
 
     function safePatternColor(value, fallback = "#ffcc4d") {
@@ -2544,6 +3083,7 @@
         weight: Number(el("lineWeight").value),
         dashArray: el("dashStyle").value || null,
         pattern: el("fillPattern").value || "",
+        shadow: Boolean(el("objectShadow")?.checked),
         showMeasurements: el("showMeasurements").checked
       };
     }
@@ -2552,6 +3092,10 @@
       const style = baseStyle();
       if (kind === "line") {
         style.fillOpacity = 0;
+        style.pattern = "";
+      }
+      if (kind === "marker") {
+        style.fillOpacity = 1;
         style.pattern = "";
       }
       return style;
@@ -2602,9 +3146,18 @@
         outline: Boolean(el("labelTextOutline")?.checked),
         position: el("labelPosition")?.value || "above",
         offsetX: Number(el("labelOffsetX")?.value || 0),
-        offsetY: Number(el("labelOffsetY")?.value || -12),
+        offsetY: labelOffsetYFromControl(),
         scaleWithIcon: Boolean(el("labelScaleWithIcon")?.checked)
       };
+    }
+
+    function labelOffsetYToControl(value) {
+      const number = Number(value);
+      return Number.isFinite(number) ? -number : 12;
+    }
+
+    function labelOffsetYFromControl() {
+      return -Number(el("labelOffsetY")?.value || 0);
     }
 
     function addDefaultDrawLayer() {
@@ -2676,14 +3229,14 @@
         row.innerHTML = `
           <input type="checkbox" ${map.hasLayer(layer) ? "checked" : ""} aria-label="${cfg.name}">
           <span class="tile-meta"><strong>${cfg.name}</strong><span class="tiny">${escapeHtml(layerRoleLabel(cfg))} · ${index === 0 ? "top" : index === tileConfigs.length - 1 ? "bottom" : "middle"}</span></span>
-          <span class="tile-opacity tiny">${Math.round(opacity * 100)}%</span>
+          <input class="tile-opacity-input tiny" type="number" min="0" max="100" step="1" value="${Math.round(opacity * 100)}" aria-label="${cfg.name} opacity percent">
           <button title="Move background layer up">↑</button>
           <button title="Move background layer down">↓</button>
           <input type="range" min="0" max="1" step="0.05" value="${opacity}">
         `;
         const check = row.querySelector("input[type='checkbox']");
         const range = row.querySelector("input[type='range']");
-        const pct = row.querySelector(".tile-opacity");
+        const pct = row.querySelector(".tile-opacity-input");
         const buttons = row.querySelectorAll("button");
         check.addEventListener("change", () => {
           pushUndo("tile-layer");
@@ -2696,8 +3249,23 @@
         range.addEventListener("input", () => {
           pushUndo("tile-opacity", { coalesceMs: 1000 });
           setBackgroundLayerOpacity(layer, Number(range.value));
-          pct.textContent = `${Math.round(Number(range.value) * 100)}%`;
+          pct.value = Math.round(Number(range.value) * 100);
           scheduleSave();
+        });
+        const commitOpacityPercent = () => {
+          pushUndo("tile-opacity", { coalesceMs: 1000 });
+          const percent = clampNumber(pct.value, 0, 100, Math.round(Number(range.value) * 100));
+          pct.value = Math.round(percent);
+          range.value = percent / 100;
+          setBackgroundLayerOpacity(layer, Number(range.value));
+          scheduleSave();
+        };
+        pct.addEventListener("change", commitOpacityPercent);
+        pct.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            commitOpacityPercent();
+          }
         });
         buttons[0].disabled = index === 0;
         buttons[1].disabled = index === tileConfigs.length - 1;
@@ -3577,11 +4145,11 @@
         : "milsymbol library unavailable; GeoSketch will show SIDC fallback badges.";
     }
 
-    function app6Svg(icon, size, opacity = 1) {
-      return app6Render(icon, size, opacity).html;
+    function app6Svg(icon, size, opacity = 1, shadow = false) {
+      return app6Render(icon, size, opacity, shadow).html;
     }
 
-    function app6Render(icon, size, opacity = 1) {
+    function app6Render(icon, size, opacity = 1, shadow = false) {
       const sidc = icon?.sidc || buildApp6Sidc(icon?.app6 || defaultApp6Icon().app6);
       try {
         if (!window.ms?.Symbol) throw new Error("milsymbol missing");
@@ -3592,13 +4160,13 @@
         });
         const dimensions = milsymbolSize(symbol, size);
         return {
-          html: `<div style="width:${dimensions[0]}px;height:${dimensions[1]}px;opacity:${opacity};">${symbol.asSVG()}</div>`,
+          html: `<div style="width:${dimensions[0]}px;height:${dimensions[1]}px;opacity:${opacity};filter:${shadow ? "drop-shadow(0 1px 3px rgba(0,0,0,.72))" : "none"};">${symbol.asSVG()}</div>`,
           iconSize: dimensions,
           anchor: milsymbolAnchor(symbol, icon, size, dimensions)
         };
       } catch {
         return {
-          html: `<div style="width:${size}px;height:${size}px;display:grid;place-items:center;border:2px solid ${iconFallbackColor(sidc)};border-radius:4px;background:rgba(255,255,255,.9);color:#111;font-size:${Math.max(7, Math.round(size / 5))}px;font-weight:700;line-height:1;text-align:center;opacity:${opacity};">${escapeHtml(sidc.slice(0, 5))}<br>${escapeHtml(sidc.slice(5, 10))}</div>`,
+          html: `<div style="width:${size}px;height:${size}px;display:grid;place-items:center;border:2px solid ${iconFallbackColor(sidc)};border-radius:4px;background:rgba(255,255,255,.9);color:#111;font-size:${Math.max(7, Math.round(size / 5))}px;font-weight:700;line-height:1;text-align:center;opacity:${opacity};filter:${shadow ? "drop-shadow(0 1px 3px rgba(0,0,0,.72))" : "none"};">${escapeHtml(sidc.slice(0, 5))}<br>${escapeHtml(sidc.slice(5, 10))}</div>`,
           iconSize: [size, size],
           anchor: [0, size]
         };
@@ -3654,38 +4222,39 @@
       obj.icon.sidc = buildApp6Sidc(obj.icon.app6);
     }
 
-    function pointMarkerSvg(kind, size, color, fillColor, opacity = 1) {
+    function pointMarkerSvg(kind, size, color, fillColor, opacity = 1, shadow = false, fillOpacity = 1) {
       const markerKind = POINT_ICON_KINDS.has(kind) ? kind : "dot";
       const stroke = escapeHtml(color || "#ffcc4d");
       const fill = escapeHtml(fillColor || color || "#ffcc4d");
       const sw = markerKind === "circle-outline" ? 6 : 5;
-      const shownOpacity = Number.isFinite(Number(opacity)) ? Number(opacity) : 1;
-      const svgStyle = `display:block;opacity:${shownOpacity};filter:drop-shadow(0 1px 3px rgba(0,0,0,.72));`;
+      const lineOpacity = clamp01(opacity, 1);
+      const iconFillOpacity = clamp01(fillOpacity, 1);
+      const svgStyle = `display:block;filter:${shadow ? "drop-shadow(0 1px 3px rgba(0,0,0,.72))" : "none"};`;
       let body = "";
       if (markerKind === "dot") {
-        body = `<circle cx="32" cy="32" r="20" fill="${fill}" stroke="#fff" stroke-width="5"/>`;
+        body = `<circle cx="32" cy="32" r="20" fill="${fill}" fill-opacity="${iconFillOpacity}" stroke="#fff" stroke-opacity="${lineOpacity}" stroke-width="5"/>`;
       } else if (markerKind === "target") {
-        body = `<circle cx="32" cy="32" r="23" fill="rgba(0,0,0,.14)" stroke="${stroke}" stroke-width="6"/><path d="M32 8v48M8 32h48" stroke="${stroke}" stroke-width="5" stroke-linecap="round"/><circle cx="32" cy="32" r="5" fill="${stroke}"/>`;
+        body = `<circle cx="32" cy="32" r="23" fill="${fill}" fill-opacity="${Math.min(iconFillOpacity, 0.22)}" stroke="${stroke}" stroke-opacity="${lineOpacity}" stroke-width="6"/><path d="M32 8v48M8 32h48" stroke="${stroke}" stroke-opacity="${lineOpacity}" stroke-width="5" stroke-linecap="round"/><circle cx="32" cy="32" r="5" fill="${stroke}" fill-opacity="${lineOpacity}"/>`;
       } else if (markerKind === "circle-outline") {
-        body = `<circle cx="32" cy="32" r="22" fill="none" stroke="${stroke}" stroke-width="${sw}"/>`;
+        body = `<circle cx="32" cy="32" r="22" fill="none" stroke="${stroke}" stroke-opacity="${lineOpacity}" stroke-width="${sw}"/>`;
       } else if (markerKind === "triangle") {
-        body = `<polygon points="32 9 57 54 7 54" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="round"/>`;
+        body = `<polygon points="32 9 57 54 7 54" fill="${fill}" fill-opacity="${iconFillOpacity}" stroke="${stroke}" stroke-opacity="${lineOpacity}" stroke-width="${sw}" stroke-linejoin="round"/>`;
       } else if (markerKind === "square") {
-        body = `<rect x="12" y="12" width="40" height="40" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" rx="2"/>`;
+        body = `<rect x="12" y="12" width="40" height="40" fill="${fill}" fill-opacity="${iconFillOpacity}" stroke="${stroke}" stroke-opacity="${lineOpacity}" stroke-width="${sw}" rx="2"/>`;
       } else if (markerKind === "diamond") {
-        body = `<polygon points="32 6 58 32 32 58 6 32" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="round"/>`;
+        body = `<polygon points="32 6 58 32 32 58 6 32" fill="${fill}" fill-opacity="${iconFillOpacity}" stroke="${stroke}" stroke-opacity="${lineOpacity}" stroke-width="${sw}" stroke-linejoin="round"/>`;
       } else if (markerKind === "cross") {
-        body = `<path d="M32 9v46M9 32h46" stroke="${stroke}" stroke-width="9" stroke-linecap="round"/>`;
+        body = `<path d="M32 9v46M9 32h46" stroke="${stroke}" stroke-opacity="${lineOpacity}" stroke-width="9" stroke-linecap="round"/>`;
       } else if (markerKind === "xmark") {
-        body = `<path d="M15 15l34 34M49 15 15 49" stroke="${stroke}" stroke-width="9" stroke-linecap="round"/>`;
+        body = `<path d="M15 15l34 34M49 15 15 49" stroke="${stroke}" stroke-opacity="${lineOpacity}" stroke-width="9" stroke-linecap="round"/>`;
       } else if (markerKind === "pin") {
-        body = `<path d="M32 59C20 43 14 34 14 24 14 14 22 7 32 7s18 7 18 17c0 10-6 19-18 35z" fill="${fill}" stroke="${stroke}" stroke-width="5" stroke-linejoin="round"/><circle cx="32" cy="24" r="7" fill="#fff" opacity=".92"/>`;
+        body = `<path d="M32 59C20 43 14 34 14 24 14 14 22 7 32 7s18 7 18 17c0 10-6 19-18 35z" fill="${fill}" fill-opacity="${iconFillOpacity}" stroke="${stroke}" stroke-opacity="${lineOpacity}" stroke-width="5" stroke-linejoin="round"/><circle cx="32" cy="24" r="7" fill="#fff" opacity=".92"/>`;
       } else if (markerKind === "airport") {
-        body = `<path d="M8 35l21-7 2-20h5l2 20 21 7v6l-21-4-1 12 10 6v5l-13-4-13 4v-5l10-6-1-12-21 4z" fill="${stroke}" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>`;
+        body = `<path d="M8 35l21-7 2-20h5l2 20 21 7v6l-21-4-1 12 10 6v5l-13-4-13 4v-5l10-6-1-12-21 4z" fill="${fill}" fill-opacity="${iconFillOpacity}" stroke="${stroke}" stroke-opacity="${lineOpacity}" stroke-width="2" stroke-linejoin="round"/>`;
       } else if (markerKind === "hospital") {
-        body = `<rect x="10" y="10" width="44" height="44" rx="5" fill="#fff" stroke="${stroke}" stroke-width="5"/><path d="M32 20v24M20 32h24" stroke="${stroke}" stroke-width="8" stroke-linecap="round"/>`;
+        body = `<rect x="10" y="10" width="44" height="44" rx="5" fill="${fill}" fill-opacity="${iconFillOpacity}" stroke="${stroke}" stroke-opacity="${lineOpacity}" stroke-width="5"/><path d="M32 20v24M20 32h24" stroke="${stroke}" stroke-opacity="${lineOpacity}" stroke-width="8" stroke-linecap="round"/>`;
       } else if (markerKind === "port") {
-        body = `<circle cx="32" cy="12" r="5" fill="none" stroke="${stroke}" stroke-width="5"/><path d="M32 17v33M20 29h24M15 40c4 11 12 17 17 17s13-6 17-17M15 40l-7 4M49 40l7 4" fill="none" stroke="${stroke}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`;
+        body = `<circle cx="32" cy="12" r="5" fill="none" stroke="${stroke}" stroke-opacity="${lineOpacity}" stroke-width="5"/><path d="M32 17v33M20 29h24M15 40c4 11 12 17 17 17s13-6 17-17M15 40l-7 4M49 40l7 4" fill="none" stroke="${stroke}" stroke-opacity="${lineOpacity}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`;
       }
       return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 64 64" style="${svgStyle}" aria-hidden="true">${body}</svg>`;
     }
@@ -3697,16 +4266,17 @@
       let html;
       let iconSize = [size, size];
       let anchor = [half, half];
+      const shadow = Boolean(obj.style?.shadow);
       if (obj.kind === "unit" || obj.icon?.kind === "app6") {
         syncUnitIconText(obj);
-        const rendered = app6Render(obj.icon, size, opacity);
+        const rendered = app6Render(obj.icon, size, opacity, shadow);
         html = rendered.html;
         iconSize = rendered.iconSize;
         anchor = rendered.anchor;
       } else if (obj.icon?.url) {
-        html = `<img src="${obj.icon.url}" alt="" style="width:${size}px;height:${size}px;display:block;opacity:${opacity};">`;
+        html = `<img src="${obj.icon.url}" alt="" style="width:${size}px;height:${size}px;display:block;opacity:${opacity};filter:${shadow ? "drop-shadow(0 1px 3px rgba(0,0,0,.72))" : "none"};">`;
       } else {
-        html = pointMarkerSvg(obj.icon?.kind || "dot", size, obj.style?.color, obj.style?.fillColor, opacity);
+        html = pointMarkerSvg(obj.icon?.kind || "dot", size, obj.style?.color, obj.style?.fillColor, opacity, shadow, obj.style?.fillOpacity ?? 1);
       }
       return L.divIcon({ html, className: "leaflet-div-icon", iconSize, iconAnchor: anchor });
     }
@@ -3716,6 +4286,11 @@
     }
 
     function styleLayer(obj) {
+      if (obj.kind === "image") {
+        obj.layer.setOpacity?.(clamp01(obj.style?.opacity ?? 0.75, 0.75));
+        updateHitLayer(obj);
+        return;
+      }
       if (!obj.layer.setStyle) {
         if (isPointLike(obj)) updateMarkerIcon(obj);
         return;
@@ -3730,8 +4305,14 @@
         dashArray: style.dashArray || null,
         pane: "objects"
       });
+      applyObjectPathShadow(obj);
       updateHitLayer(obj);
       setTimeout(() => applyPattern(obj), 0);
+    }
+
+    function applyObjectPathShadow(obj) {
+      if (!obj?.layer?._path) return;
+      obj.layer._path.style.filter = obj.style?.shadow ? "drop-shadow(0 2px 3px rgba(0,0,0,.65))" : "";
     }
 
     function applyPattern(obj) {
@@ -3780,11 +4361,20 @@
       };
       if (obj.kind === "unit" && obj.icon?.kind !== "app6") obj.icon = defaultApp6Icon();
       if (obj.kind === "unit" && !objectExtra.style) obj.style.showMeasurements = false;
-      if (obj.kind === "marker" && obj.icon?.kind === "app6") obj.icon = state.activePointIcon;
+      if (obj.kind === "marker") {
+        if (obj.icon?.kind === "app6") obj.icon = state.activePointIcon;
+        obj.style.fillOpacity = obj.style.fillOpacity ?? 1;
+        obj.style.pattern = "";
+      }
       if (obj.kind === "exportArea") {
         obj.style = exportAreaStyle(objectExtra.style || {});
         obj.label = obj.label || "Export area";
         obj.buffers = [];
+      }
+      if (obj.kind === "image") {
+        obj.label = obj.label || obj.image?.name || "Image";
+        obj.buffers = [];
+        obj.style = { ...obj.style, opacity: obj.style?.opacity ?? 0.75, showMeasurements: false };
       }
       state.objects.set(obj.id, obj);
       if (!map.hasLayer(layer)) layer.addTo(map);
@@ -3800,12 +4390,23 @@
 
     function attachLayerEvents(obj) {
       obj.layer.options.pane = obj.layer.options.pane || "objects";
+      obj.layer.options.bubblingMouseEvents = true;
+      obj.layer.on("mousemove", (event) => {
+        if (!event.latlng) return;
+        state.lastMouseLatLng = event.latlng;
+        updateCursorReadout(event.latlng);
+      });
       obj.layer.on("click", (event) => {
         if (isDrawingActive()) return;
         L.DomEvent.stopPropagation(event);
+        if (state.imageGeorefPick) {
+          handleImageGeorefClick(event.latlng, obj);
+          return;
+        }
         selectObject(obj.id);
       });
       obj.layer.on("pm:editstart pm:dragstart dragstart movestart", () => {
+        cancelImageGeorefCapture();
         pushUndo("geometry", { coalesceMs: 1000 });
       });
       obj.layer.on("pm:dragstart dragstart movestart", () => startMoveGuide(obj));
@@ -3828,6 +4429,12 @@
           updateDerived(obj);
           if (obj.kind === "exportArea") updateExportAreaPixelUi();
           scheduleSave();
+        });
+      }
+      if (obj.kind === "image") {
+        obj.layer.on("load", () => {
+          styleLayer(obj);
+          updateHitLayer(obj);
         });
       }
     }
@@ -3880,6 +4487,8 @@
     function syncDeleteVertexButton() {
       const button = el("deleteVertexBtn");
       if (!button) return;
+      const obj = selectedObj();
+      button.hidden = !["line", "polygon"].includes(obj?.kind);
       const valid = validSelectedVertex();
       const canDelete = Boolean(valid && !valid.obj.locked && valid.pts.length > vertexMinimumCount(valid.obj));
       button.disabled = !canDelete;
@@ -3912,7 +4521,7 @@
           iconAnchor: className.includes("is-selected") ? [11, 11] : [9, 9]
         })
       });
-      if (options.onDragStart) marker.on("dragstart", options.onDragStart);
+      if (options.onDragStart) marker.on("dragstart", () => options.onDragStart(marker.getLatLng()));
       if (options.onDrag) marker.on("drag", () => options.onDrag(marker.getLatLng()));
       if (options.onDragEnd) marker.on("dragend", () => options.onDragEnd(marker.getLatLng()));
       marker.on("click", (event) => {
@@ -3962,6 +4571,16 @@
     function renderVertexSelection() {
       vertexSelection.clearLayers();
       const obj = selectedObj();
+      if (obj?.kind === "image") {
+        if (isObjectVisible(obj) && (state.editOn || state.dragOn) && !obj.locked) {
+          renderImageEditHandles(obj);
+        } else if (isObjectVisible(obj)) {
+          renderImageGeorefMarkers(obj);
+        }
+        syncLineEndpointButtons();
+        syncDeleteVertexButton();
+        return;
+      }
       if (!state.editOn || !vertexEditableObject(obj) || obj.locked || obj.visible === false) {
         syncLineEndpointButtons();
         syncDeleteVertexButton();
@@ -3999,6 +4618,764 @@
       }
       syncLineEndpointButtons();
       syncDeleteVertexButton();
+    }
+
+    function imageBoundsCorners(obj) {
+      const b = obj.layer.getBounds();
+      return [
+        { key: "nw", latlng: b.getNorthWest(), title: "Drag to resize from northwest corner" },
+        { key: "ne", latlng: b.getNorthEast(), title: "Drag to resize from northeast corner" },
+        { key: "se", latlng: b.getSouthEast(), title: "Drag to resize from southeast corner" },
+        { key: "sw", latlng: b.getSouthWest(), title: "Drag to resize from southwest corner" }
+      ];
+    }
+
+    function oppositeImageCorner(bounds, key) {
+      return {
+        nw: bounds.getSouthEast(),
+        ne: bounds.getSouthWest(),
+        se: bounds.getNorthWest(),
+        sw: bounds.getNorthEast()
+      }[key];
+    }
+
+    function imageCorner(bounds, key) {
+      return {
+        nw: bounds.getNorthWest(),
+        ne: bounds.getNorthEast(),
+        se: bounds.getSouthEast(),
+        sw: bounds.getSouthWest()
+      }[key];
+    }
+
+    function imageKeepAspect(obj) {
+      return obj?.image?.keepAspect !== false;
+    }
+
+    function imageAspectRatio(obj) {
+      const size = imageNaturalSize(obj?.image || {});
+      return Math.max(0.05, size.width / Math.max(1, size.height));
+    }
+
+    function imageAffineMatrixFromBounds(obj, bounds = obj?.layer?.getBounds?.()) {
+      if (!obj?.image || !bounds) return null;
+      const size = imageNaturalSize(obj.image);
+      const nw = projectLatLngForAffine(bounds.getNorthWest());
+      const ne = projectLatLngForAffine(bounds.getNorthEast());
+      const sw = projectLatLngForAffine(bounds.getSouthWest());
+      return {
+        a: (ne.x - nw.x) / size.width,
+        b: (sw.x - nw.x) / size.height,
+        c: nw.x,
+        d: (ne.y - nw.y) / size.width,
+        e: (sw.y - nw.y) / size.height,
+        f: nw.y
+      };
+    }
+
+    function ensureImageAffine(obj) {
+      if (!obj?.image) return null;
+      if (!obj.image.affine?.matrix) {
+        const matrix = imageAffineMatrixFromBounds(obj);
+        if (!matrix) return null;
+        obj.image.affine = { type: "manual-affine", matrix, points: imageControlPoints(obj).slice(0, 3) };
+        rebuildImageLayer(obj);
+      }
+      return obj.image.affine.matrix;
+    }
+
+    function imageAffineCenterPoint(obj) {
+      const matrix = ensureImageAffine(obj);
+      if (!matrix) return null;
+      const size = imageNaturalSize(obj.image);
+      return transformAffinePoint(matrix, size.width / 2, size.height / 2);
+    }
+
+    function imageRotationDegrees(obj) {
+      const matrix = obj?.image?.affine?.matrix || imageAffineMatrixFromBounds(obj);
+      if (!matrix) return 0;
+      return Math.atan2(matrix.d, matrix.a) * 180 / Math.PI;
+    }
+
+    function applyImageAffineTransform(obj, transform = {}, finalize = false) {
+      const matrix = ensureImageAffine(obj);
+      const center = imageAffineCenterPoint(obj);
+      if (!matrix || !center) return false;
+      const rotation = Number(transform.rotationDeg || 0) * Math.PI / 180;
+      const scaleX = Math.max(0.01, Number(transform.scaleX || 1));
+      const scaleY = Math.max(0.01, Number(transform.scaleY || 1));
+      const skewX = Math.tan(Number(transform.skewXDeg || 0) * Math.PI / 180);
+      const skewY = Math.tan(Number(transform.skewYDeg || 0) * Math.PI / 180);
+      const offsetX = Number(transform.offsetX || 0);
+      const offsetY = Number(transform.offsetY || 0);
+      const cos = Math.cos(rotation);
+      const sin = Math.sin(rotation);
+      const k11 = scaleX;
+      const k12 = skewX * scaleY;
+      const k21 = skewY * scaleX;
+      const k22 = scaleY;
+      const t11 = cos * k11 - sin * k21;
+      const t12 = cos * k12 - sin * k22;
+      const t21 = sin * k11 + cos * k21;
+      const t22 = sin * k12 + cos * k22;
+      obj.image.affine.matrix = {
+        a: t11 * matrix.a + t12 * matrix.d,
+        b: t11 * matrix.b + t12 * matrix.e,
+        c: center.x + t11 * (matrix.c - center.x) + t12 * (matrix.f - center.y) + offsetX,
+        d: t21 * matrix.a + t22 * matrix.d,
+        e: t21 * matrix.b + t22 * matrix.e,
+        f: center.y + t21 * (matrix.c - center.x) + t22 * (matrix.f - center.y) + offsetY
+      };
+      rebuildImageLayer(obj);
+      updateSelectionHalo();
+      renderImageGeorefControls(obj);
+      updateCoordinatePanel();
+      updateMeasurementPanel();
+      if (finalize) {
+        renderVertexSelection();
+        scheduleSave();
+      }
+      return true;
+    }
+
+    function rotateImageToDegrees(obj, degrees, finalize = false) {
+      const current = imageRotationDegrees(obj);
+      const target = Number(degrees);
+      if (!Number.isFinite(target)) return false;
+      return applyImageAffineTransform(obj, { rotationDeg: target - current }, finalize);
+    }
+
+    function imageRotateHandleLatLng(obj) {
+      const bounds = obj?.layer?.getBounds?.();
+      if (!bounds) return null;
+      const topCenter = L.latLng(bounds.getNorth(), bounds.getCenter().lng);
+      const point = map.latLngToContainerPoint(topCenter);
+      return map.containerPointToLatLng(L.point(point.x, point.y - 38));
+    }
+
+    function angleFromAffineCenter(center, latlng) {
+      const point = projectLatLngForAffine(latlng);
+      return Math.atan2(point.y - center.y, point.x - center.x) * 180 / Math.PI;
+    }
+
+    function constrainedImageCorner(obj, bounds, key, latlng) {
+      if (!imageKeepAspect(obj)) return latlng;
+      const fixedLatLng = oppositeImageCorner(bounds, key);
+      if (!fixedLatLng) return latlng;
+      const zoom = map.getZoom();
+      const fixed = map.project(fixedLatLng, zoom);
+      const pointer = map.project(latlng, zoom);
+      const sx = key === "ne" || key === "se" ? 1 : -1;
+      const sy = key === "sw" || key === "se" ? 1 : -1;
+      const aspect = imageAspectRatio(obj);
+      let width = Math.abs(pointer.x - fixed.x);
+      let height = Math.abs(pointer.y - fixed.y);
+      if (!width && !height) return latlng;
+      if (height && width / height > aspect) height = width / aspect;
+      else width = height * aspect;
+      return map.unproject(L.point(fixed.x + sx * width, fixed.y + sy * height), zoom);
+    }
+
+    function setAffineImageBoundsFromCorner(obj, key, latlng, finalize = false) {
+      const matrix = obj.image?.affine?.matrix;
+      const bounds = obj.layer.getBounds();
+      const fixedLatLng = oppositeImageCorner(bounds, key);
+      const oldMovingLatLng = imageCorner(bounds, key);
+      if (!matrix || !fixedLatLng || !oldMovingLatLng) return false;
+      const fixed = projectLatLngForAffine(fixedLatLng);
+      const oldMoving = projectLatLngForAffine(oldMovingLatLng);
+      let target = projectLatLngForAffine(latlng);
+      if (imageKeepAspect(obj)) {
+        const oldWidth = Math.abs(oldMoving.x - fixed.x);
+        const oldHeight = Math.abs(oldMoving.y - fixed.y);
+        const aspect = oldHeight ? oldWidth / oldHeight : imageAspectRatio(obj);
+        const sx = oldMoving.x >= fixed.x ? 1 : -1;
+        const sy = oldMoving.y >= fixed.y ? 1 : -1;
+        let width = Math.abs(target.x - fixed.x);
+        let height = Math.abs(target.y - fixed.y);
+        if (height && width / height > aspect) height = width / aspect;
+        else width = height * aspect;
+        target = { x: fixed.x + sx * width, y: fixed.y + sy * height };
+      }
+      const scaleX = (oldMoving.x - fixed.x) ? (target.x - fixed.x) / (oldMoving.x - fixed.x) : 1;
+      const scaleY = (oldMoving.y - fixed.y) ? (target.y - fixed.y) / (oldMoving.y - fixed.y) : 1;
+      if (!Number.isFinite(scaleX) || !Number.isFinite(scaleY)) return false;
+      obj.image.affine.matrix = {
+        a: matrix.a * scaleX,
+        b: matrix.b * scaleX,
+        c: fixed.x + scaleX * (matrix.c - fixed.x),
+        d: matrix.d * scaleY,
+        e: matrix.e * scaleY,
+        f: fixed.y + scaleY * (matrix.f - fixed.y)
+      };
+      rebuildImageLayer(obj);
+      if (finalize) {
+        renderVertexSelection();
+        scheduleSave();
+        status("Warped image bounds updated.");
+      }
+      return true;
+    }
+
+    function setImageBoundsFromCorner(obj, key, latlng, finalize = false) {
+      if (obj.image?.affine?.matrix && setAffineImageBoundsFromCorner(obj, key, latlng, finalize)) return;
+      const bounds = obj.layer.getBounds();
+      const fixed = oppositeImageCorner(bounds, key);
+      if (!fixed) return;
+      obj.layer.setBounds(L.latLngBounds(fixed, constrainedImageCorner(obj, bounds, key, latlng)));
+      updateHitLayer(obj);
+      updateDerived(obj);
+      refreshLabelsAndMeasurements();
+      updateCoordinatePanel();
+      updateMeasurementPanel();
+      if (finalize) {
+        renderVertexSelection();
+        scheduleSave();
+        status("Image bounds updated.");
+      }
+    }
+
+    function moveImageBounds(obj, from, to, finalize = false) {
+      if (obj.image?.affine?.matrix) {
+        const start = projectLatLngForAffine(from);
+        const end = projectLatLngForAffine(to);
+        obj.image.affine.matrix.c += end.x - start.x;
+        obj.image.affine.matrix.f += end.y - start.y;
+        rebuildImageLayer(obj);
+        updateCoordinatePanel();
+        updateMeasurementPanel();
+        if (finalize) {
+          renderVertexSelection();
+          scheduleSave();
+          status("Warped image moved.");
+        }
+        return;
+      }
+      const bounds = obj.layer.getBounds();
+      const zoom = map.getZoom();
+      const start = map.project(from, zoom);
+      const end = map.project(to, zoom);
+      const dx = end.x - start.x;
+      const dy = end.y - start.y;
+      const movePoint = (latlng) => {
+        const p = map.project(latlng, zoom);
+        return map.unproject(L.point(p.x + dx, p.y + dy), zoom);
+      };
+      obj.layer.setBounds(L.latLngBounds(movePoint(bounds.getSouthWest()), movePoint(bounds.getNorthEast())));
+      updateHitLayer(obj);
+      updateDerived(obj);
+      refreshLabelsAndMeasurements();
+      updateCoordinatePanel();
+      updateMeasurementPanel();
+      if (finalize) {
+        renderVertexSelection();
+        scheduleSave();
+        status("Image moved.");
+      }
+    }
+
+    function renderImageEditHandles(obj) {
+      const bounds = obj.layer.getBounds();
+      imageBoundsCorners(obj).forEach((corner, index) => {
+        vertexSelection.addLayer(vertexHandleMarker(
+          corner.latlng,
+          String(index + 1),
+          "",
+          () => status("Drag an image corner to resize it."),
+          corner.title,
+          {
+            draggable: true,
+            onDragStart: () => {
+              cancelImageGeorefCapture();
+              pushUndo("resize-image");
+            },
+            onDrag: (latlng) => setImageBoundsFromCorner(obj, corner.key, latlng, false),
+            onDragEnd: (latlng) => setImageBoundsFromCorner(obj, corner.key, latlng, true)
+          }
+        ));
+      });
+      let previousCenter = bounds.getCenter();
+      vertexSelection.addLayer(vertexHandleMarker(
+        previousCenter,
+        "↕",
+        "is-add",
+        () => status("Drag the centre handle to move the image."),
+        "Drag to move image",
+        {
+          draggable: true,
+          onDragStart: () => {
+            cancelImageGeorefCapture();
+            previousCenter = obj.layer.getBounds().getCenter();
+            pushUndo("move-image");
+          },
+          onDrag: (latlng) => {
+            moveImageBounds(obj, previousCenter, latlng, false);
+            previousCenter = latlng;
+          },
+          onDragEnd: (latlng) => {
+            moveImageBounds(obj, previousCenter, latlng, true);
+          }
+        }
+      ));
+      const rotateLatLng = imageRotateHandleLatLng(obj);
+      if (rotateLatLng) {
+        let rotateDrag = null;
+        vertexSelection.addLayer(vertexHandleMarker(
+          rotateLatLng,
+          "↻",
+          "is-add",
+          () => status("Drag the rotation handle to rotate the image."),
+          "Drag to rotate image",
+          {
+            draggable: true,
+            onDragStart: (latlng) => {
+              cancelImageGeorefCapture();
+              pushUndo("rotate-image");
+              const center = imageAffineCenterPoint(obj);
+              rotateDrag = center ? {
+                center,
+                startAngle: angleFromAffineCenter(center, latlng),
+                startRotation: imageRotationDegrees(obj)
+              } : null;
+            },
+            onDrag: (latlng) => {
+              if (!rotateDrag) return;
+              const nextAngle = angleFromAffineCenter(rotateDrag.center, latlng);
+              rotateImageToDegrees(obj, rotateDrag.startRotation + nextAngle - rotateDrag.startAngle, false);
+            },
+            onDragEnd: (latlng) => {
+              if (rotateDrag) {
+                const nextAngle = angleFromAffineCenter(rotateDrag.center, latlng);
+                rotateImageToDegrees(obj, rotateDrag.startRotation + nextAngle - rotateDrag.startAngle, true);
+              }
+              rotateDrag = null;
+              status("Image rotation updated.");
+            }
+          }
+        ));
+      }
+      renderImageGeorefMarkers(obj);
+    }
+
+    function imageControlPoints(obj) {
+      if (!obj?.image) return [];
+      if (!Array.isArray(obj.image.controlPoints)) obj.image.controlPoints = Array.isArray(obj.image.affine?.points) ? obj.image.affine.points.slice() : [];
+      return obj.image.controlPoints;
+    }
+
+    function completeImageControlPoints(obj) {
+      return imageControlPoints(obj).filter((point) => point?.image && point?.map).slice(0, 3);
+    }
+
+    function ensureImageControlPoint(obj, index) {
+      const points = imageControlPoints(obj);
+      while (points.length <= index) points.push({ image: null, map: null });
+      points[index] = points[index] || { image: null, map: null };
+      return points[index];
+    }
+
+    function imagePointPixels(obj, point) {
+      if (!point?.image) return { x: "", y: "" };
+      const size = imageNaturalSize(obj.image);
+      return {
+        x: Number((clamp01(point.image.x ?? 0, 0) * size.width).toFixed(2)),
+        y: Number((clamp01(point.image.y ?? 0, 0) * size.height).toFixed(2))
+      };
+    }
+
+    function imagePointFromPixelInputs(obj, xValue, yValue) {
+      if (String(xValue).trim() === "" && String(yValue).trim() === "") return null;
+      const x = Number(xValue);
+      const y = Number(yValue);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return undefined;
+      const size = imageNaturalSize(obj.image);
+      return {
+        x: clamp01(x / size.width, 0),
+        y: clamp01(y / size.height, 0)
+      };
+    }
+
+    function formatGeorefMapInput(point) {
+      return point?.map ? formatLatLng(L.latLng(point.map)) : "";
+    }
+
+    function syncImageGeorefCaptureCursor() {
+      el("map")?.classList.toggle("georef-capture", Boolean(state.imageGeorefPick));
+    }
+
+    function cancelImageGeorefCapture(message = "") {
+      if (!state.imageGeorefPick) return;
+      state.imageGeorefPick = null;
+      syncImageGeorefCaptureCursor();
+      renderImageGeorefControls(selectedObj());
+      if (message) status(message);
+    }
+
+    function latLngToImageNorm(obj, latlng) {
+      const matrix = obj.image?.affine?.matrix;
+      if (matrix) {
+        const projected = projectLatLngForAffine(latlng);
+        const pixel = inverseAffinePoint(matrix, projected);
+        if (!pixel) return null;
+        const size = imageNaturalSize(obj.image);
+        const tolerance = 0.5;
+        if (pixel.x < -tolerance || pixel.y < -tolerance || pixel.x > size.width + tolerance || pixel.y > size.height + tolerance) return null;
+        return {
+          x: clamp01(pixel.x / size.width, 0.5),
+          y: clamp01(pixel.y / size.height, 0.5)
+        };
+      }
+      const bounds = obj.layer.getBounds();
+      if (!bounds.contains(latlng)) return null;
+      const zoom = map.getZoom();
+      const nw = map.project(bounds.getNorthWest(), zoom);
+      const se = map.project(bounds.getSouthEast(), zoom);
+      const p = map.project(latlng, zoom);
+      return {
+        x: clamp01((p.x - nw.x) / Math.max(1e-9, se.x - nw.x), 0.5),
+        y: clamp01((p.y - nw.y) / Math.max(1e-9, se.y - nw.y), 0.5)
+      };
+    }
+
+    function imageNormToLatLng(obj, point) {
+      const matrix = obj.image?.affine?.matrix;
+      const norm = { x: clamp01(point?.x ?? 0, 0), y: clamp01(point?.y ?? 0, 0) };
+      if (matrix) {
+        const size = imageNaturalSize(obj.image);
+        return unprojectAffinePoint(transformAffinePoint(matrix, norm.x * size.width, norm.y * size.height));
+      }
+      const bounds = obj.layer.getBounds();
+      const zoom = map.getZoom();
+      const nw = map.project(bounds.getNorthWest(), zoom);
+      const se = map.project(bounds.getSouthEast(), zoom);
+      return map.unproject(L.point(nw.x + (se.x - nw.x) * norm.x, nw.y + (se.y - nw.y) * norm.y), zoom);
+    }
+
+    function georefCrossMarker(latlng, label, className = "", onClick = null, title = "") {
+      const marker = L.marker(latlng, {
+        interactive: true,
+        keyboard: false,
+        zIndexOffset: 21000,
+        icon: L.divIcon({
+          className: "georef-cross-icon",
+          html: `<div class="georef-cross ${className}" title="${escapeHtml(title || label)}"><span class="georef-cross-label">${escapeHtml(label)}</span></div>`,
+          iconSize: [42, 42],
+          iconAnchor: [21, 21]
+        })
+      });
+      marker.on("click", (event) => {
+        L.DomEvent.stopPropagation(event);
+        onClick?.();
+      });
+      return marker;
+    }
+
+    function renderImageGeorefMarkers(obj) {
+      imageControlPoints(obj).forEach((point, index) => {
+        if (point.image) {
+          const imageLatLng = imageNormToLatLng(obj, point.image);
+          vertexSelection.addLayer(georefCrossMarker(
+            imageLatLng,
+            `P${index + 1}`,
+            "is-image",
+            () => status(point.map ? `Image control point ${index + 1}. Matching map point: ${formatLatLng(point.map)}` : `Image control point ${index + 1}. Map point not set.`),
+            `Image control point ${index + 1}`
+          ));
+        }
+        if (point.map) {
+          vertexSelection.addLayer(georefCrossMarker(
+            L.latLng(point.map),
+            `M${index + 1}`,
+            "is-map",
+            () => status(`Map control point ${index + 1}.`),
+            `Map control point ${index + 1}`
+          ));
+        }
+      });
+    }
+
+    function renderImageGeorefControls(obj = selectedObj()) {
+      const controls = el("imageGeorefControls");
+      if (!controls) return;
+      const isImage = obj?.kind === "image";
+      controls.hidden = !isImage;
+      if (!isImage) return;
+      el("imageKeepAspect").checked = imageKeepAspect(obj);
+      const points = imageControlPoints(obj);
+      const list = el("imageControlPointList");
+      list.innerHTML = "";
+      if (!points.length) {
+        list.textContent = "No control point rows yet.";
+      } else {
+        const size = imageNaturalSize(obj.image);
+        points.forEach((point, index) => {
+          const pixels = imagePointPixels(obj, point);
+          const capture = state.imageGeorefPick?.objectId === obj.id && state.imageGeorefPick?.index === index ? state.imageGeorefPick.target : "";
+          const row = document.createElement("div");
+          row.className = `georef-point-row ${capture ? "is-capturing" : ""}`;
+          row.innerHTML = `
+            <strong>${index + 1}</strong>
+            <div class="georef-point-fields">
+              <label>Image X px
+                <input data-georef-field="image-x" data-index="${index}" type="number" min="0" max="${size.width}" step="1" value="${escapeHtml(pixels.x)}">
+              </label>
+              <label>Image Y px
+                <input data-georef-field="image-y" data-index="${index}" type="number" min="0" max="${size.height}" step="1" value="${escapeHtml(pixels.y)}">
+              </label>
+              <button data-georef-action="pick-image" data-index="${index}" title="Click this point on the image">${capture === "image" ? "Click image" : "Pick image"}</button>
+              <button data-georef-action="pick-map" data-index="${index}" title="Click the matching point on the map">${capture === "map" ? "Click map" : "Pick map"}</button>
+              <label class="wide">Map coordinate
+                <input data-georef-field="map" data-index="${index}" value="${escapeHtml(formatGeorefMapInput(point))}" placeholder="Example: 60.1708, 24.9375">
+              </label>
+              <button data-georef-action="delete" data-index="${index}" class="danger wide" title="Delete this control point row">Delete point</button>
+            </div>
+          `;
+          list.appendChild(row);
+          bindImageGeorefRow(row, obj, index);
+        });
+      }
+      syncImageGeorefButtons(obj);
+      syncImageWarpControls(obj);
+    }
+
+    function syncImageGeorefButtons(obj = selectedObj()) {
+      if (!obj || obj.kind !== "image") return;
+      const points = imageControlPoints(obj);
+      const locked = Boolean(obj.locked);
+      el("imageApplyAffine").disabled = locked || completeImageControlPoints(obj).length < 3;
+      el("imageResetAffine").disabled = locked || !obj.image?.affine;
+      el("imageAddControlPoint").disabled = locked || points.length >= 3;
+      el("imageClearControlPoints").disabled = locked || !points.length;
+    }
+
+    function syncImageWarpControls(obj = selectedObj()) {
+      if (!obj || obj.kind !== "image") return;
+      const locked = Boolean(obj.locked);
+      const rotationInput = el("imageRotationDegrees");
+      if (rotationInput && document.activeElement !== rotationInput) {
+        rotationInput.value = Number(imageRotationDegrees(obj).toFixed(1));
+      }
+      ["imageRotationDegrees", "imageWarpScaleX", "imageWarpScaleY", "imageWarpSkewX", "imageWarpSkewY", "imageWarpOffsetX", "imageWarpOffsetY", "imageApplyWarpAdjustment", "imageResetWarpAdjustment"].forEach((id) => {
+        if (el(id)) el(id).disabled = locked;
+      });
+    }
+
+    function resetImageWarpAdjustmentFields() {
+      ["imageWarpScaleX", "imageWarpScaleY"].forEach((id) => { if (el(id)) el(id).value = 100; });
+      ["imageWarpSkewX", "imageWarpSkewY", "imageWarpOffsetX", "imageWarpOffsetY"].forEach((id) => { if (el(id)) el(id).value = 0; });
+    }
+
+    function applyImageWarpAdjustment() {
+      const obj = selectedObj();
+      if (obj?.kind !== "image") return status("Select an image object first.");
+      if (obj.locked) return status("Unlock the image before warping it.");
+      const scaleX = clampNumber(el("imageWarpScaleX").value, 1, 1000, 100) / 100;
+      const scaleY = clampNumber(el("imageWarpScaleY").value, 1, 1000, 100) / 100;
+      const skewXDeg = clampNumber(el("imageWarpSkewX").value, -80, 80, 0);
+      const skewYDeg = clampNumber(el("imageWarpSkewY").value, -80, 80, 0);
+      const offsetX = Number(el("imageWarpOffsetX").value || 0);
+      const offsetY = Number(el("imageWarpOffsetY").value || 0);
+      if (![scaleX, scaleY, skewXDeg, skewYDeg, offsetX, offsetY].every(Number.isFinite)) return status("Enter valid warp adjustment numbers.");
+      pushUndo("image-warp-adjustment");
+      if (applyImageAffineTransform(obj, { scaleX, scaleY, skewXDeg, skewYDeg, offsetX, offsetY }, true)) {
+        resetImageWarpAdjustmentFields();
+        status("Image warp adjustment applied.");
+      }
+    }
+
+    function commitImageRotationInput() {
+      const obj = selectedObj();
+      if (obj?.kind !== "image") return status("Select an image object first.");
+      if (obj.locked) return status("Unlock the image before rotating it.");
+      const degrees = Number(el("imageRotationDegrees").value);
+      if (!Number.isFinite(degrees)) return status("Enter a valid rotation angle.");
+      pushUndo("image-rotation");
+      if (rotateImageToDegrees(obj, degrees, true)) status("Image rotation updated.");
+    }
+
+    function bindImageGeorefRow(row, obj, index) {
+      row.querySelectorAll("[data-georef-field='image-x'], [data-georef-field='image-y']").forEach((input) => {
+        input.disabled = obj.locked;
+        input.addEventListener("change", () => updateImageControlPointPixels(row, index));
+      });
+      const mapInput = row.querySelector("[data-georef-field='map']");
+      if (mapInput) {
+        mapInput.disabled = obj.locked;
+        mapInput.addEventListener("change", () => updateImageControlPointMapInput(mapInput, index));
+      }
+      row.querySelectorAll("[data-georef-action]").forEach((button) => {
+        button.disabled = obj.locked;
+        button.addEventListener("click", () => {
+          const action = button.dataset.georefAction;
+          if (action === "pick-image") startImageControlPointCapture("image", index);
+          if (action === "pick-map") startImageControlPointCapture("map", index);
+          if (action === "delete") deleteImageControlPoint(index);
+        });
+      });
+    }
+
+    function addImageControlPointRow() {
+      const obj = selectedObj();
+      if (obj?.kind !== "image") return status("Select an image object first.");
+      if (obj.locked) return status("Unlock the image before georeferencing it.");
+      const points = imageControlPoints(obj);
+      if (points.length >= 3) return status("Three control point rows are already set. Delete or clear a row first.");
+      pushUndo("image-control-point-row");
+      points.push({ image: null, map: null });
+      renderImageGeorefControls(obj);
+      renderVertexSelection();
+      scheduleSave();
+      status("Control point row added. Pick or type image and map locations in any order.");
+    }
+
+    function startImageControlPointCapture(target, index) {
+      const obj = selectedObj();
+      if (obj?.kind !== "image") return status("Select an image object first.");
+      if (obj.locked) return status("Unlock the image before georeferencing it.");
+      ensureImageControlPoint(obj, index);
+      state.imageGeorefPick = { objectId: obj.id, index, target };
+      syncImageGeorefCaptureCursor();
+      renderImageGeorefControls(obj);
+      status(target === "image"
+        ? `Click image pixel location for control point ${index + 1}. Press Esc to cancel.`
+        : `Click map location for control point ${index + 1}. Press Esc to cancel.`);
+    }
+
+    function handleImageGeorefClick(latlng, clickedObj = null) {
+      const pick = state.imageGeorefPick;
+      if (!pick) return false;
+      const obj = state.objects.get(pick.objectId);
+      if (!obj || obj.kind !== "image") {
+        state.imageGeorefPick = null;
+        return false;
+      }
+      selectObject(obj.id);
+      if (pick.target === "image") {
+        if (clickedObj && clickedObj.id !== obj.id) return status("Click the selected image for the image control point.");
+        const imagePoint = latLngToImageNorm(obj, latlng);
+        if (!imagePoint) return status("Click within the image for the image control point.");
+        pushUndo("image-control-point", { coalesceMs: 1000 });
+        ensureImageControlPoint(obj, pick.index).image = imagePoint;
+        cancelImageGeorefCapture();
+        renderImageGeorefControls(obj);
+        renderVertexSelection();
+        scheduleSave();
+        status(`Image point ${pick.index + 1} set.`);
+        return true;
+      }
+      if (pick.target === "map") {
+        pushUndo("image-control-point", { coalesceMs: 1000 });
+        ensureImageControlPoint(obj, pick.index).map = { lat: latlng.lat, lng: latlng.lng };
+        cancelImageGeorefCapture();
+        renderImageGeorefControls(obj);
+        renderVertexSelection();
+        scheduleSave();
+        status(`Map point ${pick.index + 1} set.`);
+        return true;
+      }
+      return false;
+    }
+
+    function updateImageControlPointPixels(row, index) {
+      const obj = selectedObj();
+      if (obj?.kind !== "image") return;
+      if (obj.locked) return status("Unlock the image before editing control points.");
+      const xInput = row.querySelector("[data-georef-field='image-x']");
+      const yInput = row.querySelector("[data-georef-field='image-y']");
+      const imagePoint = imagePointFromPixelInputs(obj, xInput?.value, yInput?.value);
+      if (imagePoint === undefined) return status("Enter numeric image X/Y pixel values.");
+      pushUndo("image-control-point-edit", { coalesceMs: 1000 });
+      ensureImageControlPoint(obj, index).image = imagePoint;
+      renderVertexSelection();
+      syncImageGeorefButtons(obj);
+      scheduleSave();
+      status(imagePoint ? `Image point ${index + 1} updated.` : `Image point ${index + 1} cleared.`);
+    }
+
+    function updateImageControlPointMapInput(input, index) {
+      const obj = selectedObj();
+      if (obj?.kind !== "image") return;
+      if (obj.locked) return status("Unlock the image before editing control points.");
+      const text = input.value.trim();
+      pushUndo("image-control-point-edit", { coalesceMs: 1000 });
+      const point = ensureImageControlPoint(obj, index);
+      if (!text) {
+        point.map = null;
+        renderVertexSelection();
+        syncImageGeorefButtons(obj);
+        scheduleSave();
+        return status(`Map point ${index + 1} cleared.`);
+      }
+      const latlng = parseAnyCoordinate(text);
+      if (!latlng) return status("Could not parse map coordinate.");
+      point.map = { lat: latlng.lat, lng: latlng.lng };
+      input.value = formatLatLng(latlng);
+      renderVertexSelection();
+      syncImageGeorefButtons(obj);
+      scheduleSave();
+      status(`Map point ${index + 1} updated.`);
+    }
+
+    function deleteImageControlPoint(index) {
+      const obj = selectedObj();
+      if (obj?.kind !== "image") return;
+      if (obj.locked) return status("Unlock the image before editing control points.");
+      pushUndo("delete-image-control-point");
+      imageControlPoints(obj).splice(index, 1);
+      cancelImageGeorefCapture();
+      renderImageGeorefControls(obj);
+      renderVertexSelection();
+      scheduleSave();
+      status("Control point deleted.");
+    }
+
+    function applyImageAffineFromControls() {
+      const obj = selectedObj();
+      if (obj?.kind !== "image") return status("Select an image object first.");
+      if (obj.locked) return status("Unlock the image before georeferencing it.");
+      const points = completeImageControlPoints(obj);
+      if (points.length < 3) return status("Add three control points first.");
+      const matrix = solveAffine3(points, obj.image);
+      if (!matrix) return status("Could not solve affine warp. Check that image control points are not collinear.");
+      pushUndo("image-affine");
+      obj.image.affine = { type: "affine-3point", matrix, points: points.slice(0, 3) };
+      rebuildImageLayer(obj);
+      renderImageGeorefControls(obj);
+      renderVertexSelection();
+      updateCoordinatePanel();
+      updateMeasurementPanel();
+      scheduleSave();
+      status("Image warped from three control points.");
+    }
+
+    function clearImageControlPoints() {
+      const obj = selectedObj();
+      if (obj?.kind !== "image") return;
+      if (obj.locked) return status("Unlock the image before editing control points.");
+      pushUndo("clear-image-control-points");
+      obj.image.controlPoints = [];
+      if (obj.image.affine) obj.image.affine.points = [];
+      cancelImageGeorefCapture();
+      renderImageGeorefControls(obj);
+      renderVertexSelection();
+      scheduleSave();
+      status(obj.image.affine ? "Image control points cleared. Existing warp kept." : "Image control points cleared.");
+    }
+
+    function resetImageAffine() {
+      const obj = selectedObj();
+      if (obj?.kind !== "image" || !obj.image?.affine) return;
+      if (obj.locked) return status("Unlock the image before resetting the warp.");
+      pushUndo("reset-image-warp");
+      const bounds = obj.layer.getBounds();
+      delete obj.image.affine;
+      replaceImageLayer(obj, createImageLayerFromData(obj.image, bounds, obj.style));
+      renderImageGeorefControls(obj);
+      renderVertexSelection();
+      updateCoordinatePanel();
+      updateMeasurementPanel();
+      scheduleSave();
+      status("Image warp reset.");
     }
 
     function highlightCoordinateLine(index) {
@@ -4092,8 +5469,9 @@
         el("notesInput").value = obj.notes || "";
         el("strokeColor").value = obj.style.color || "#ffcc4d";
         el("fillColor").value = obj.style.fillColor || "#ffcc4d";
-        el("strokeOpacity").value = obj.style.opacity ?? 1;
-        el("fillOpacity").value = obj.style.fillOpacity ?? 0.25;
+        setOpacityControlValue("strokeOpacity", obj.style.opacity ?? 1);
+        setOpacityControlValue("fillOpacity", obj.kind === "marker" ? (obj.style.fillOpacity ?? 1) : (obj.style.fillOpacity ?? 0.25));
+        el("objectShadow").checked = Boolean(obj.style.shadow);
         el("lineWeight").value = obj.style.weight ?? 3;
         el("dashStyle").value = obj.style.dashArray || "";
         el("fillPattern").value = obj.style.pattern || "";
@@ -4107,7 +5485,7 @@
         el("textItalic").checked = Boolean(obj.textStyle.italic);
         el("textColor").value = obj.textStyle.color;
         el("textBoxFill").value = obj.textStyle.fillColor;
-        el("textBoxFillOpacity").value = obj.textStyle.fillOpacity;
+        setOpacityControlValue("textBoxFillOpacity", obj.textStyle.fillOpacity);
         el("textBoxLine").value = obj.textStyle.lineColor;
         el("textBoxWeight").value = obj.textStyle.weight;
         el("textBoxDash").value = obj.textStyle.dashArray || "";
@@ -4117,7 +5495,7 @@
         el("labelTextItalic").checked = Boolean(obj.labelStyle.italic);
         el("labelTextColor").value = obj.labelStyle.color;
         el("labelBoxFill").value = obj.labelStyle.fillColor;
-        el("labelBoxFillOpacity").value = obj.labelStyle.fillOpacity;
+        setOpacityControlValue("labelBoxFillOpacity", obj.labelStyle.fillOpacity);
         el("labelBoxLine").value = obj.labelStyle.lineColor;
         el("labelBoxWeight").value = obj.labelStyle.weight;
         el("labelBoxDash").value = obj.labelStyle.dashArray || "";
@@ -4125,9 +5503,11 @@
         el("labelTextOutline").checked = Boolean(obj.labelStyle.outline);
         el("labelPosition").value = obj.labelStyle.position;
         el("labelOffsetX").value = obj.labelStyle.offsetX;
-        el("labelOffsetY").value = obj.labelStyle.offsetY;
+        el("labelOffsetY").value = labelOffsetYToControl(obj.labelStyle.offsetY);
         el("labelScaleWithIcon").checked = Boolean(obj.labelStyle.scaleWithIcon);
+        if (obj.kind === "image" && el("imageKeepAspect")) el("imageKeepAspect").checked = obj.image?.keepAspect !== false;
         el("lockToggle").textContent = obj.locked ? "Unlock object" : "Lock object";
+        syncAllOpacityPercentInputs();
       }
       updateObjectControlVisibility(obj);
       renderObjectList();
@@ -4151,10 +5531,14 @@
       setTimeout(() => map.invalidateSize(), 220);
     }
 
-    function movePointStyleControls(isPoint) {
-      const target = isPoint ? el("pointIconStyleSlot") : el("generalStyleSlot");
+    function moveStyleControlsForObject(obj) {
+      const target = obj?.kind === "marker"
+        ? el("pointIconStyleSlot")
+        : obj?.kind === "image"
+          ? el("imageOpacitySlot")
+          : el("generalStyleSlot");
       if (!target) return;
-      ["strokeFillControls", "opacityControls"].forEach((id) => {
+      ["strokeFillControls", "opacityControls", "objectShadowControl"].forEach((id) => {
         const node = el(id);
         if (node && node.parentElement !== target) target.appendChild(node);
       });
@@ -4174,7 +5558,23 @@
       const color = el("strokeColor").value || obj.style?.color || "#ffcc4d";
       const fill = el("fillColor").value || obj.style?.fillColor || color;
       const opacity = Number(el("strokeOpacity").value || obj.style?.opacity || 1);
-      preview.innerHTML = `${pointMarkerSvg(kind, 24, color, fill, opacity)}<span>${escapeHtml(pointIconName(kind))}</span>`;
+      const fillOpacity = Number(el("fillOpacity").value ?? obj.style?.fillOpacity ?? 1);
+      preview.innerHTML = `${pointMarkerSvg(kind, 24, color, fill, opacity, Boolean(el("objectShadow")?.checked), fillOpacity)}<span>${escapeHtml(pointIconName(kind))}</span>`;
+    }
+
+    function syncRemoveBuffersButton(obj = selectedObj()) {
+      const button = el("removeBuffers");
+      if (!button) return;
+      const count = obj?.buffers?.length || 0;
+      const disabled = !obj || obj.locked || !count;
+      button.disabled = disabled;
+      button.title = !obj
+        ? "Select an object to remove attached buffers."
+        : obj.locked
+          ? "Unlock the object before removing buffers."
+          : count
+            ? `Remove all ${count} attached buffer${count === 1 ? "" : "s"}`
+            : "No buffers to remove.";
     }
 
     function updateObjectControlVisibility(obj) {
@@ -4183,9 +5583,10 @@
       const isUnit = obj?.kind === "unit";
       const pointLike = isPoint || isUnit;
       const isText = obj?.kind === "text";
+      const isImage = obj?.kind === "image";
       const isExportArea = obj?.kind === "exportArea";
       const locked = Boolean(obj?.locked);
-      movePointStyleControls(isPoint);
+      moveStyleControlsForObject(obj);
       el("iconControls").hidden = !pointLike;
       el("iconControls").querySelector("summary").textContent = isUnit ? "APP-6 unit symbol" : "Point icon";
       const iconKindControl = el("iconKind")?.closest("label");
@@ -4199,18 +5600,22 @@
       el("showLabelControl").hidden = isText || !hasObj;
       el("unitNameControl").hidden = !isUnit;
       el("higherFormationControl").hidden = !isUnit;
-      el("strokeFillControls").hidden = !hasObj || isUnit || isText;
+      el("strokeFillControls").hidden = !hasObj || isUnit || isText || isImage;
       el("opacityControls").hidden = !hasObj || isText;
+      el("opacityControls").classList.toggle("image-opacity-wide", isImage);
       el("strokeOpacityLabel").hidden = !hasObj;
-      el("fillOpacityLabel").hidden = !hasObj || pointLike;
-      el("lineControls").hidden = !hasObj || pointLike || isText;
-      el("fillPatternControl").hidden = !hasObj || pointLike || isText;
+      el("fillOpacityLabel").hidden = !hasObj || isUnit || isImage;
+      el("objectShadowControl").hidden = !hasObj || isText || isImage;
+      el("lineControls").hidden = !hasObj || pointLike || isText || isImage;
+      el("fillPatternControl").hidden = !hasObj || pointLike || isText || isImage;
       el("endpointControls").hidden = !hasObj || pointLike || obj?.kind !== "line";
-      el("measurementBoxControl").hidden = !hasObj || pointLike || isText;
-      el("measureToggleLabel").hidden = !hasObj;
+      el("measurementBoxControl").hidden = !hasObj || pointLike || isText || isImage;
+      el("measureToggleLabel").hidden = !hasObj || isImage;
       el("coordinateSection").hidden = !hasObj;
-      el("measurementSection").hidden = !hasObj || pointLike || isText;
-      el("bufferSection").hidden = !hasObj || isText || isExportArea;
+      el("measurementSection").hidden = !hasObj || pointLike || isText || isImage;
+      el("imageGeorefControls").hidden = !isImage;
+      el("imageWarpControls").hidden = !isImage;
+      el("bufferSection").hidden = !hasObj || isText || isExportArea || isImage;
       el("objectLayerControl").hidden = !hasObj;
       el("objectLayerStatus").hidden = !hasObj;
       el("objectLayerSelect").disabled = locked || !hasObj;
@@ -4218,27 +5623,29 @@
       el("lockToggle").textContent = locked ? "Unlock object" : "Lock object";
       el("lockedNote").hidden = !locked;
       updateSelectedObjectTitle(obj);
-      const canEditPoints = hasObj && ["line", "polygon", "circle", "exportArea"].includes(obj.kind);
+      const canEditPoints = hasObj && ["line", "polygon", "circle", "exportArea", "image"].includes(obj.kind);
       el("editToggle").hidden = !canEditPoints;
-      el("editToggle").textContent = obj?.kind === "circle" || isExportArea ? "Edit shape" : "Edit points";
-      el("editToggle").title = obj?.kind === "circle" || isExportArea ? "Toggle shape editing" : "Toggle vertex editing. Click a point to select it; click a segment to add a point; use plus handles or Add Start/End Point to extend lines; use Delete Point, Del, or Backspace to delete the selected point.";
+      el("editToggle").textContent = obj?.kind === "circle" || isExportArea || isImage ? "Edit shape" : "Edit points";
+      el("editToggle").title = obj?.kind === "circle" || isExportArea ? "Toggle shape editing" : isImage ? "Toggle image edit handles. Drag corners to resize, the centre handle to move, or the rotation handle to rotate." : "Toggle vertex editing. Click a point to select it; click a segment to add a point; use plus handles or Add Start/End Point to extend lines; use Delete Point, Del, or Backspace to delete the selected point.";
       el("labelControl").firstChild.textContent = isUnit ? "Unique designation" : isText ? "Text" : "Label";
       el("showLabelText").textContent = isUnit ? "Show unit text" : "Show label";
       el("measureToggleText").textContent = pointLike || isText ? "Show coordinates" : "Show measurements";
       el("strokeColorText").textContent = isPoint ? "Icon line" : "Line color";
       el("fillColorText").textContent = isPoint ? "Icon fill" : "Fill color";
-      el("strokeOpacityLabel").firstChild.textContent = pointLike ? "Icon opacity" : "Line opacity";
-      ["objectLayerControl", "labelControl", "unitNameControl", "higherFormationControl", "showLabelControl", "measureToggleLabel", "iconControls", "textStyleControls", "labelStyleControls", "strokeFillControls", "opacityControls", "strokeOpacityLabel", "fillOpacityLabel", "lineControls", "fillPatternControl", "endpointControls", "bufferSection"].forEach((id) => {
+      el("strokeOpacityLabel").firstChild.textContent = isImage ? "Image opacity" : "Line opacity";
+      ["objectLayerControl", "labelControl", "unitNameControl", "higherFormationControl", "showLabelControl", "measureToggleLabel", "iconControls", "textStyleControls", "labelStyleControls", "strokeFillControls", "opacityControls", "objectShadowControl", "strokeOpacityLabel", "fillOpacityLabel", "lineControls", "fillPatternControl", "endpointControls", "imageGeorefControls", "imageWarpControls", "bufferSection"].forEach((id) => {
         el(id)?.classList.toggle("locked-disabled", locked);
       });
       ["editToggle", "moveToggle", "deleteSelected", "frontBtn", "backBtn", "editCoordinates", "addBuffer", "removeBuffers"].forEach((id) => {
         if (el(id)) el(id).disabled = locked || !hasObj;
       });
+      syncRemoveBuffersButton(obj);
       syncLineEndpointButtons();
       syncDeleteVertexButton();
       updatePointIconPreview();
       updatePatternPreview();
       updateObjectLayerStatus(obj);
+      renderImageGeorefControls(obj);
     }
 
     function updateSelectionHalo() {
@@ -4248,9 +5655,11 @@
       }
       const obj = selectedObj();
       if (!obj || obj.visible === false) return;
-      const haloStyle = { color: "#7ed0a6", weight: Math.max(6, (obj.style?.weight || 3) + 4), opacity: 0.75, fillOpacity: 0.08, interactive: false, pane: "objects" };
+      const haloStyle = { color: "#7ed0a6", weight: Math.max(6, (obj.style?.weight || 3) + 4), opacity: 0.72, fillOpacity: 0.08, interactive: false, pane: "selection" };
       if (isPointLike(obj) || obj.kind === "text") {
         state.selectedHalo = L.circleMarker(obj.layer.getLatLng(), { ...haloStyle, radius: Math.max(14, effectiveIconSize(obj) / 2 + 6) }).addTo(map);
+      } else if (obj.kind === "image") {
+        state.selectedHalo = L.rectangle(obj.layer.getBounds(), haloStyle).addTo(map);
       } else if (obj.kind === "circle") {
         state.selectedHalo = L.circle(obj.layer.getLatLng(), { ...haloStyle, radius: obj.layer.getRadius() }).addTo(map);
       } else if (obj.kind === "line") {
@@ -4272,6 +5681,7 @@
       obj.showLabel = obj.kind === "text" ? false : el("showLabel").checked;
       obj.text = obj.kind === "text" ? obj.label : (obj.text || "");
       obj.notes = el("notesInput").value;
+      if (obj.kind === "image") obj.image = { ...(obj.image || {}), keepAspect: el("imageKeepAspect").checked };
       const nextStyle = baseStyle();
       if (isPointLike(obj)) {
         obj.iconSize = Number(el("iconSize").value || obj.iconSize || 32);
@@ -4294,9 +5704,11 @@
       obj.textStyle = obj.kind === "text" ? baseTextStyle() : normalizeTextStyle(obj.textStyle);
       obj.labelStyle = obj.kind === "text" ? normalizeLabelStyle(obj.labelStyle) : baseLabelStyle();
       obj.style = obj.kind === "marker"
-        ? { ...obj.style, color: nextStyle.color, fillColor: nextStyle.fillColor, opacity: nextStyle.opacity, showMeasurements: nextStyle.showMeasurements }
+        ? { ...obj.style, color: nextStyle.color, fillColor: nextStyle.fillColor, opacity: nextStyle.opacity, fillOpacity: nextStyle.fillOpacity, pattern: "", shadow: nextStyle.shadow, showMeasurements: nextStyle.showMeasurements }
         : obj.kind === "unit"
-        ? { ...obj.style, opacity: nextStyle.opacity, showMeasurements: nextStyle.showMeasurements }
+        ? { ...obj.style, opacity: nextStyle.opacity, shadow: nextStyle.shadow, showMeasurements: nextStyle.showMeasurements }
+        : obj.kind === "image"
+        ? { ...obj.style, opacity: nextStyle.opacity, showMeasurements: false }
         : obj.kind === "text"
           ? { ...nextStyle, showMeasurements: nextStyle.showMeasurements }
         : nextStyle;
@@ -4452,6 +5864,25 @@
       if (selected && obj?.id === selected.obj.id) highlightCoordinateLine(selected.index);
     }
 
+    function isCoordinateEditing() {
+      const output = el("coordinateOutput");
+      return Boolean(output && !output.readOnly);
+    }
+
+    function cancelCoordinateEditing(message = "Coordinate editing cancelled.") {
+      const output = el("coordinateOutput");
+      if (!output || output.readOnly) return false;
+      const obj = selectedObj();
+      output.readOnly = true;
+      el("editCoordinates").classList.remove("active");
+      el("editCoordinates").textContent = "Edit Coordinates";
+      output.value = obj ? objectCoordinateText(obj) : "";
+      resizeCoordinateOutput(output);
+      output.blur();
+      status(message);
+      return true;
+    }
+
     function updateMeasurementPanel() {
       const output = el("measurementOutput");
       if (!output) return;
@@ -4479,7 +5910,7 @@
         const ring = polygonRing(obj);
         return ring.map((p, index) => `${index + 1}. ${formatLatLng(p)}`).join("\n");
       }
-      if (obj.kind === "exportArea") {
+      if (obj.kind === "exportArea" || obj.kind === "image") {
         const bounds = exportAreaBounds(obj);
         return `Northwest: ${formatLatLng(bounds.getNorthWest())}\nSoutheast: ${formatLatLng(bounds.getSouthEast())}`;
       }
@@ -4572,6 +6003,8 @@
       } else if (obj.kind === "polygon" || obj.kind === "exportArea") {
         obj.layer.setLatLngs([parsed.latlngs]);
         if (obj.kind === "exportArea" && obj.layer.setBounds) obj.layer.setBounds(L.latLngBounds(parsed.latlngs));
+      } else if (obj.kind === "image") {
+        obj.layer.setBounds(L.latLngBounds(parsed.latlngs));
       } else if (obj.kind === "circle") {
         obj.layer.setLatLng(parsed.latlng);
         if (parsed.radius) obj.layer.setRadius(parsed.radius);
@@ -4589,7 +6022,7 @@
       if (isPointLike(kind) || kind === "text") return points.length >= 1 ? { latlng: points[0] } : null;
       if (kind === "line") return points.length >= 2 ? { latlngs: points } : null;
       if (kind === "polygon") return points.length >= 3 ? { latlngs: points } : null;
-      if (kind === "exportArea") {
+      if (kind === "exportArea" || kind === "image") {
         if (points.length >= 2) return { latlngs: rectangleCorners(L.latLngBounds(points[0], points[1])) };
         return null;
       }
@@ -4753,14 +6186,28 @@
       if (el("exportAttribution")) el("exportAttribution").checked = state.exportAttribution !== false;
       if (el("referenceHighlights")) el("referenceHighlights").checked = state.referenceHighlights !== false;
       if (el("referenceBackdropColor")) el("referenceBackdropColor").value = safeMapBackdropColor(state.referenceBackdropColor);
-      if (el("referenceBackdropOpacity")) el("referenceBackdropOpacity").value = clamp01(state.referenceBackdropOpacity, 0.15);
+      if (el("referenceBackdropOpacity")) {
+        el("referenceBackdropOpacity").value = clamp01(state.referenceBackdropOpacity, 0.15);
+        if (el("referenceBackdropOpacityPercent")) el("referenceBackdropOpacityPercent").value = percentFromOpacity(state.referenceBackdropOpacity);
+      }
       if (el("bufferUnit")) el("bufferUnit").value = distanceUnitToBufferUnit(state.distanceUnit);
       if (el("unitScale")) el("unitScale").value = Math.round((state.unitIconScale || 1) * 100);
       if (el("pointScale")) el("pointScale").value = Math.round((state.pointIconScale || 1) * 100);
-      if (el("unitScaleValue")) el("unitScaleValue").textContent = `${Math.round((state.unitIconScale || 1) * 100)}%`;
-      if (el("pointScaleValue")) el("pointScaleValue").textContent = `${Math.round((state.pointIconScale || 1) * 100)}%`;
+      if (el("unitScaleValue")) el("unitScaleValue").value = Math.round((state.unitIconScale || 1) * 100);
+      if (el("pointScaleValue")) el("pointScaleValue").value = Math.round((state.pointIconScale || 1) * 100);
+      state.scaleBars = normalizeScaleBars(state.scaleBars);
+      ["horizontal", "vertical"].forEach((kind) => {
+        const controls = scaleBarControls(kind);
+        const settings = state.scaleBars[kind];
+        if (controls.show) controls.show.checked = Boolean(settings.show);
+        if (controls.position) controls.position.value = settings.position;
+        if (controls.divisions) controls.divisions.value = settings.divisions;
+        if (controls.offsetX) controls.offsetX.value = settings.offsetX;
+        if (controls.offsetY) controls.offsetY.value = settings.offsetY;
+      });
       updateCursorReadout();
       updateAttributionPrefix();
+      updateScaleBars();
     }
 
     function setCoordinateSystem(value) {
@@ -4805,6 +6252,101 @@
       updateSelectionHalo();
       refreshLabelsAndMeasurements();
       scheduleSave();
+    }
+
+    function resetControlValues(values) {
+      Object.entries(values).forEach(([id, value]) => {
+        const node = el(id);
+        if (!node) return;
+        if (node.type === "checkbox") node.checked = Boolean(value);
+        else node.value = value;
+      });
+    }
+
+    function resetNewObjectDrawingDefaults() {
+      resetControlValues({
+        strokeColor: "#ffcc4d",
+        fillColor: "#ffcc4d",
+        strokeOpacity: 1,
+        fillOpacity: 0.25,
+        objectShadow: false,
+        lineWeight: 3,
+        dashStyle: "",
+        fillPattern: "",
+        startEndpoint: "",
+        endEndpoint: "",
+        showMeasurements: false,
+        iconSize: 32,
+        iconKind: "dot",
+        textSize: 13,
+        textBold: false,
+        textItalic: false,
+        textColor: "#161616",
+        textBoxFill: "#fff7d8",
+        textBoxFillOpacity: 0.92,
+        textBoxLine: "#161616",
+        textBoxWeight: 1,
+        textBoxDash: "",
+        textShadow: true,
+        labelTextSize: 11,
+        labelTextBold: false,
+        labelTextItalic: false,
+        labelTextColor: "#000000",
+        labelBoxFill: "#ffffff",
+        labelBoxFillOpacity: 0,
+        labelBoxLine: "#ff0000",
+        labelBoxWeight: 0,
+        labelBoxDash: "",
+        labelShadow: false,
+        labelTextOutline: true,
+        labelPosition: "above",
+        labelOffsetX: 0,
+        labelOffsetY: 12,
+        labelScaleWithIcon: true,
+        bufferDistance: 1,
+        bufferMeasurements: false,
+        bufferShowOverlaps: false
+      });
+      if (el("bufferUnit")) el("bufferUnit").value = distanceUnitToBufferUnit(state.distanceUnit);
+      state.activeIcon = pointIconFromKind("dot");
+      state.activePointIcon = state.activeIcon;
+      state.activeUnitIcon = defaultApp6Icon();
+      setApp6Controls(state.activeUnitIcon);
+      if (el("iconKind")) el("iconKind").value = "dot";
+      updateIconControlVisibility();
+      updatePatternPreview();
+      updatePointIconPreview();
+    }
+
+    function resetSettingsToDefaults() {
+      if (!confirm("Reset Settings and new-object drawing defaults? Existing map objects and layers will be kept.")) return;
+      pushUndo("reset-settings");
+      state.coordinateSystem = "dd";
+      state.distanceUnit = "metric";
+      state.exportAreaRatio = "free";
+      state.exportCredit = true;
+      state.exportDate = true;
+      state.exportAttribution = true;
+      state.referenceHighlights = true;
+      state.referenceBackdropColor = "#0f1419";
+      state.referenceBackdropOpacity = 0.15;
+      state.unitIconScale = 1;
+      state.pointIconScale = 1;
+      state.scaleBars = defaultScaleBars();
+      state.mapTitleStyle = normalizeTitleStyle({});
+      setTitleStyleControls(state.mapTitleStyle);
+      resetNewObjectDrawingDefaults();
+      restoreReferenceLayerState({});
+      applyMapBackdrop();
+      applyReferenceLayers();
+      updateMapTitleOverlay();
+      updateCoordinatePanel();
+      updateMeasurementPanel();
+      refreshLabelsAndMeasurements();
+      updateSelectionHalo();
+      syncSettingsControls();
+      scheduleSave();
+      status("Settings reset to defaults.");
     }
 
     function formatDmsLatLng(p) {
@@ -5079,6 +6621,7 @@
         buffers: obj.buffers,
         icon: obj.icon,
         iconSize: obj.iconSize,
+        image: obj.image || null,
         endpoints: obj.endpoints,
         geometry: serializeGeometry(obj)
       }));
@@ -5192,7 +6735,8 @@
         polygon: "Polygon",
         exportArea: "Export area",
         circle: "Circle",
-        text: "Text box"
+        text: "Text box",
+        image: "Image"
       }[kind] || kind || "Object";
     }
 
@@ -5505,11 +7049,15 @@
       const fillOpacity = Number(obj.style?.fillOpacity ?? 0.25);
       const weight = Math.max(1.5, Math.min(4, Number(obj.style?.weight || 3)));
       if (isPointLike(obj)) {
-        if (obj.kind === "unit" || obj.icon?.kind === "app6") return `<span class="object-icon-preview">${app6Svg(obj.icon, 18, opacity)}</span>`;
-        if (obj.icon?.url) return `<span class="object-icon-preview"><img src="${escapeHtml(obj.icon.url)}" alt="" style="opacity:${opacity};"></span>`;
-        return `<span class="object-icon-preview">${pointMarkerSvg(obj.icon?.kind || "dot", 18, obj.style?.color, obj.style?.fillColor, opacity)}</span>`;
+        const shadow = Boolean(obj.style?.shadow);
+        if (obj.kind === "unit" || obj.icon?.kind === "app6") return `<span class="object-icon-preview">${app6Svg(obj.icon, 18, opacity, shadow)}</span>`;
+        if (obj.icon?.url) return `<span class="object-icon-preview"><img src="${escapeHtml(obj.icon.url)}" alt="" style="opacity:${opacity};filter:${shadow ? "drop-shadow(0 1px 3px rgba(0,0,0,.72))" : "none"};"></span>`;
+        return `<span class="object-icon-preview">${pointMarkerSvg(obj.icon?.kind || "dot", 18, obj.style?.color, obj.style?.fillColor, opacity, shadow, obj.style?.fillOpacity ?? 1)}</span>`;
       }
       if (obj.kind === "text") return `<span class="object-icon-preview" style="color:${escapeHtml(normalizeTextStyle(obj.textStyle).color)};">T</span>`;
+      if (obj.kind === "image") {
+        return `<span class="object-icon-preview" title="Image"><svg viewBox="0 0 18 18" aria-hidden="true"><rect x="3" y="4" width="12" height="10" rx="1" fill="rgba(126,208,166,.28)" stroke="#7ed0a6" stroke-width="1.5"/><path d="M4.5 12l3.2-3 2.1 2 1.4-1.5 2.3 2.5" fill="none" stroke="#f0bc70" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11.8" cy="6.7" r="1" fill="#f8fafc"/></svg></span>`;
+      }
       if (obj.kind === "line") {
         return `<span class="object-icon-preview" title="Line"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 13 L7 5 L16 10" fill="none" stroke="${color}" stroke-width="${weight}" stroke-linecap="round" stroke-linejoin="round" opacity="${opacity}"/></svg></span>`;
       }
@@ -5579,11 +7127,17 @@
       if (obj.kind === "line") obj.hitLayer = L.polyline(obj.layer.getLatLngs(), options);
       if (obj.kind === "polygon" || obj.kind === "exportArea") obj.hitLayer = L.polygon(obj.layer.getLatLngs(), options);
       if (obj.kind === "circle") obj.hitLayer = L.circle(obj.layer.getLatLng(), { ...options, radius: obj.layer.getRadius() });
+      if (obj.kind === "image") obj.hitLayer = L.rectangle(obj.layer.getBounds(), options);
       if (!obj.hitLayer) return;
       obj.hitLayer.on("click", (event) => {
         if (isDrawingActive()) return;
         L.DomEvent.stopPropagation(event);
         selectObject(obj.id);
+      });
+      obj.hitLayer.on("mousemove", (event) => {
+        if (!event.latlng) return;
+        state.lastMouseLatLng = event.latlng;
+        updateCursorReadout(event.latlng);
       });
       if (isObjectVisible(obj)) obj.hitLayer.addTo(map);
       obj.hitLayer.bringToFront?.();
@@ -5610,13 +7164,46 @@
       }
     }
 
-    function syncDrawingInteractivity() {
-      const clickThrough = isDrawingActive();
+    function objectSnapPoints(obj) {
+      if (!obj || !isObjectVisible(obj)) return [];
+      if (isPointLike(obj) || obj.kind === "text") return obj.layer?.getLatLng ? [obj.layer.getLatLng()] : [];
+      if (obj.kind === "line") return (obj.layer?.getLatLngs?.() || []).flat().filter(Boolean);
+      if (obj.kind === "polygon" || obj.kind === "exportArea") return (polygonRing(obj) || []).filter(Boolean);
+      if (obj.kind === "circle") return obj.layer?.getLatLng ? [obj.layer.getLatLng()] : [];
+      if (obj.kind === "image" && obj.layer?.getBounds) return rectangleCorners(obj.layer.getBounds());
+      return [];
+    }
+
+    function refreshSnapGuides() {
+      snapGuides.clearLayers();
+      if (!isDrawingActive()) return;
+      const seen = new Set();
       for (const obj of state.objects.values()) {
-        setLayerClickThrough(obj.layer, clickThrough);
-        if (obj.hitLayer) setLayerClickThrough(obj.hitLayer, clickThrough);
+        objectSnapPoints(obj).forEach((latlng) => {
+          const point = L.latLng(latlng);
+          const key = `${point.lat.toFixed(7)},${point.lng.toFixed(7)}`;
+          if (seen.has(key)) return;
+          seen.add(key);
+          snapGuides.addLayer(L.marker(point, {
+            pane: "objects",
+            interactive: false,
+            keyboard: false,
+            opacity: 0,
+            pmIgnore: false,
+            snapIgnore: false,
+            icon: snapGuideIcon
+          }));
+        });
+      }
+    }
+
+    function syncDrawingInteractivity() {
+      for (const obj of state.objects.values()) {
+        setLayerClickThrough(obj.layer, false);
+        if (obj.hitLayer) setLayerClickThrough(obj.hitLayer, isDrawingActive());
         updateHitLayer(obj);
       }
+      refreshSnapGuides();
     }
 
     function labelOffset(obj) {
@@ -5655,12 +7242,12 @@
       const pts = obj.layer.getLatLngs();
       if (pts.length < 2) return [];
       return [
-        endpointMarker(pts[0], pts[1], obj.endpoints.start, true, obj.style.color),
-        endpointMarker(pts[pts.length - 1], pts[pts.length - 2], obj.endpoints.end, false, obj.style.color)
+        endpointMarker(pts[0], pts[1], obj.endpoints.start, true, obj.style.color, obj.style.shadow),
+        endpointMarker(pts[pts.length - 1], pts[pts.length - 2], obj.endpoints.end, false, obj.style.color, obj.style.shadow)
       ].filter(Boolean);
     }
 
-    function endpointMarker(point, neighbor, type, isStart, color = "#f8fafc") {
+    function endpointMarker(point, neighbor, type, isStart, color = "#f8fafc", shadow = false) {
       if (!type) return null;
       const lineAngle = isStart ? segmentScreenAngle(point, neighbor) : segmentScreenAngle(neighbor, point);
       let html = '<div class="endpoint-point"></div>';
@@ -5678,7 +7265,7 @@
         interactive: false,
         icon: L.divIcon({
           className: "leaflet-div-icon",
-          html: `<div class="endpoint-marker" style="color:${escapeHtml(color)};transform:rotate(${angle}deg)">${html}</div>`,
+          html: `<div class="endpoint-marker ${shadow ? "has-shadow" : ""}" style="color:${escapeHtml(color)};transform:rotate(${angle}deg)">${html}</div>`,
           iconSize: [24, 24],
           iconAnchor: [12, 12]
         })
@@ -5823,6 +7410,11 @@
         if (ring.length && (ring[0][0] !== ring[ring.length - 1][0] || ring[0][1] !== ring[ring.length - 1][1])) ring.push(ring[0]);
         return turf.polygon([ring]);
       }
+      if (obj.kind === "image") {
+        const ring = rectangleCorners(obj.layer.getBounds()).map((p) => [p.lng, p.lat]);
+        if (ring.length) ring.push(ring[0]);
+        return turf.polygon([ring]);
+      }
       if (obj.kind === "circle") {
         const p = obj.layer.getLatLng();
         return turf.circle([p.lng, p.lat], obj.layer.getRadius() / 1000, { steps: 96, units: "kilometers" });
@@ -5854,6 +7446,7 @@
       obj.buffers.push(spec);
       updateBuffers(obj);
       renderBufferList();
+      syncRemoveBuffersButton(obj);
       scheduleSave();
     }
 
@@ -5941,7 +7534,10 @@
       const list = el("bufferList");
       const obj = selectedObj();
       list.innerHTML = "";
-      if (!obj) return;
+      if (!obj) {
+        syncRemoveBuffersButton(null);
+        return;
+      }
       obj.buffers.forEach((buffer, index) => {
         buffer.style = normalizeBufferStyle(buffer.style, obj);
         const row = document.createElement("div");
@@ -5957,7 +7553,12 @@
           <button class="danger" title="Delete buffer">×</button>
           <div class="buffer-style-grid">
             <label>Line color<input data-buf="color" type="color" value="${buffer.style.color}"></label>
-            <label>Line opacity<input data-buf="opacity" type="range" min="0" max="1" step="0.05" value="${buffer.style.opacity}"></label>
+            <label>Line opacity
+              <span class="range-percent">
+                <input data-buf="opacity" type="range" min="0" max="1" step="0.05" value="${buffer.style.opacity}">
+                <input data-buf-percent="opacity" type="number" min="0" max="100" step="1" value="${percentFromOpacity(buffer.style.opacity)}" aria-label="Buffer line opacity percent">
+              </span>
+            </label>
             <label>Line width<input data-buf="weight" type="number" min="1" max="24" value="${buffer.style.weight}"></label>
             <label>Line dash<select data-buf="dashArray">
               <option value="" ${!buffer.style.dashArray ? "selected" : ""}>Solid</option>
@@ -5966,7 +7567,12 @@
               <option value="12 6 2 6" ${buffer.style.dashArray === "12 6 2 6" ? "selected" : ""}>Dash-dot</option>
             </select></label>
             <label>Fill color<input data-buf="fillColor" type="color" value="${buffer.style.fillColor}"></label>
-            <label>Fill opacity<input data-buf="fillOpacity" type="range" min="0" max="1" step="0.05" value="${buffer.style.fillOpacity}"></label>
+            <label>Fill opacity
+              <span class="range-percent">
+                <input data-buf="fillOpacity" type="range" min="0" max="1" step="0.05" value="${buffer.style.fillOpacity}">
+                <input data-buf-percent="fillOpacity" type="number" min="0" max="100" step="1" value="${percentFromOpacity(buffer.style.fillOpacity)}" aria-label="Buffer fill opacity percent">
+              </span>
+            </label>
             <label class="wide pattern-control"><span>Fill pattern</span>
               <span class="pattern-preview" style="${patternPreviewBackground(buffer.style.pattern, buffer.style.color, buffer.style.fillColor, buffer.style.fillOpacity)}" aria-hidden="true"></span>
               <select data-buf="pattern">
@@ -6001,16 +7607,42 @@
           input.addEventListener("input", () => updateBufferFromControl(input, buffer, obj));
           input.addEventListener("change", () => updateBufferFromControl(input, buffer, obj));
         });
+        row.querySelectorAll("[data-buf='opacity'], [data-buf='fillOpacity']").forEach((range) => {
+          const percentInput = row.querySelector(`[data-buf-percent="${range.dataset.buf}"]`);
+          range.addEventListener("input", () => {
+            if (percentInput) percentInput.value = percentFromOpacity(range.value);
+          });
+        });
+        row.querySelectorAll("[data-buf-percent]").forEach((input) => {
+          const commit = () => {
+            const key = input.dataset.bufPercent;
+            const range = row.querySelector(`[data-buf="${key}"]`);
+            if (!range) return;
+            const percent = clampNumber(input.value, 0, 100, percentFromOpacity(range.value));
+            input.value = Math.round(percent);
+            range.value = percent / 100;
+            updateBufferFromControl(range, buffer, obj);
+          };
+          input.addEventListener("change", commit);
+          input.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              commit();
+            }
+          });
+        });
         row.querySelector("button").addEventListener("click", () => {
           pushUndo("delete-buffer");
           obj.buffers.splice(index, 1);
           updateBuffers(obj);
           renderBufferList();
+          syncRemoveBuffersButton(obj);
           refreshLabelsAndMeasurements();
           scheduleSave();
         });
         list.appendChild(row);
       });
+      syncRemoveBuffersButton(obj);
     }
 
     function normalizeBufferStyle(style = {}, obj = selectedObj()) {
@@ -6174,7 +7806,11 @@
         add.textContent = "Add";
         add.title = "Add search result as point";
         add.addEventListener("click", () => addSearchResultPoint(item));
-        row.append(button, copy, add);
+        const clear = document.createElement("button");
+        clear.textContent = "Clear";
+        clear.title = "Clear the search marker from the map";
+        clear.addEventListener("click", clearSearchMarker);
+        row.append(button, copy, add, clear);
         results.appendChild(row);
       });
       status(`${items.length} search results.`);
@@ -6198,10 +7834,24 @@
       add.textContent = "Add";
       add.title = "Add coordinate as point";
       add.addEventListener("click", () => addSearchResultPoint({ lat: latlng.lat, lon: latlng.lng, name: "Coordinate", display_name: sourceText || bundle }));
-      row.append(button, copy, add);
+      const clear = document.createElement("button");
+      clear.textContent = "Clear";
+      clear.title = "Clear the search marker from the map";
+      clear.addEventListener("click", clearSearchMarker);
+      row.append(button, copy, add, clear);
       results.appendChild(row);
       showSearchResult({ lat: latlng.lat, lon: latlng.lng, name: "Coordinate", display_name: sourceText || bundle });
       status("Map focused to coordinate.");
+    }
+
+    function clearSearchMarker() {
+      if (state.searchMarker) {
+        map.removeLayer(state.searchMarker);
+        state.searchMarker = null;
+        status("Search marker cleared.");
+      } else {
+        status("No search marker to clear.");
+      }
     }
 
     function showSearchResult(item) {
@@ -6275,6 +7925,7 @@
       state.exportCredit = true;
       state.exportDate = true;
       state.exportAttribution = true;
+      state.scaleBars = defaultScaleBars();
       restoreReferenceLayerState();
       state.drawLayers.clear();
       const obsLayerId = uid("layer");
@@ -6347,6 +7998,7 @@
       renderDrawLayers();
       renderObjectList();
       syncLayerVisibility();
+      syncSettingsControls();
       zoomToObjects();
       scheduleSave();
       status("Sample project loaded.");
@@ -6417,6 +8069,11 @@
       const mapShape = requestedShape === "Line" ? "Line" : requestedShape;
       map.pm.enableDraw(mapShape, {
         snappable: true,
+        snapDistance: 28,
+        snapVertex: true,
+        snapSegment: false,
+        snapMiddle: false,
+        requireSnapToFinish: false,
         pathOptions: { ...(shape === "ExportArea" ? exportAreaStyle() : objectDefaultStyle(shape === "Line" ? "line" : shape.toLowerCase())), pane: "objects" },
         markerStyle: { draggable: true, pane: "objects" },
         tooltips: requestedShape !== "Marker"
@@ -6496,6 +8153,7 @@
     function clearDrawingMeasurement() {
       map.getContainer().classList.remove("placing-marker");
       if (state.tempMeasure) measurements.removeLayer(state.tempMeasure);
+      snapGuides.clearLayers();
       if (state.drawingMeasure?.layer && state.drawingMeasure?.update) {
         state.drawingMeasure.layer.off("pm:vertexadded pm:change pm:centerplaced pm:markerdrag drag dragend", state.drawingMeasure.update);
         map.off("mousemove", state.drawingMeasure.update);
@@ -6626,10 +8284,10 @@
 
     function toggleEdit() {
       const obj = selectedObj();
-      if (!obj || !["line", "polygon", "circle", "exportArea"].includes(obj.kind)) {
+      if (!obj || !["line", "polygon", "circle", "exportArea", "image"].includes(obj.kind)) {
         state.editOn = false;
         applyInteractionModes();
-        return status("Select a line, polygon, circle, or export area to edit.");
+        return status("Select a line, polygon, circle, export area, or image to edit.");
       }
       if (obj?.locked) return status("Unlock the object before editing it.");
       const next = !state.editOn;
@@ -6690,6 +8348,7 @@
         startEditMeasurement(selected);
         renderVertexSelection();
         if (["line", "polygon"].includes(selected.kind)) status("Edit points: click a point to select it, click a segment to add a point, use plus handles/Add Start/End Point to extend lines, and use Delete Point, Del, or Backspace to delete the selected point.");
+        if (selected.kind === "image") status("Edit image: drag corners to resize, the centre handle to move, or the rotation handle to rotate.");
       } else {
         clearSelectedVertex();
       }
@@ -6698,6 +8357,10 @@
         selected.layer.dragging?.enable();
         updateHitLayer(selected);
         startEditMeasurement(selected);
+        if (selected.kind === "image") {
+          renderVertexSelection();
+          status("Move image: drag the centre handle to move, corner handles to resize, or rotation handle to rotate.");
+        }
       }
       if (!state.editOn && !state.dragOn) {
         for (const obj of state.objects.values()) {
@@ -6793,6 +8456,216 @@
         reader.onerror = () => reject(reader.error || new Error("File read failed"));
         reader.readAsText(file);
       });
+    }
+
+    function readFileDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error || new Error("File read failed"));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function imageDataUrlSize(dataUrl) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve({ width: img.naturalWidth || img.width || 1, height: img.naturalHeight || img.height || 1 });
+        img.onerror = () => resolve({ width: 1, height: 1 });
+        img.src = dataUrl;
+      });
+    }
+
+    function escapeXmlAttr(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" }[ch]));
+    }
+
+    function defaultImageBounds(width, height) {
+      const size = map.getSize();
+      const aspect = Math.max(0.05, width / Math.max(1, height));
+      let finalWidth = Math.min(size.x * 0.55, 640);
+      let finalHeight = finalWidth / aspect;
+      const maxHeight = Math.min(size.y * 0.55, 520);
+      if (finalHeight > maxHeight) {
+        finalHeight = maxHeight;
+        finalWidth = finalHeight * aspect;
+      }
+      finalWidth = Math.max(24, finalWidth);
+      finalHeight = Math.max(24, finalHeight);
+      const center = map.latLngToContainerPoint(map.getCenter());
+      const sw = map.containerPointToLatLng([center.x - finalWidth / 2, center.y + finalHeight / 2]);
+      const ne = map.containerPointToLatLng([center.x + finalWidth / 2, center.y - finalHeight / 2]);
+      return L.latLngBounds(sw, ne);
+    }
+
+    function imageSource(image = {}) {
+      return image.src || image.dataUrl || "";
+    }
+
+    function imageNaturalSize(image = {}) {
+      return {
+        width: Math.max(1, Number(image.naturalWidth || image.width || 1)),
+        height: Math.max(1, Number(image.naturalHeight || image.height || 1))
+      };
+    }
+
+    function projectLatLngForAffine(latlng) {
+      const p = map.options.crs.project(L.latLng(latlng));
+      return { x: p.x, y: p.y };
+    }
+
+    function unprojectAffinePoint(point) {
+      return map.options.crs.unproject(L.point(point.x, point.y));
+    }
+
+    function transformAffinePoint(matrix, x, y) {
+      return {
+        x: matrix.a * x + matrix.b * y + matrix.c,
+        y: matrix.d * x + matrix.e * y + matrix.f
+      };
+    }
+
+    function inverseAffinePoint(matrix, point) {
+      const a = Number(matrix?.a);
+      const b = Number(matrix?.b);
+      const c = Number(matrix?.c);
+      const d = Number(matrix?.d);
+      const e = Number(matrix?.e);
+      const f = Number(matrix?.f);
+      const det = a * e - b * d;
+      if (![a, b, c, d, e, f, det].every(Number.isFinite) || Math.abs(det) < 1e-12) return null;
+      const x = Number(point?.x) - c;
+      const y = Number(point?.y) - f;
+      return {
+        x: (e * x - b * y) / det,
+        y: (-d * x + a * y) / det
+      };
+    }
+
+    function affineImageOverlayData(image = {}) {
+      const matrix = image.affine?.matrix;
+      const src = imageSource(image);
+      if (!matrix || !src) return null;
+      const m = {
+        a: Number(matrix.a),
+        b: Number(matrix.b),
+        c: Number(matrix.c),
+        d: Number(matrix.d),
+        e: Number(matrix.e),
+        f: Number(matrix.f)
+      };
+      if (!Object.values(m).every(Number.isFinite)) return null;
+      const size = imageNaturalSize(image);
+      const transformed = [
+        transformAffinePoint(m, 0, 0),
+        transformAffinePoint(m, size.width, 0),
+        transformAffinePoint(m, size.width, size.height),
+        transformAffinePoint(m, 0, size.height)
+      ];
+      const xs = transformed.map((p) => p.x);
+      const ys = transformed.map((p) => p.y);
+      const minX = Math.min(...xs);
+      const maxX = Math.max(...xs);
+      const minY = Math.min(...ys);
+      const maxY = Math.max(...ys);
+      const viewWidth = maxX - minX;
+      const viewHeight = maxY - minY;
+      if (viewWidth <= 0 || viewHeight <= 0) return null;
+      const svgMatrix = [
+        m.a,
+        -m.d,
+        m.b,
+        -m.e,
+        m.c - minX,
+        maxY - m.f
+      ].map((n) => Number(n.toFixed(9))).join(" ");
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${viewWidth} ${viewHeight}" preserveAspectRatio="none"><image href="${escapeXmlAttr(src)}" xlink:href="${escapeXmlAttr(src)}" width="${size.width}" height="${size.height}" transform="matrix(${svgMatrix})"/></svg>`;
+      return {
+        src: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+        bounds: L.latLngBounds(unprojectAffinePoint({ x: minX, y: minY }), unprojectAffinePoint({ x: maxX, y: maxY }))
+      };
+    }
+
+    function createImageLayerFromData(image = {}, bounds, style = {}) {
+      const affine = affineImageOverlayData(image);
+      const opacity = clamp01(style.opacity ?? 0.75, 0.75);
+      if (affine) return L.imageOverlay(affine.src, affine.bounds, { pane: "objects", interactive: true, opacity });
+      return L.imageOverlay(imageSource(image), bounds, { pane: "objects", interactive: true, opacity });
+    }
+
+    function replaceImageLayer(obj, layer) {
+      if (!obj || obj.kind !== "image" || !layer) return;
+      const wasOnMap = map.hasLayer(obj.layer);
+      if (obj.layer && map.hasLayer(obj.layer)) map.removeLayer(obj.layer);
+      if (obj.hitLayer && map.hasLayer(obj.hitLayer)) map.removeLayer(obj.hitLayer);
+      obj.hitLayer = null;
+      obj.layer = layer;
+      attachLayerEvents(obj);
+      if (wasOnMap) layer.addTo(map);
+      styleLayer(obj);
+      updateHitLayer(obj);
+      updateDerived(obj);
+      renderObjectList();
+    }
+
+    function rebuildImageLayer(obj) {
+      if (!obj?.image) return;
+      const bounds = obj.layer?.getBounds?.() || defaultImageBounds(obj.image.naturalWidth, obj.image.naturalHeight);
+      replaceImageLayer(obj, createImageLayerFromData(obj.image, bounds, obj.style));
+    }
+
+    function solveAffine3(controlPoints, image = {}) {
+      const points = (controlPoints || []).slice(0, 3);
+      if (points.length < 3) return null;
+      const size = imageNaturalSize(image);
+      const src = points.map((point) => ({
+        x: clamp01(point.image?.x ?? 0, 0) * size.width,
+        y: clamp01(point.image?.y ?? 0, 0) * size.height
+      }));
+      const dst = points.map((point) => projectLatLngForAffine(point.map));
+      const denom = src[0].x * (src[1].y - src[2].y) + src[1].x * (src[2].y - src[0].y) + src[2].x * (src[0].y - src[1].y);
+      if (Math.abs(denom) < 1e-9) return null;
+      const coeff = (values) => ({
+        a: (values[0] * (src[1].y - src[2].y) + values[1] * (src[2].y - src[0].y) + values[2] * (src[0].y - src[1].y)) / denom,
+        b: (values[0] * (src[2].x - src[1].x) + values[1] * (src[0].x - src[2].x) + values[2] * (src[1].x - src[0].x)) / denom,
+        c: (values[0] * (src[1].x * src[2].y - src[2].x * src[1].y) + values[1] * (src[2].x * src[0].y - src[0].x * src[2].y) + values[2] * (src[0].x * src[1].y - src[1].x * src[0].y)) / denom
+      });
+      const x = coeff(dst.map((p) => p.x));
+      const y = coeff(dst.map((p) => p.y));
+      return { a: x.a, b: x.b, c: x.c, d: y.a, e: y.b, f: y.c };
+    }
+
+    async function addImageObjectFromFile(file) {
+      if (!file) return;
+      if (!file.type?.startsWith("image/")) return status("Choose an image file.");
+      status(`Loading image ${file.name}…`);
+      try {
+        const src = await readFileDataUrl(file);
+        const size = await imageDataUrlSize(src);
+        const bounds = defaultImageBounds(size.width, size.height);
+        const layer = L.imageOverlay(src, bounds, { pane: "objects", interactive: true, opacity: 0.75 });
+        const obj = createObject("image", layer, {
+          label: fileBaseName(file.name),
+          image: {
+            src,
+            name: file.name,
+            type: file.type || "image",
+            size: file.size || 0,
+            naturalWidth: size.width,
+            naturalHeight: size.height,
+            keepAspect: true,
+            controlPoints: []
+          },
+          style: { ...baseStyle(), opacity: 0.75, fillOpacity: 0, showMeasurements: false },
+          buffers: []
+        });
+        state.editOn = true;
+        state.dragOn = false;
+        applyInteractionModes();
+        status(`Image "${objectName(obj)}" added. Drag image edit handles to move or resize it.`);
+      } catch (error) {
+        status(`Image import failed: ${error.message}`);
+      }
     }
 
     function normalizedLayerName(name) {
@@ -6931,6 +8804,7 @@
           referenceBackdropOpacity: clamp01(state.referenceBackdropOpacity, 0.15),
           unitIconScale: state.unitIconScale,
           pointIconScale: state.pointIconScale,
+          scaleBars: normalizeScaleBars(state.scaleBars),
           view: { center: map.getCenter(), zoom: map.getZoom() },
           tileLayers: tileLayerState(),
           attribution: ATTRIBUTION_NOTE,
@@ -7342,6 +9216,17 @@
       ctx.lineWidth = Math.max(0, Number(style.weight ?? 3));
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
+      if (style.shadow) {
+        ctx.shadowColor = "rgba(0,0,0,0.55)";
+        ctx.shadowBlur = 5;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 2;
+      } else {
+        ctx.shadowColor = "transparent";
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+      }
       const dash = String(style.dashArray || "").trim().split(/\s+/).map(Number).filter((value) => Number.isFinite(value) && value > 0);
       ctx.setLineDash(dash);
     }
@@ -7657,6 +9542,13 @@
     #panelTab:hover { background: rgba(126,208,166,.98); }
     body.export-panel-open #panelTab { left: var(--panel-width); }
     #mapTitleOverlay { position: absolute; z-index: 900; top: 12px; left: 50%; transform: translateX(-50%); max-width: min(720px, calc(100% - 80px)); padding: 5px 12px; border: 1px solid rgba(255,255,255,.22); border-radius: 6px; background: rgba(12,16,20,.78); color: #f2f6fb; font-size: 17px; font-weight: 700; text-align: center; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .map-scale-bar { position: absolute; z-index: 905; display: grid; gap: 3px; color: #f8fafc; font-size: 11px; font-weight: 700; line-height: 1.1; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,.9), 0 0 2px #000; }
+    .map-scale-bar.horizontal { justify-items: center; }
+    .map-scale-bar.vertical { grid-template-columns: auto auto; align-items: center; }
+    .scale-bar-track { display: flex; border: 2px solid #f8fafc; border-top: 0; box-shadow: 0 0 0 1px rgba(0,0,0,.7), 0 1px 2px rgba(0,0,0,.7); }
+    .vertical .scale-bar-track { flex-direction: column; border: 2px solid #f8fafc; border-right: 0; }
+    .scale-bar-segment { flex: 1 1 0; min-width: 1px; min-height: 1px; background: rgba(248,250,252,.88); }
+    .scale-bar-segment:nth-child(even) { background: rgba(17,24,39,.88); }
     h1 { font-size: 14px; margin: 0 0 8px; }
     .map-notes { margin: 0 0 10px; color: #c7d0da; font-size: 11px; line-height: 1.35; white-space: normal; overflow-wrap: anywhere; }
     .map-notes a { color: #7ed0a6; text-decoration: none; }
@@ -7674,7 +9566,8 @@
     .text-annotation { display: block; width: max-content; min-width: 40px; max-width: min(320px, calc(100vw - 40px)); padding: 4px 6px; background: rgba(255,250,230,.92); color: #161616; border: 1px solid rgba(0,0,0,.28); border-radius: 4px; font-size: 12px; line-height: 1.25; white-space: pre-wrap; overflow-wrap: break-word; box-shadow: 0 2px 8px rgba(0,0,0,.24); }
     .leaflet-div-icon { background: transparent; border: 0; }
     .center-dot { width: 9px; height: 9px; border-radius: 50%; background: #fff; border: 2px solid #111820; box-shadow: 0 0 0 2px rgba(126,208,166,.7); }
-    .endpoint-marker { filter: drop-shadow(0 1px 2px #000); width: 24px; height: 24px; display: grid; place-items: center; }
+    .endpoint-marker { width: 24px; height: 24px; display: grid; place-items: center; }
+    .endpoint-marker.has-shadow { filter: drop-shadow(0 1px 2px #000); }
     .endpoint-arrow { width: 0; height: 0; border-top: 7px solid transparent; border-bottom: 7px solid transparent; border-left: 18px solid currentColor; }
     .endpoint-point { width: 11px; height: 11px; border-radius: 50%; background: currentColor; border: 2px solid #111820; }
     .endpoint-tick { width: 24px; height: 3px; border-radius: 2px; background: currentColor; }
@@ -7687,6 +9580,8 @@
 <body>
   <div id="map"></div>
   <div id="mapTitleOverlay" ${exportedState.showMapTitle && exportedState.mapTitle ? "" : "hidden"}>${escapeHtml(exportedState.mapTitle || "")}</div>
+  <div id="horizontalScaleBar" class="map-scale-bar horizontal" hidden></div>
+  <div id="verticalScaleBar" class="map-scale-bar vertical" hidden></div>
   <div id="panel">
     <h1>${escapeHtml(state.mapTitle || "GeoSketch Interactive Map")}</h1>
     ${state.mapNotes ? `<div class="map-notes">${renderLinkedText(state.mapNotes)}</div>` : ""}
@@ -7755,6 +9650,8 @@
     setupPanelToggle();
     applyTitleStyle();
     renderMap();
+    updateScaleBars();
+    map.on("zoomend moveend", updateScaleBars);
 
     function setupPanelToggle() {
       const button = document.getElementById("panelTab");
@@ -7948,6 +9845,7 @@
       const g = obj.geometry || {};
       if (obj.kind === "marker" || obj.kind === "unit") return L.marker(g.latlng, { icon: markerIcon(obj) });
       if (obj.kind === "text") return L.marker(g.latlng, { icon: textIcon(obj) });
+      if (obj.kind === "image") return imageLayerFromObject(obj);
       if (obj.kind === "line") return L.polyline(g.latlngs || []);
       if (obj.kind === "exportArea") return L.rectangle(exportAreaBoundsFromGeometry(g));
       if (obj.kind === "polygon") return L.polygon(g.latlngs || []);
@@ -7956,9 +9854,14 @@
     }
 
     function styleObjectLayer(layer, obj) {
+      if (obj.kind === "image") {
+        layer.setOpacity?.(obj.style?.opacity ?? 0.75);
+        return;
+      }
       if (!layer.setStyle) return;
       const s = obj.style || {};
       layer.setStyle({ color: s.color || "#ffcc4d", fillColor: s.fillColor || "#ffcc4d", opacity: s.opacity ?? 1, fillOpacity: s.fillOpacity ?? .25, weight: s.weight ?? 3, dashArray: s.dashArray || null });
+      if (layer._path) layer._path.style.filter = s.shadow ? "drop-shadow(0 2px 3px rgba(0,0,0,.65))" : "";
       setTimeout(() => applyPattern(layer, s), 0);
     }
 
@@ -7981,7 +9884,7 @@
       const g = obj.geometry || {};
       if (obj.kind === "marker" || obj.kind === "unit" || obj.kind === "text") return turf.point([g.latlng.lng, g.latlng.lat]);
       if (obj.kind === "line") return turf.lineString((g.latlngs || []).map((p) => [p.lng, p.lat]));
-      if (obj.kind === "polygon" || obj.kind === "exportArea") {
+      if (obj.kind === "polygon" || obj.kind === "exportArea" || obj.kind === "image") {
         const ring = (g.latlngs || []).map((p) => [p.lng, p.lat]);
         if (ring.length && (ring[0][0] !== ring[ring.length - 1][0] || ring[0][1] !== ring[ring.length - 1][1])) ring.push(ring[0]);
         return turf.polygon([ring]);
@@ -7990,26 +9893,28 @@
       return null;
     }
 
-    function pointMarkerSvg(kind, size, color, fillColor, opacity) {
+    function pointMarkerSvg(kind, size, color, fillColor, opacity, shadow, fillOpacity) {
       const kinds = ["dot", "target", "circle-outline", "triangle", "square", "diamond", "cross", "xmark", "pin", "airport", "hospital", "port"];
       const markerKind = kinds.includes(kind) ? kind : "dot";
       const stroke = escapeHtml(color || "#ffcc4d");
       const fill = escapeHtml(fillColor || color || "#ffcc4d");
-      const shownOpacity = Number.isFinite(Number(opacity)) ? Number(opacity) : 1;
-      const svgStyle = "display:block;opacity:" + shownOpacity + ";filter:drop-shadow(0 1px 3px rgba(0,0,0,.72));";
+      const lineOpacity = clamp01(opacity, 1);
+      const iconFillOpacity = clamp01(fillOpacity, 1);
+      const faintFillOpacity = Math.min(iconFillOpacity, .22);
+      const svgStyle = "display:block;filter:" + (shadow ? "drop-shadow(0 1px 3px rgba(0,0,0,.72))" : "none") + ";";
       let body = "";
-      if (markerKind === "dot") body = '<circle cx="32" cy="32" r="20" fill="' + fill + '" stroke="#fff" stroke-width="5"/>';
-      else if (markerKind === "target") body = '<circle cx="32" cy="32" r="23" fill="rgba(0,0,0,.14)" stroke="' + stroke + '" stroke-width="6"/><path d="M32 8v48M8 32h48" stroke="' + stroke + '" stroke-width="5" stroke-linecap="round"/><circle cx="32" cy="32" r="5" fill="' + stroke + '"/>';
-      else if (markerKind === "circle-outline") body = '<circle cx="32" cy="32" r="22" fill="none" stroke="' + stroke + '" stroke-width="6"/>';
-      else if (markerKind === "triangle") body = '<polygon points="32 9 57 54 7 54" fill="' + fill + '" stroke="' + stroke + '" stroke-width="5" stroke-linejoin="round"/>';
-      else if (markerKind === "square") body = '<rect x="12" y="12" width="40" height="40" fill="' + fill + '" stroke="' + stroke + '" stroke-width="5" rx="2"/>';
-      else if (markerKind === "diamond") body = '<polygon points="32 6 58 32 32 58 6 32" fill="' + fill + '" stroke="' + stroke + '" stroke-width="5" stroke-linejoin="round"/>';
-      else if (markerKind === "cross") body = '<path d="M32 9v46M9 32h46" stroke="' + stroke + '" stroke-width="9" stroke-linecap="round"/>';
-      else if (markerKind === "xmark") body = '<path d="M15 15l34 34M49 15 15 49" stroke="' + stroke + '" stroke-width="9" stroke-linecap="round"/>';
-      else if (markerKind === "pin") body = '<path d="M32 59C20 43 14 34 14 24 14 14 22 7 32 7s18 7 18 17c0 10-6 19-18 35z" fill="' + fill + '" stroke="' + stroke + '" stroke-width="5" stroke-linejoin="round"/><circle cx="32" cy="24" r="7" fill="#fff" opacity=".92"/>';
-      else if (markerKind === "airport") body = '<path d="M8 35l21-7 2-20h5l2 20 21 7v6l-21-4-1 12 10 6v5l-13-4-13 4v-5l10-6-1-12-21 4z" fill="' + stroke + '" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>';
-      else if (markerKind === "hospital") body = '<rect x="10" y="10" width="44" height="44" rx="5" fill="#fff" stroke="' + stroke + '" stroke-width="5"/><path d="M32 20v24M20 32h24" stroke="' + stroke + '" stroke-width="8" stroke-linecap="round"/>';
-      else if (markerKind === "port") body = '<circle cx="32" cy="12" r="5" fill="none" stroke="' + stroke + '" stroke-width="5"/><path d="M32 17v33M20 29h24M15 40c4 11 12 17 17 17s13-6 17-17M15 40l-7 4M49 40l7 4" fill="none" stroke="' + stroke + '" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>';
+      if (markerKind === "dot") body = '<circle cx="32" cy="32" r="20" fill="' + fill + '" fill-opacity="' + iconFillOpacity + '" stroke="#fff" stroke-opacity="' + lineOpacity + '" stroke-width="5"/>';
+      else if (markerKind === "target") body = '<circle cx="32" cy="32" r="23" fill="' + fill + '" fill-opacity="' + faintFillOpacity + '" stroke="' + stroke + '" stroke-opacity="' + lineOpacity + '" stroke-width="6"/><path d="M32 8v48M8 32h48" stroke="' + stroke + '" stroke-opacity="' + lineOpacity + '" stroke-width="5" stroke-linecap="round"/><circle cx="32" cy="32" r="5" fill="' + stroke + '" fill-opacity="' + lineOpacity + '"/>';
+      else if (markerKind === "circle-outline") body = '<circle cx="32" cy="32" r="22" fill="none" stroke="' + stroke + '" stroke-opacity="' + lineOpacity + '" stroke-width="6"/>';
+      else if (markerKind === "triangle") body = '<polygon points="32 9 57 54 7 54" fill="' + fill + '" fill-opacity="' + iconFillOpacity + '" stroke="' + stroke + '" stroke-opacity="' + lineOpacity + '" stroke-width="5" stroke-linejoin="round"/>';
+      else if (markerKind === "square") body = '<rect x="12" y="12" width="40" height="40" fill="' + fill + '" fill-opacity="' + iconFillOpacity + '" stroke="' + stroke + '" stroke-opacity="' + lineOpacity + '" stroke-width="5" rx="2"/>';
+      else if (markerKind === "diamond") body = '<polygon points="32 6 58 32 32 58 6 32" fill="' + fill + '" fill-opacity="' + iconFillOpacity + '" stroke="' + stroke + '" stroke-opacity="' + lineOpacity + '" stroke-width="5" stroke-linejoin="round"/>';
+      else if (markerKind === "cross") body = '<path d="M32 9v46M9 32h46" stroke="' + stroke + '" stroke-opacity="' + lineOpacity + '" stroke-width="9" stroke-linecap="round"/>';
+      else if (markerKind === "xmark") body = '<path d="M15 15l34 34M49 15 15 49" stroke="' + stroke + '" stroke-opacity="' + lineOpacity + '" stroke-width="9" stroke-linecap="round"/>';
+      else if (markerKind === "pin") body = '<path d="M32 59C20 43 14 34 14 24 14 14 22 7 32 7s18 7 18 17c0 10-6 19-18 35z" fill="' + fill + '" fill-opacity="' + iconFillOpacity + '" stroke="' + stroke + '" stroke-opacity="' + lineOpacity + '" stroke-width="5" stroke-linejoin="round"/><circle cx="32" cy="24" r="7" fill="#fff" opacity=".92"/>';
+      else if (markerKind === "airport") body = '<path d="M8 35l21-7 2-20h5l2 20 21 7v6l-21-4-1 12 10 6v5l-13-4-13 4v-5l10-6-1-12-21 4z" fill="' + stroke + '" fill-opacity="' + iconFillOpacity + '" stroke="#fff" stroke-opacity="' + lineOpacity + '" stroke-width="2" stroke-linejoin="round"/>';
+      else if (markerKind === "hospital") body = '<rect x="10" y="10" width="44" height="44" rx="5" fill="#fff" fill-opacity="' + iconFillOpacity + '" stroke="' + stroke + '" stroke-opacity="' + lineOpacity + '" stroke-width="5"/><path d="M32 20v24M20 32h24" stroke="' + stroke + '" stroke-opacity="' + lineOpacity + '" stroke-width="8" stroke-linecap="round"/>';
+      else if (markerKind === "port") body = '<circle cx="32" cy="12" r="5" fill="none" stroke="' + stroke + '" stroke-opacity="' + lineOpacity + '" stroke-width="5"/><path d="M32 17v33M20 29h24M15 40c4 11 12 17 17 17s13-6 17-17M15 40l-7 4M49 40l7 4" fill="none" stroke="' + stroke + '" stroke-opacity="' + lineOpacity + '" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>';
       return '<svg xmlns="http://www.w3.org/2000/svg" width="' + size + '" height="' + size + '" viewBox="0 0 64 64" style="' + svgStyle + '" aria-hidden="true">' + body + '</svg>';
     }
 
@@ -8018,36 +9923,37 @@
       const color = obj.style?.color || "#ffcc4d";
       const fillColor = obj.style?.fillColor || color;
       const opacity = obj.style?.opacity ?? 1;
+      const shadow = Boolean(obj.style?.shadow);
       let html;
       let iconSize = [size, size];
       let anchor = [size / 2, size / 2];
       if (obj.kind === "unit" || obj.icon?.kind === "app6") {
         syncUnitIconText(obj);
-        const rendered = app6Render(obj.icon, size, opacity);
+        const rendered = app6Render(obj.icon, size, opacity, shadow);
         html = rendered.html;
         iconSize = rendered.iconSize;
         anchor = rendered.anchor;
       } else {
         html = obj.icon?.url
-          ? '<img src="' + obj.icon.url + '" alt="" style="width:' + size + 'px;height:' + size + 'px;display:block;opacity:' + opacity + ';">'
-          : pointMarkerSvg(obj.icon?.kind || "dot", size, color, fillColor, opacity);
+          ? '<img src="' + obj.icon.url + '" alt="" style="width:' + size + 'px;height:' + size + 'px;display:block;opacity:' + opacity + ';filter:' + (shadow ? "drop-shadow(0 1px 3px rgba(0,0,0,.72))" : "none") + ';">'
+          : pointMarkerSvg(obj.icon?.kind || "dot", size, color, fillColor, opacity, shadow, obj.style?.fillOpacity ?? 1);
       }
       return L.divIcon({ html, className: "leaflet-div-icon", iconSize, iconAnchor: anchor });
     }
 
-    function app6Svg(icon, size, opacity) {
-      return app6Render(icon, size, opacity).html;
+    function app6Svg(icon, size, opacity, shadow) {
+      return app6Render(icon, size, opacity, shadow).html;
     }
 
-    function app6Render(icon, size, opacity) {
+    function app6Render(icon, size, opacity, shadow) {
       const sidc = icon?.sidc || "10031000001211000000";
       try {
         if (!window.ms?.Symbol) throw new Error("milsymbol missing");
         const symbol = new window.ms.Symbol(sidc, { size, outlineWidth: icon?.app6?.outline === false ? 0 : Math.max(1, Math.round(size / 14)), ...app6TextModifiers(icon?.app6 || {}) });
         const dimensions = milsymbolSize(symbol, size);
-        return { html: '<div style="width:' + dimensions[0] + 'px;height:' + dimensions[1] + 'px;opacity:' + opacity + ';">' + symbol.asSVG() + '</div>', iconSize: dimensions, anchor: milsymbolAnchor(symbol, icon, size, dimensions) };
+        return { html: '<div style="width:' + dimensions[0] + 'px;height:' + dimensions[1] + 'px;opacity:' + opacity + ';filter:' + (shadow ? "drop-shadow(0 1px 3px rgba(0,0,0,.72))" : "none") + ';">' + symbol.asSVG() + '</div>', iconSize: dimensions, anchor: milsymbolAnchor(symbol, icon, size, dimensions) };
       } catch {
-        return { html: '<div style="width:' + size + 'px;height:' + size + 'px;display:grid;place-items:center;border:2px solid ' + iconFallbackColor(sidc) + ';border-radius:4px;background:rgba(255,255,255,.9);color:#111;font-size:' + Math.max(7, Math.round(size / 5)) + 'px;font-weight:700;line-height:1;text-align:center;opacity:' + opacity + ';">' + escapeHtml(sidc.slice(0,5)) + '<br>' + escapeHtml(sidc.slice(5,10)) + '</div>', iconSize: [size, size], anchor: [0, size] };
+        return { html: '<div style="width:' + size + 'px;height:' + size + 'px;display:grid;place-items:center;border:2px solid ' + iconFallbackColor(sidc) + ';border-radius:4px;background:rgba(255,255,255,.9);color:#111;font-size:' + Math.max(7, Math.round(size / 5)) + 'px;font-weight:700;line-height:1;text-align:center;opacity:' + opacity + ';filter:' + (shadow ? "drop-shadow(0 1px 3px rgba(0,0,0,.72))" : "none") + ';">' + escapeHtml(sidc.slice(0,5)) + '<br>' + escapeHtml(sidc.slice(5,10)) + '</div>', iconSize: [size, size], anchor: [0, size] };
       }
     }
 
@@ -8166,6 +10072,94 @@
       title.hidden = !(saved.showMapTitle && saved.mapTitle);
     }
 
+    function clampNumber(value, min, max, fallback) {
+      const number = Number(value);
+      if (!Number.isFinite(number)) return fallback;
+      return Math.max(min, Math.min(max, number));
+    }
+
+    function defaultScaleBars() {
+      return {
+        horizontal: { show: false, position: "bottom-left", offsetX: 16, offsetY: 42, divisions: 2 },
+        vertical: { show: false, position: "bottom-right", offsetX: 16, offsetY: 40, divisions: 2 }
+      };
+    }
+
+    function normalizeScaleBars(value) {
+      const defaults = defaultScaleBars();
+      const positions = new Set(["top-left", "top-center", "top-right", "middle-left", "middle-right", "bottom-left", "bottom-center", "bottom-right"]);
+      ["horizontal", "vertical"].forEach((kind) => {
+        const source = value?.[kind] || {};
+        defaults[kind].show = Boolean(source.show);
+        defaults[kind].position = positions.has(source.position) ? source.position : defaults[kind].position;
+        defaults[kind].offsetX = Math.round(clampNumber(source.offsetX, -1000, 1000, defaults[kind].offsetX));
+        defaults[kind].offsetY = Math.round(clampNumber(source.offsetY, -1000, 1000, defaults[kind].offsetY));
+        defaults[kind].divisions = Math.round(clampNumber(source.divisions, 1, 10, defaults[kind].divisions));
+      });
+      return defaults;
+    }
+
+    function scaleBarMetersForPixels(pixels, orientation) {
+      const size = map.getSize();
+      const center = L.point(size.x / 2, size.y / 2);
+      const half = pixels / 2;
+      const a = orientation === "vertical" ? map.containerPointToLatLng([center.x, center.y - half]) : map.containerPointToLatLng([center.x - half, center.y]);
+      const b = orientation === "vertical" ? map.containerPointToLatLng([center.x, center.y + half]) : map.containerPointToLatLng([center.x + half, center.y]);
+      return a.distanceTo(b);
+    }
+
+    function niceScaleDistance(meters) {
+      if (!Number.isFinite(meters) || meters <= 0) return 0;
+      const exponent = Math.floor(Math.log10(meters));
+      const base = Math.pow(10, exponent);
+      const candidates = [1, 2, 5, 10].map((factor) => factor * base);
+      return candidates.filter((value) => value <= meters).pop() || candidates[0];
+    }
+
+    function formatScaleBarDistance(meters) {
+      const unit = normalizeDistanceUnit(saved.distanceUnit);
+      if (unit === "metric") return meters >= 1000 ? Math.round(meters / 1000) + " km" : meters.toFixed(0) + " m";
+      const value = meters / distanceUnitToMeters(unit);
+      const precision = unit === "meters" || value >= 1 ? 0 : 2;
+      return value.toFixed(precision) + " " + distanceUnitLabel(unit);
+    }
+
+    function positionScaleBar(node, settings) {
+      const pos = settings.position || "bottom-left";
+      const x = Math.round(clampNumber(settings.offsetX, -1000, 1000, 0));
+      const y = Math.round(clampNumber(settings.offsetY, -1000, 1000, 0));
+      node.style.top = ""; node.style.right = ""; node.style.bottom = ""; node.style.left = ""; node.style.transform = "";
+      if (pos.startsWith("top")) node.style.top = y + "px";
+      else if (pos.startsWith("bottom")) node.style.bottom = y + "px";
+      else { node.style.top = "calc(50% + " + y + "px)"; node.style.transform = "translateY(-50%)"; }
+      if (pos.endsWith("right")) node.style.right = x + "px";
+      else if (pos.endsWith("center")) { node.style.left = "calc(50% + " + x + "px)"; node.style.transform = [node.style.transform, "translateX(-50%)"].filter(Boolean).join(" "); }
+      else node.style.left = x + "px";
+    }
+
+    function renderScaleBar(kind) {
+      const node = document.getElementById(kind === "vertical" ? "verticalScaleBar" : "horizontalScaleBar");
+      const settings = normalizeScaleBars(saved.scaleBars || {})[kind];
+      if (!node) return;
+      node.hidden = !settings.show;
+      if (!settings.show) return;
+      const targetPixels = kind === "vertical" ? 108 : 156;
+      const targetMeters = scaleBarMetersForPixels(targetPixels, kind);
+      const distance = niceScaleDistance(targetMeters);
+      if (!distance) { node.hidden = true; return; }
+      const pixels = Math.max(28, Math.round(targetPixels * (distance / targetMeters)));
+      const divisions = Math.max(1, Math.min(10, Math.round(settings.divisions || 2)));
+      const segments = Array.from({ length: divisions }, () => '<span class="scale-bar-segment"></span>').join("");
+      const dimension = kind === "vertical" ? "height:" + pixels + "px;width:9px;" : "width:" + pixels + "px;height:9px;";
+      node.innerHTML = '<span class="scale-bar-label">' + formatScaleBarDistance(distance) + '</span><span class="scale-bar-track" style="' + dimension + '">' + segments + '</span>';
+      positionScaleBar(node, settings);
+    }
+
+    function updateScaleBars() {
+      renderScaleBar("horizontal");
+      renderScaleBar("vertical");
+    }
+
     function hexToRgba(hex, opacity) {
       const clean = String(hex || "#000000").replace("#", "");
       const value = clean.length === 3 ? clean.split("").map((ch) => ch + ch).join("") : clean.padEnd(6, "0").slice(0, 6);
@@ -8210,6 +10204,7 @@
     function objectCenter(obj) {
       const g = obj.geometry || {};
       if (obj.kind === "marker" || obj.kind === "unit" || obj.kind === "text" || obj.kind === "circle") return g.latlng;
+      if (obj.kind === "image") return imageBoundsFromGeometry(g).getCenter();
       const feature = toTurfFeature(obj);
       const c = turf.center(feature).geometry.coordinates;
       return { lat: c[1], lng: c[0] };
@@ -8218,6 +10213,75 @@
     function exportAreaBoundsFromGeometry(g) {
       if (g.bounds) return L.latLngBounds([g.bounds.south, g.bounds.west], [g.bounds.north, g.bounds.east]);
       return L.latLngBounds(g.latlngs || []);
+    }
+
+    function imageBoundsFromGeometry(g) {
+      if (g.bounds) return L.latLngBounds([g.bounds.south, g.bounds.west], [g.bounds.north, g.bounds.east]);
+      return L.latLngBounds(g.latlngs || []);
+    }
+
+    function escapeXmlAttr(value) {
+      return String(value == null ? "" : value).replace(/[&<>"']/g, function(ch) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" }[ch];
+      });
+    }
+
+    function imageSource(image) {
+      return image?.src || image?.dataUrl || "";
+    }
+
+    function imageNaturalSize(image) {
+      return {
+        width: Math.max(1, Number(image?.naturalWidth || image?.width || 1)),
+        height: Math.max(1, Number(image?.naturalHeight || image?.height || 1))
+      };
+    }
+
+    function transformAffinePoint(matrix, x, y) {
+      return {
+        x: matrix.a * x + matrix.b * y + matrix.c,
+        y: matrix.d * x + matrix.e * y + matrix.f
+      };
+    }
+
+    function unprojectAffinePoint(point) {
+      return map.options.crs.unproject(L.point(point.x, point.y));
+    }
+
+    function affineImageOverlayData(image) {
+      const matrix = image?.affine?.matrix;
+      const src = imageSource(image);
+      if (!matrix || !src) return null;
+      const m = { a: Number(matrix.a), b: Number(matrix.b), c: Number(matrix.c), d: Number(matrix.d), e: Number(matrix.e), f: Number(matrix.f) };
+      if (!Object.keys(m).every(function(key) { return Number.isFinite(m[key]); })) return null;
+      const size = imageNaturalSize(image);
+      const transformed = [
+        transformAffinePoint(m, 0, 0),
+        transformAffinePoint(m, size.width, 0),
+        transformAffinePoint(m, size.width, size.height),
+        transformAffinePoint(m, 0, size.height)
+      ];
+      const xs = transformed.map(function(p) { return p.x; });
+      const ys = transformed.map(function(p) { return p.y; });
+      const minX = Math.min.apply(null, xs);
+      const maxX = Math.max.apply(null, xs);
+      const minY = Math.min.apply(null, ys);
+      const maxY = Math.max.apply(null, ys);
+      const viewWidth = maxX - minX;
+      const viewHeight = maxY - minY;
+      if (viewWidth <= 0 || viewHeight <= 0) return null;
+      const svgMatrix = [m.a, -m.d, m.b, -m.e, m.c - minX, maxY - m.f].map(function(n) { return Number(n.toFixed(9)); }).join(" ");
+      const svg = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ' + viewWidth + ' ' + viewHeight + '" preserveAspectRatio="none"><image href="' + escapeXmlAttr(src) + '" xlink:href="' + escapeXmlAttr(src) + '" width="' + size.width + '" height="' + size.height + '" transform="matrix(' + svgMatrix + ')"/></svg>';
+      return {
+        src: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg),
+        bounds: L.latLngBounds(unprojectAffinePoint({ x: minX, y: minY }), unprojectAffinePoint({ x: maxX, y: maxY }))
+      };
+    }
+
+    function imageLayerFromObject(obj) {
+      const affine = affineImageOverlayData(obj.image || {});
+      if (affine) return L.imageOverlay(affine.src, affine.bounds, { interactive: true, opacity: obj.style?.opacity ?? 0.75 });
+      return L.imageOverlay(imageSource(obj.image || {}), imageBoundsFromGeometry(obj.geometry || {}), { interactive: true, opacity: obj.style?.opacity ?? 0.75 });
     }
 
     function objectPopup(obj) {
@@ -8233,7 +10297,7 @@
       if (obj.kind === "marker" || obj.kind === "unit" || obj.kind === "text") return formatLatLng(g.latlng);
       if (obj.kind === "line") return (g.latlngs || []).map((p, i) => (i + 1) + ". " + formatLatLng(p)).join("\\n");
       if (obj.kind === "polygon") return (g.latlngs || []).map((p, i) => (i + 1) + ". " + formatLatLng(p)).join("\\n");
-      if (obj.kind === "exportArea") {
+      if (obj.kind === "exportArea" || obj.kind === "image") {
         const bounds = exportAreaBoundsFromGeometry(g);
         return "Northwest: " + formatLatLng(bounds.getNorthWest()) + "\\nSoutheast: " + formatLatLng(bounds.getSouthEast());
       }
@@ -8265,10 +10329,13 @@
       if (obj.kind !== "line" || !obj.endpoints) return [];
       const pts = obj.geometry?.latlngs || [];
       if (pts.length < 2) return [];
-      return [endpointMarker(pts[0], pts[1], obj.endpoints.start, true, obj.style?.color), endpointMarker(pts[pts.length - 1], pts[pts.length - 2], obj.endpoints.end, false, obj.style?.color)].filter(Boolean);
+      return [
+        endpointMarker(pts[0], pts[1], obj.endpoints.start, true, obj.style?.color, obj.style?.shadow),
+        endpointMarker(pts[pts.length - 1], pts[pts.length - 2], obj.endpoints.end, false, obj.style?.color, obj.style?.shadow)
+      ].filter(Boolean);
     }
 
-    function endpointMarker(point, neighbor, type, isStart, color = "#f8fafc") {
+    function endpointMarker(point, neighbor, type, isStart, color = "#f8fafc", shadow = false) {
       if (!type) return null;
       const lineAngle = isStart ? segmentScreenAngle(point, neighbor) : segmentScreenAngle(neighbor, point);
       let html = '<div class="endpoint-point"></div>';
@@ -8281,7 +10348,7 @@
         html = '<div class="endpoint-tick"></div>';
         angle = lineAngle + 90;
       }
-      return L.marker(point, { interactive: false, icon: L.divIcon({ className: "leaflet-div-icon", html: '<div class="endpoint-marker" style="color:' + escapeHtml(color) + ';transform:rotate(' + angle + 'deg)">' + html + '</div>', iconSize: [24,24], iconAnchor: [12,12] }) });
+      return L.marker(point, { interactive: false, icon: L.divIcon({ className: "leaflet-div-icon", html: '<div class="endpoint-marker ' + (shadow ? "has-shadow" : "") + '" style="color:' + escapeHtml(color) + ';transform:rotate(' + angle + 'deg)">' + html + '</div>', iconSize: [24,24], iconAnchor: [12,12] }) });
     }
 
     function segmentScreenAngle(from, to) {
@@ -8455,6 +10522,7 @@
         referenceBackdropOpacity: clamp01(state.referenceBackdropOpacity, 0.15),
         unitIconScale: state.unitIconScale,
         pointIconScale: state.pointIconScale,
+        scaleBars: normalizeScaleBars(state.scaleBars),
         view: { center: map.getCenter(), zoom: map.getZoom() },
         tileLayers: tileLayerState(),
         drawLayers: Array.from(state.drawLayers.values()),
@@ -8480,6 +10548,7 @@
           buffers: buffersForStorage(obj.buffers),
           icon: obj.icon,
           iconSize: obj.iconSize,
+          image: obj.image || null,
           endpoints: obj.endpoints,
           geometry: serializeGeometry(obj)
         }))
@@ -8491,6 +10560,18 @@
       if (obj.kind === "line") return { latlngs: obj.layer.getLatLngs() };
       if (obj.kind === "exportArea") {
         const bounds = exportAreaBounds(obj);
+        return {
+          bounds: {
+            north: bounds.getNorth(),
+            south: bounds.getSouth(),
+            east: bounds.getEast(),
+            west: bounds.getWest()
+          },
+          latlngs: rectangleCorners(bounds)
+        };
+      }
+      if (obj.kind === "image") {
+        const bounds = obj.layer.getBounds();
         return {
           bounds: {
             north: bounds.getNorth(),
@@ -8579,6 +10660,7 @@
       applyMapBackdrop();
       state.unitIconScale = Number(saved.unitIconScale || 1);
       state.pointIconScale = Number(saved.pointIconScale || 1);
+      state.scaleBars = normalizeScaleBars(saved.scaleBars || saved.properties?.scaleBars || {});
       syncSettingsControls();
       state.nextId = saved.nextId || 1;
       state.zCounter = saved.zCounter || 10;
@@ -8614,11 +10696,16 @@
           bufferLayers: [],
           icon: item.icon || (restoredKind === "unit" ? FALLBACK_ICONS[0] : FALLBACK_ICONS[1]),
           iconSize: item.iconSize || 32,
+          image: item.image || null,
           endpoints: item.endpoints || { start: "", end: "" }
         };
         if (obj.kind === "exportArea") {
           obj.style = exportAreaStyle(item.style || {});
           obj.buffers = [];
+        }
+        if (obj.kind === "image") {
+          obj.buffers = [];
+          obj.style = { ...obj.style, opacity: obj.style?.opacity ?? 0.75, showMeasurements: false };
         }
         state.objects.set(obj.id, obj);
         attachLayerEvents(obj);
@@ -8646,6 +10733,12 @@
       const g = item.geometry || {};
       if (item.kind === "marker" || item.kind === "unit") return L.marker(g.latlng, { draggable: true, pane: "objects" });
       if (item.kind === "text") return L.marker(g.latlng, { draggable: true, pane: "objects" });
+      if (item.kind === "image") {
+        const bounds = g.bounds
+          ? L.latLngBounds([g.bounds.south, g.bounds.west], [g.bounds.north, g.bounds.east])
+          : L.latLngBounds(g.latlngs || []);
+        return createImageLayerFromData(item.image || {}, bounds, item.style || {});
+      }
       if (item.kind === "line") return L.polyline(g.latlngs || [], { pane: "objects" });
       if (item.kind === "exportArea") {
         const bounds = g.bounds
@@ -8666,8 +10759,16 @@
         if (action === "save" && !exportGeoJSON()) return status("GeoJSON load cancelled.");
         applyGeoJsonProject(geojson, action === "keep" ? "keep" : "discard", file.name);
       } catch (error) {
-        status(`GeoJSON load failed: ${error.message}`);
+        reportFileLoadFailure(file, error, "GeoJSON");
       }
+    }
+
+    function reportFileLoadFailure(file, error, label = "File") {
+      const filename = file?.name ? ` "${file.name}"` : "";
+      const detail = error?.message || String(error || "Unknown error");
+      const message = `${label} load failed${filename}: ${detail}`;
+      status(message);
+      console.warn(message, error);
     }
 
     function applyGeoJsonProject(geojson, mode = "discard", filename = "") {
@@ -8700,6 +10801,7 @@
         applyMapBackdrop();
         if (geojson.properties?.unitIconScale) state.unitIconScale = Number(geojson.properties.unitIconScale) || 1;
         if (geojson.properties?.pointIconScale) state.pointIconScale = Number(geojson.properties.pointIconScale) || 1;
+        state.scaleBars = normalizeScaleBars(geojson.properties?.scaleBars || {});
         applyTileLayerState(geojson.properties?.tileLayers || []);
         syncSettingsControls();
         state.drawLayers.clear();
@@ -8738,6 +10840,9 @@
           if (kind === "exportArea") {
             layer = L.rectangle(layer.getBounds(), { pane: "objects" }).addTo(map);
           }
+          if (kind === "image") {
+            layer = createImageLayerFromData(props.image || {}, layer.getBounds(), props.style || {}).addTo(map);
+          }
           const targetLayerId = layerIdMap.get(props.drawLayerId) || defaultLayerId || layerForNewObject();
           const obj = createObject(kind, layer, {
             label: props.label || "",
@@ -8755,12 +10860,18 @@
             buffers: buffersForStorage(props.buffers),
             icon: props.icon || state.activeIcon,
             iconSize: props.iconSize || 32,
+            image: props.image || null,
             endpoints: props.endpoints || { start: "", end: "" },
             skipUndo: true
           });
           if (kind === "exportArea") {
             obj.style = exportAreaStyle(props.style || {});
             obj.buffers = [];
+            styleLayer(obj);
+          }
+          if (kind === "image") {
+            obj.buffers = [];
+            if (props.image?.affine) rebuildImageLayer(obj);
             styleLayer(obj);
           }
           if (kind === "text") updateTextAnnotation(obj);
@@ -8784,89 +10895,102 @@
     function loadGeoJsonAsLayers(file) {
       const reader = new FileReader();
       reader.onload = () => {
-        const geojson = JSON.parse(reader.result);
-        const sourceLayers = geojson.properties?.drawLayers || [];
-        const sourceName = fileBaseName(file.name);
-        let allowed = null;
-        if (sourceLayers.length > 1) {
-          const menu = sourceLayers.map((layer, index) => `${index + 1}: ${layer.name}`).join("\n");
-          const answer = prompt(`GeoJSON contains multiple layers. Enter layer numbers/names to load, comma-separated, or leave blank for all:\n${menu}`, "");
-          if (answer === null) return;
-          const picks = answer.split(",").map((part) => part.trim()).filter(Boolean);
-          if (picks.length) {
-            allowed = new Set();
-            picks.forEach((pick) => {
-              const byIndex = sourceLayers[Number(pick) - 1];
-              const byName = sourceLayers.find((layer) => layer.name.toLowerCase() === pick.toLowerCase());
-              const found = byIndex || byName;
-              if (found) allowed.add(found.id);
+        try {
+          const geojson = JSON.parse(reader.result);
+          const sourceLayers = geojson.properties?.drawLayers || [];
+          const sourceName = fileBaseName(file.name);
+          let allowed = null;
+          if (sourceLayers.length > 1) {
+            const menu = sourceLayers.map((layer, index) => `${index + 1}: ${layer.name}`).join("\n");
+            const answer = prompt(`GeoJSON contains multiple layers. Enter layer numbers/names to load, comma-separated, or leave blank for all:\n${menu}`, "");
+            if (answer === null) return;
+            const picks = answer.split(",").map((part) => part.trim()).filter(Boolean);
+            if (picks.length) {
+              allowed = new Set();
+              picks.forEach((pick) => {
+                const byIndex = sourceLayers[Number(pick) - 1];
+                const byName = sourceLayers.find((layer) => layer.name.toLowerCase() === pick.toLowerCase());
+                const found = byIndex || byName;
+                if (found) allowed.add(found.id);
+              });
+            }
+          }
+          pushUndo("load-geojson-layer");
+          const layerIdMap = new Map();
+          if (sourceLayers.length) {
+            sourceLayers.forEach((layer) => {
+              if (allowed && !allowed.has(layer.id)) return;
+              const id = uid("layer");
+              layerIdMap.set(layer.id, id);
+              state.drawLayers.set(id, { id, name: `${sourceName}: ${layer.name}`, visible: layer.visible !== false, objectsCollapsed: false });
             });
           }
-        }
-        pushUndo("load-geojson-layer");
-        const layerIdMap = new Map();
-        if (sourceLayers.length) {
-          sourceLayers.forEach((layer) => {
-            if (allowed && !allowed.has(layer.id)) return;
-            const id = uid("layer");
-            layerIdMap.set(layer.id, id);
-            state.drawLayers.set(id, { id, name: `${sourceName}: ${layer.name}`, visible: layer.visible !== false, objectsCollapsed: false });
+          let defaultLayerId = null;
+          if (!layerIdMap.size) {
+            defaultLayerId = uid("layer");
+            state.drawLayers.set(defaultLayerId, { id: defaultLayerId, name: sourceName, visible: true, objectsCollapsed: false });
+          }
+          state.activeLayerId = Array.from(layerIdMap.values())[0] || defaultLayerId || state.activeLayerId;
+          L.geoJSON(geojson, {
+            filter: (feature) => !allowed || allowed.has(feature.properties?.drawLayerId),
+            pointToLayer: (feature, latlng) => L.marker(latlng, { draggable: true, pane: "objects" }),
+            onEachFeature: (feature, layer) => {
+              const props = feature.properties || {};
+              let kind = props.kind || geometryKind(feature.geometry.type);
+              if (kind === "marker" && props.icon?.kind === "app6") kind = "unit";
+              if (kind === "circle") {
+                const center = turf.center(feature).geometry.coordinates;
+                layer = L.circle([center[1], center[0]], { radius: props.radiusMeters || 1, pane: "objects" }).addTo(map);
+              }
+              if (kind === "exportArea") {
+                layer = L.rectangle(layer.getBounds(), { pane: "objects" }).addTo(map);
+              }
+              if (kind === "image") {
+                layer = createImageLayerFromData(props.image || {}, layer.getBounds(), props.style || {}).addTo(map);
+              }
+              const targetLayerId = layerIdMap.get(props.drawLayerId) || defaultLayerId || layerForNewObject();
+              const obj = createObject(kind, layer, {
+                label: props.label || "",
+                unitName: props.unitName || "",
+                higherFormation: props.higherFormation || props.icon?.app6?.higherFormation || "",
+                showLabel: props.showLabel !== false,
+                text: props.text || "",
+                notes: props.notes || "",
+                style: props.style || baseStyle(),
+                textStyle: props.textStyle || baseTextStyle(),
+                labelStyle: props.labelStyle || baseLabelStyle(),
+                locked: Boolean(props.locked),
+                drawLayerId: targetLayerId,
+                visible: props.visible !== false,
+                buffers: buffersForStorage(props.buffers),
+                icon: props.icon || state.activeIcon,
+                iconSize: props.iconSize || 32,
+                image: props.image || null,
+                endpoints: props.endpoints || { start: "", end: "" },
+                skipUndo: true
+              });
+              if (kind === "exportArea") {
+                obj.style = exportAreaStyle(props.style || {});
+                obj.buffers = [];
+                styleLayer(obj);
+              }
+              if (kind === "image") {
+                obj.buffers = [];
+                styleLayer(obj);
+              }
+              if (kind === "text") updateTextAnnotation(obj);
+            }
           });
+          renderDrawLayers();
+          renderObjectList();
+          syncLayerVisibility();
+          scheduleSave();
+          status(`GeoJSON loaded as layer/template from ${file.name}.`);
+        } catch (error) {
+          reportFileLoadFailure(file, error, "Layer GeoJSON");
         }
-        let defaultLayerId = null;
-        if (!layerIdMap.size) {
-          defaultLayerId = uid("layer");
-          state.drawLayers.set(defaultLayerId, { id: defaultLayerId, name: sourceName, visible: true, objectsCollapsed: false });
-        }
-        state.activeLayerId = Array.from(layerIdMap.values())[0] || defaultLayerId || state.activeLayerId;
-        L.geoJSON(geojson, {
-          filter: (feature) => !allowed || allowed.has(feature.properties?.drawLayerId),
-          pointToLayer: (feature, latlng) => L.marker(latlng, { draggable: true, pane: "objects" }),
-          onEachFeature: (feature, layer) => {
-            const props = feature.properties || {};
-            let kind = props.kind || geometryKind(feature.geometry.type);
-            if (kind === "marker" && props.icon?.kind === "app6") kind = "unit";
-            if (kind === "circle") {
-              const center = turf.center(feature).geometry.coordinates;
-              layer = L.circle([center[1], center[0]], { radius: props.radiusMeters || 1, pane: "objects" }).addTo(map);
-            }
-            if (kind === "exportArea") {
-              layer = L.rectangle(layer.getBounds(), { pane: "objects" }).addTo(map);
-            }
-            const targetLayerId = layerIdMap.get(props.drawLayerId) || defaultLayerId || layerForNewObject();
-            const obj = createObject(kind, layer, {
-              label: props.label || "",
-              unitName: props.unitName || "",
-              higherFormation: props.higherFormation || props.icon?.app6?.higherFormation || "",
-              showLabel: props.showLabel !== false,
-              text: props.text || "",
-              notes: props.notes || "",
-              style: props.style || baseStyle(),
-              textStyle: props.textStyle || baseTextStyle(),
-              labelStyle: props.labelStyle || baseLabelStyle(),
-              locked: Boolean(props.locked),
-              drawLayerId: targetLayerId,
-              visible: props.visible !== false,
-              buffers: buffersForStorage(props.buffers),
-              icon: props.icon || state.activeIcon,
-              iconSize: props.iconSize || 32,
-              endpoints: props.endpoints || { start: "", end: "" },
-              skipUndo: true
-            });
-            if (kind === "exportArea") {
-              obj.style = exportAreaStyle(props.style || {});
-              obj.buffers = [];
-              styleLayer(obj);
-            }
-            if (kind === "text") updateTextAnnotation(obj);
-          }
-        });
-        renderDrawLayers();
-        renderObjectList();
-        syncLayerVisibility();
-        scheduleSave();
-        status("GeoJSON loaded as layer/template.");
       };
+      reader.onerror = () => reportFileLoadFailure(file, reader.error || new Error("File read failed."), "Layer GeoJSON");
       reader.readAsText(file);
     }
 
@@ -8902,6 +11026,7 @@
       measurements.clearLayers();
       centers.clearLayers();
       endpoints.clearLayers();
+      snapGuides.clearLayers();
       bufferGroup.clearLayers();
       renderObjectList();
       renderBufferList();
@@ -8928,6 +11053,7 @@
       state.exportCredit = true;
       state.exportDate = true;
       state.exportAttribution = true;
+      state.scaleBars = defaultScaleBars();
       state.referenceHighlights = true;
       state.referenceBackdropColor = "#0f1419";
       state.referenceBackdropOpacity = 0.15;
@@ -8996,6 +11122,12 @@
     }
 
     document.querySelectorAll("[data-draw]").forEach((button) => button.addEventListener("click", () => enableDraw(button.dataset.draw)));
+    el("addImageObject").addEventListener("click", () => el("imageObjectFile").click());
+    el("imageObjectFile").addEventListener("change", (event) => {
+      const file = event.target.files?.[0];
+      event.target.value = "";
+      addImageObjectFromFile(file);
+    });
     el("mapTitleInput").addEventListener("input", (event) => {
       pushUndo("map-title", { coalesceMs: 1000 });
       setMapTitle(event.target.value);
@@ -9031,6 +11163,7 @@
     el("referencePresetFull").addEventListener("click", () => setReferenceLayerPreset(referenceLayerConfigs.map((cfg) => cfg.id)));
     el("referencePresetRoads").addEventListener("click", () => setReferenceLayerPreset(["roads", "places", "borders", "chokepoints"]));
     el("referencePresetTransport").addEventListener("click", () => setReferenceLayerPreset(["roads", "rail", "transport", "chokepoints", "places", "borders"]));
+    el("referencePresetNone").addEventListener("click", () => setReferenceLayerPreset([]));
     el("referenceHighlights").addEventListener("change", (event) => setReferenceStyleSetting("referenceHighlights", event.target.checked));
     el("referenceBackdropColor").addEventListener("input", (event) => setReferenceStyleSetting("referenceBackdropColor", event.target.value));
     el("referenceBackdropOpacity").addEventListener("input", (event) => setReferenceStyleSetting("referenceBackdropOpacity", event.target.value));
@@ -9046,12 +11179,20 @@
       const obj = selectedObj();
       if (!obj) return;
       if (obj.locked) return status("Unlock the object before removing buffers.");
+      const count = obj.buffers?.length || 0;
+      if (!count) return status("No buffers to remove.");
+      const label = objectName(obj);
+      if (!confirm(`Remove all ${count} buffer${count === 1 ? "" : "s"} from "${label}"?`)) {
+        return status("Buffer removal cancelled.");
+      }
       pushUndo("remove-buffers");
       obj.buffers = [];
       updateBuffers(obj);
       renderBufferList();
+      syncRemoveBuffersButton(obj);
       refreshLabelsAndMeasurements();
       scheduleSave();
+      status(`Removed ${count} buffer${count === 1 ? "" : "s"}.`);
     });
     el("frontBtn").addEventListener("click", () => {
       const obj = selectedObj();
@@ -9075,9 +11216,23 @@
         scheduleSave();
       }
     });
-    ["labelInput", "unitNameInput", "higherFormationInput", "showLabel", "notesInput", "strokeColor", "fillColor", "strokeOpacity", "fillOpacity", "lineWeight", "dashStyle", "fillPattern", "startEndpoint", "endEndpoint", "showMeasurements", "iconSize", "iconKind", "app6Identity", "app6Status", "app6MainIcon", "app6Echelon", "app6Modifier1", "app6SymbolModifier1", "app6SymbolModifier2", "app6ReinforcedReduced", "app6Outline", "app6ManualSidc", "textSize", "textBold", "textItalic", "textColor", "textBoxFill", "textBoxFillOpacity", "textBoxLine", "textBoxWeight", "textBoxDash", "textShadow", "labelTextSize", "labelTextBold", "labelTextItalic", "labelTextColor", "labelBoxFill", "labelBoxFillOpacity", "labelBoxLine", "labelBoxWeight", "labelBoxDash", "labelShadow", "labelTextOutline", "labelOffsetX", "labelOffsetY", "labelScaleWithIcon"].forEach((id) => {
+    ["labelInput", "unitNameInput", "higherFormationInput", "showLabel", "notesInput", "imageKeepAspect", "strokeColor", "fillColor", "objectShadow", "strokeOpacity", "fillOpacity", "lineWeight", "dashStyle", "fillPattern", "startEndpoint", "endEndpoint", "showMeasurements", "iconSize", "iconKind", "app6Identity", "app6Status", "app6MainIcon", "app6Echelon", "app6Modifier1", "app6SymbolModifier1", "app6SymbolModifier2", "app6ReinforcedReduced", "app6Outline", "app6ManualSidc", "textSize", "textBold", "textItalic", "textColor", "textBoxFill", "textBoxFillOpacity", "textBoxLine", "textBoxWeight", "textBoxDash", "textShadow", "labelTextSize", "labelTextBold", "labelTextItalic", "labelTextColor", "labelBoxFill", "labelBoxFillOpacity", "labelBoxLine", "labelBoxWeight", "labelBoxDash", "labelShadow", "labelTextOutline", "labelOffsetX", "labelOffsetY", "labelScaleWithIcon"].forEach((id) => {
       el(id).addEventListener("input", setSelectedStyle);
       el(id).addEventListener("change", setSelectedStyle);
+    });
+    bindOpacityPercentControls();
+    el("imageAddControlPoint").addEventListener("click", addImageControlPointRow);
+    el("imageApplyAffine").addEventListener("click", applyImageAffineFromControls);
+    el("imageClearControlPoints").addEventListener("click", clearImageControlPoints);
+    el("imageResetAffine").addEventListener("click", resetImageAffine);
+    el("imageApplyWarpAdjustment").addEventListener("click", applyImageWarpAdjustment);
+    el("imageResetWarpAdjustment").addEventListener("click", resetImageWarpAdjustmentFields);
+    el("imageRotationDegrees").addEventListener("change", commitImageRotationInput);
+    el("imageRotationDegrees").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        commitImageRotationInput();
+      }
     });
     el("iconKind").addEventListener("change", updateIconControlVisibility);
     el("app6SymbolSet").addEventListener("change", () => {
@@ -9093,13 +11248,15 @@
     el("labelPosition").addEventListener("change", () => {
       const [x, y] = labelPresetOffset(el("labelPosition").value, 12);
       el("labelOffsetX").value = x;
-      el("labelOffsetY").value = y;
+      el("labelOffsetY").value = labelOffsetYToControl(y);
       setSelectedStyle();
     });
     ["titleSize", "titleColor", "titleBold", "titleItalic", "titleBoxFill", "titleBoxFillOpacity", "titleBoxLine", "titleBoxWeight", "titleShadow", "titleTextOutline"].forEach((id) => {
       el(id).addEventListener("input", setMapTitleStyleFromControls);
       el(id).addEventListener("change", setMapTitleStyleFromControls);
     });
+    bindStandaloneOpacityPercent("titleBoxFillOpacity", "titleBoxFillOpacityPercent", () => setMapTitleStyleFromControls());
+    bindStandaloneOpacityPercent("referenceBackdropOpacity", "referenceBackdropOpacityPercent", (value) => setReferenceStyleSetting("referenceBackdropOpacity", value));
     el("coordinateSystem").addEventListener("change", (event) => setCoordinateSystem(event.target.value));
     el("distanceUnit").addEventListener("change", (event) => setDistanceUnit(event.target.value));
     el("exportCredit").addEventListener("change", (event) => setExportSetting("exportCredit", event.target.checked));
@@ -9108,6 +11265,37 @@
     el("mapZoom").addEventListener("input", (event) => map.setZoom(Number(event.target.value), { animate: false }));
     el("unitScale").addEventListener("input", (event) => setGlobalIconScale("unit", event.target.value));
     el("pointScale").addEventListener("input", (event) => setGlobalIconScale("point", event.target.value));
+    el("mapZoomValue").addEventListener("change", commitTypedMapZoom);
+    el("mapZoomValue").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        commitTypedMapZoom();
+      }
+    });
+    el("unitScaleValue").addEventListener("change", (event) => setGlobalIconScale("unit", event.target.value));
+    el("pointScaleValue").addEventListener("change", (event) => setGlobalIconScale("point", event.target.value));
+    el("unitScaleValue").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        setGlobalIconScale("unit", event.target.value);
+      }
+    });
+    el("pointScaleValue").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        setGlobalIconScale("point", event.target.value);
+      }
+    });
+    ["horizontal", "vertical"].forEach((kind) => {
+      const controls = scaleBarControls(kind);
+      controls.show?.addEventListener("change", (event) => setScaleBarSetting(kind, "show", event.target.checked));
+      controls.position?.addEventListener("change", (event) => setScaleBarSetting(kind, "position", event.target.value));
+      ["divisions", "offsetX", "offsetY"].forEach((key) => {
+        controls[key]?.addEventListener("input", (event) => setScaleBarSetting(kind, key, event.target.value));
+        controls[key]?.addEventListener("change", (event) => setScaleBarSetting(kind, key, event.target.value));
+      });
+    });
+    el("resetSettingsDefaults").addEventListener("click", resetSettingsToDefaults);
     el("activeDrawLayer").addEventListener("change", (event) => {
       setActiveLayer(event.target.value);
     });
@@ -9161,12 +11349,62 @@
       el("app").classList.toggle("right-collapsed");
       setTimeout(() => map.invalidateSize(), 220);
     });
+
+    function cancelInputFunctionForEscape(target = document.activeElement) {
+      if (cancelCoordinateEditing()) return true;
+      if (state.imageGeorefPick) {
+        cancelImageGeorefCapture("Control point capture cancelled.");
+        return true;
+      }
+      if (target?.id === "coordInput") {
+        target.value = "";
+        target.blur();
+        status("Coordinate input cancelled.");
+        return true;
+      }
+      if (target?.id === "mapSearchInput") {
+        target.value = "";
+        target.blur();
+        status("Search cancelled.");
+        return true;
+      }
+      return false;
+    }
+
+    function cancelModesForEscape() {
+      const hadDrawing = Boolean(state.pendingDrawKind || state.activeDrawShape);
+      const hadMode = Boolean(state.editOn || state.dragOn);
+      map.pm.disableDraw();
+      clearDrawingMeasurement();
+      state.pendingDrawKind = null;
+      state.activeDrawShape = null;
+      syncDrawingInteractivity();
+      clearMoveGuide();
+      state.editOn = false;
+      state.dragOn = false;
+      applyInteractionModes();
+      selectObject(null);
+      status(hadDrawing || hadMode ? "Cancelled." : "Ready.");
+      return true;
+    }
+
     document.addEventListener("keydown", (event) => {
       const tag = event.target?.tagName;
       const readonlyCoordinateOutput = event.target?.id === "coordinateOutput" && event.target?.readOnly;
       const key = event.key.toLowerCase();
       const coordinateVertexDelete = readonlyCoordinateOutput && (key === "delete" || key === "backspace") && validSelectedVertex();
       const typing = !coordinateVertexDelete && (tag === "INPUT" || tag === "TEXTAREA" || event.target?.isContentEditable);
+      if (key === "escape") {
+        event.preventDefault();
+        if (cancelInputFunctionForEscape(event.target)) return;
+        if (typing) {
+          event.target?.blur?.();
+          status("Input cancelled.");
+          return;
+        }
+        cancelModesForEscape();
+        return;
+      }
       if ((event.ctrlKey || event.metaKey) && key === "z" && !event.shiftKey && !typing) {
         event.preventDefault();
         undoLast();
@@ -9197,20 +11435,6 @@
         event.preventDefault();
         return;
       }
-      if (key === "escape") {
-        map.pm.disableDraw();
-        clearDrawingMeasurement();
-        state.pendingDrawKind = null;
-        state.activeDrawShape = null;
-        syncDrawingInteractivity();
-        clearMoveGuide();
-        state.editOn = false;
-        state.dragOn = false;
-        applyInteractionModes();
-        selectObject(null);
-        status("Ready.");
-        return;
-      }
       if (key === "delete" || key === "backspace") {
         if (validSelectedVertex()) {
           event.preventDefault();
@@ -9237,9 +11461,16 @@
       if (key === "5") return enableDraw("Text");
       if (key === "6") return enableDraw("Unit");
     });
-    map.on("click", () => selectObject(null));
+    map.on("click", (event) => {
+      if (state.imageGeorefPick) {
+        handleImageGeorefClick(event.latlng);
+        return;
+      }
+      selectObject(null);
+    });
     map.on("zoomend", refreshLabelsAndMeasurements);
     map.on("zoomend", syncMapZoomControl);
+    map.on("zoomend moveend", updateScaleBars);
     map.on("zoomend moveend", updateExportAreaPixelUi);
     map.on("zoomend moveend", scheduleSave);
 
@@ -9263,6 +11494,7 @@
     updateSaveStatus();
     updateExportAreaButton();
     syncMapZoomControl();
+    updateScaleBars();
   </script>
 </body>
 </html>

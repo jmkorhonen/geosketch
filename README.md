@@ -15,7 +15,7 @@ GeoSketch is a lightweight browser tool for field-style sketching and visual ana
 
 Current release version: `v1.2`
 
-Current development build: `v1.2.5`
+Current development build: `v1.2.19`
 
 ## Requirements
 
@@ -70,7 +70,7 @@ Initial reference groups include:
 - airports and ports
 - other map detail
 
-The controls include quick presets for the full vector map, roads and places, and transport-focused overlays. Filter rows show a compact legend for the current render style, are saved in GeoJSON projects, and are carried into interactive HTML exports.
+The controls include quick presets for the full vector map, roads and places, transport-focused overlays, and clearing all overlay selections. Filter rows show a compact legend for the current render style, are saved in GeoJSON projects, and are carried into interactive HTML exports.
 
 Filter Vector Overlays also includes optional highlighting for railways, land chokepoints, airports, and ports, plus map backdrop colour and vector land-opacity controls to make vector detail more legible over satellite imagery or dark map canvases. Vector overlays are live/HTML-export only and do not render in PNG exports.
 
@@ -98,8 +98,9 @@ GeoSketch supports:
 - **Circle**: range circles and circular areas.
 - **Text box**: free map annotations.
 - **Export area**: rectangular PNG crop guides with editable coordinates, labels, notes, and line/fill styling.
+- **Image**: imported image overlays stored as layer objects, with editable bounds and an initial 3-point affine georeferencing workflow for digitising maps or imagery.
 
-Objects can have labels, notes, measurements, styles, buffers, visibility toggles, and layer assignment. Locked objects can still be copied or duplicated, but are protected from accidental editing.
+Objects can have labels, notes, measurements, styles, optional object shadows, buffers, visibility toggles, and layer assignment. New line, polygon, and circle drawing can snap to existing object points. Locked objects can still be copied or duplicated, but are protected from accidental editing.
 
 ### Map Title and Notes
 
@@ -121,6 +122,10 @@ The bottom status bar shows live cursor coordinates. `Shift+C` copies the cursor
 
 Distance labels and measurements use the Settings panel distance unit. The default auto-metric mode switches between metres and kilometres; metres, kilometres, miles, and nautical miles can also be forced.
 
+Settings can also show horizontal and vertical scale bars. Each scale bar has its own position, X/Y offsets, and division count, and the bars follow the selected display distance unit while remaining planning-grade rather than survey-grade.
+
+The reset control in Settings restores display/export settings and new-object drawing defaults without deleting existing map objects or layers.
+
 ## Drawing and Editing
 
 Use the Add Object buttons or keyboard shortcuts:
@@ -132,9 +137,10 @@ Use the Add Object buttons or keyboard shortcuts:
 - `5`: text box
 - `6`: unit
 - `S`: focus search
-- `E`: edit points/shapes on selected line, polygon, circle, or export area
+- `E`: edit points/shapes on selected line, polygon, circle, export area, or image
 - `M`: move selected object
 - `Enter`: finish the current drawing
+- `Esc`: cancel coordinate editing, coordinate/search input, control-point picking, drawing, edit, or move modes
 - `Delete`: delete selected object, with confirmation
 - `Ctrl+Z`: undo
 - `Ctrl+S`: save project as GeoJSON
@@ -147,9 +153,20 @@ When drawing lines and polygons, dynamic measurements are shown while drawing. P
 
 Shape styling separates line color, fill color, opacity, line width, line dash, and optional fill patterns. Fill opacity `0` is treated as no fill, and newly drawn lines default to no fill. Buffer styling uses the same line/fill pattern controls, but remains attached to the parent object.
 
-Edit points mode lets you adjust line, polygon, circle, and export-area geometry. For lines and polygons, click a point to select it, click a segment to add a point, use plus handles or Add Start/End Point to extend lines, and use Delete Point, Del, or Backspace to delete the selected point.
+Edit points mode lets you adjust line, polygon, circle, export-area, and image geometry. For lines and polygons, click a point to select it, click a segment to add a point, use plus handles or Add Start/End Point to extend lines, and use Delete Point, Del, or Backspace to delete the selected point. For image objects, drag the corner handles to resize the image bounds, the centre handle to move the image, or the rotate handle to rotate it; image resizing can preserve the original proportions.
 
 Export areas are rectangular guides for PNG crops. They are managed from the Files section, then edited like other shapes after creation. A format selector can constrain newly drawn export areas to common ratios such as 1:1, 4:3, 16:9, or A4 portrait/landscape.
+
+Image objects are imported from local image files and stored inside GeoSketch project data as data URLs. This keeps the single-file/no-install workflow simple, but large images can make GeoJSON project files and browser autosaves large. The current image workflow supports rectangular placement plus 3-point affine georeferencing: add three control point rows, set the image and map sides in any order, then apply the affine warp. Image edit mode also supports proportional resizing, mouse rotation, numeric rotation, and small numeric warp adjustments for scale, skew, and projected offset. This is intended for practical digitising and visual alignment, not survey-grade rectification.
+
+For best results with 3-point affine georeferencing:
+
+- Use three control points that are spread across the image, preferably near stable features such as road junctions, corners, bridges, shorelines, or grid intersections.
+- Avoid placing all three control points on one line or tightly clustered in one part of the image.
+- Use rectangular resize and move handles to get the image roughly into place before collecting control points.
+- Image control point inputs use original image pixels, measured from the top-left corner of the source image. Map control point inputs accept the same decimal degrees, DMS, and MGRS formats as other coordinate fields. On-map control points are shown as crosshairs labelled `P1`, `P2`, `P3` for image points and `M1`, `M2`, `M3` for map points.
+- Keep the original image file reasonably small when possible; the image is embedded in the saved GeoJSON project.
+- Treat the result as a visual alignment aid. Affine georeferencing can translate, rotate, scale, and skew an image, but it cannot rubber-sheet a distorted paper map or oblique photograph.
 
 ## Buffers and Measurements
 
@@ -243,6 +260,22 @@ The **Run Checks** button performs lightweight browser-side diagnostics:
 
 This is a smoke test, not a full QA suite.
 
+## Manual QA Checklist
+
+Use this checklist before publishing a development build with image/georeferencing changes:
+
+- Load the built-in sample map and confirm existing point, unit, line, polygon, circle, text, buffer, measurement, and export-area objects still render.
+- Add a PNG, JPG, and WebP image object if test files are available.
+- Select an image, move it with the centre handle, resize it with proportional resizing on, then repeat with proportional resizing off.
+- Add three image control point rows, set image and map points in mixed order by both typing and picking, apply the affine warp, and confirm the image visibly moves/rotates/skews toward the selected map features.
+- Delete one control point row and confirm the remaining rows renumber and still apply once three complete pairs exist.
+- Save the project as GeoJSON, reload it, and confirm the image source, opacity, control points, and affine warp survive the round trip.
+- Refresh the browser and restore autosave to confirm the same image state survives autosave.
+- Export an interactive HTML map and confirm image objects appear there, including affine-warped images.
+- Export visible-map PNG and export-area PNG with raster background maps enabled, then check object placement and attribution/date/credit settings.
+- Confirm PNG export remains blocked or clearly warned when only vector-background layers are available.
+- Run **Run Checks** after the manual pass.
+
 ## Privacy and Operational Notes
 
 GeoSketch runs locally in the browser, but some features contact external services:
@@ -258,6 +291,9 @@ Avoid entering sensitive operational information into external search services o
 - The app is a single HTML file, so very large projects may become slow.
 - Browser PNG export can be affected by CORS restrictions on map tiles.
 - Vector overlays use MapLibre GL through a Leaflet bridge; they add WebGL/CDN requirements and are intentionally excluded from PNG export.
+- Image objects are embedded as data URLs, so large images can make GeoJSON saves, autosaves, and HTML exports large.
+- Image georeferencing is currently 3-point affine only. It does not support many-point rubber-sheeting, local residual/error display, or survey-grade rectification.
+- Affine-warped images should be manually checked in HTML and PNG exports before publication, especially when large source images are used.
 - GeoJSON exports include GeoSketch-specific styling metadata that other GIS tools may ignore.
 - APP-6 symbol support is intentionally practical and UI-driven, not a full doctrinal validation engine.
 - Measurements are appropriate for sketching and planning, not survey-grade work.
@@ -328,3 +364,15 @@ Other files in this workspace may belong to earlier experiments or adjacent tool
 - Started v1.2.3 development with selected-object coordinates and measurements collapsed by default in the right pane.
 - Started v1.2.4 development with selectable line/polygon points, coordinate-line highlighting, and Delete Point / Del / Backspace point deletion.
 - Started v1.2.5 development with stronger visible vertex handles, explicit line endpoint add controls, and restored "press Enter" drawing tooltips.
+- Reset development versioning to v1.2.8 and removed the experimental background image-layer prototype; image objects are the target for v1.3.
+- Started v1.2.9 development with editable numeric status controls, configurable horizontal/vertical scale bars, and a reset-settings button for display/export and new-object defaults.
+- Started v1.2.10 development with corrected scale-bar segment rendering, cleaner scale-bar labels, and bottom-right default placement for the vertical scale bar.
+- Started v1.2.11 development with imported image overlays as drawing-layer objects, including save/load support and mouse edit handles for moving/resizing image bounds.
+- Started v1.2.12 development with proportional image resizing and a first 3-point affine image georeferencing workflow.
+- Started v1.2.13 development with affine-aware control-point re-picking and georeference markers visible outside image edit mode.
+- Started v1.2.14 development with editable georeferencing rows, image-pixel inputs, map-coordinate inputs, per-point deletion, and independent image/map point picking.
+- Started v1.2.15 development with crosshair georeference markers, mouse/numeric image rotation, manual affine warp adjustments, and editable opacity percentages beside opacity sliders.
+- Started v1.2.16 development with a None vector-overlay preset, Esc cancellation for coordinate/input workflows, and a cleaner image object pane ordering.
+- Started v1.2.17 development with clearable map-search markers and north-positive label Y offset controls.
+- Started v1.2.18 development with improved snap-to-existing-point drawing, underlay-style selection highlights, and default-off object shadows for point icons, paths, and line endpoints.
+- Started v1.2.19 development with separate point icon fill opacity, safer remove-all-buffers confirmation, normal arrow map cursors, and clearer file-load failure messages.
