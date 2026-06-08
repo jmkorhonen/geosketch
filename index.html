@@ -195,6 +195,55 @@
       text-overflow: ellipsis;
     }
 
+    .map-center-crosshair {
+      position: absolute;
+      z-index: 908;
+      left: 50%;
+      top: 50%;
+      width: 42px;
+      height: 42px;
+      transform: translate(-50%, -50%) scale(0.92);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .12s ease, transform .12s ease;
+    }
+
+    .map-center-crosshair::before,
+    .map-center-crosshair::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      background: rgba(0,0,0,0.86);
+      transform: translate(-50%, -50%);
+    }
+
+    .map-center-crosshair::before {
+      width: 36px;
+      height: 2px;
+    }
+
+    .map-center-crosshair::after {
+      width: 2px;
+      height: 36px;
+    }
+
+    .map-center-crosshair-ring {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(0,0,0,0.86);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .map-center-crosshair.visible {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
     .save-confirm-toast {
       position: absolute;
       z-index: 1600;
@@ -262,8 +311,8 @@
     }
 
     .scale-control input[type="number"] {
-      width: 48px;
-      padding: 1px 3px;
+      width: 54px;
+      padding: 1px 13px 1px 4px;
       border-radius: 4px;
       font-size: 10px;
       text-align: right;
@@ -497,14 +546,14 @@
 
     .range-percent {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 58px;
+      grid-template-columns: minmax(0, 1fr) 62px;
       gap: 6px;
       align-items: center;
     }
 
     .range-percent input[type="number"] {
       min-width: 0;
-      padding-inline: 5px;
+      padding-inline: 5px 13px;
       text-align: right;
     }
 
@@ -555,6 +604,26 @@
       font-size: 11px;
     }
 
+    .georef-fit-summary {
+      padding: 5px 6px;
+      border: 1px solid rgba(126,208,166,0.34);
+      border-radius: 5px;
+      background: rgba(126,208,166,0.08);
+      color: #cfe9d9;
+      line-height: 1.35;
+    }
+
+    .georef-residual {
+      grid-column: 1 / -1;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.25;
+    }
+
+    .georef-residual.warn {
+      color: var(--warn);
+    }
+
     #map.georef-capture,
     #map.georef-capture .leaflet-container,
     #map.georef-capture .leaflet-pane,
@@ -573,16 +642,16 @@
       height: 42px;
       color: #7ed0a6;
       pointer-events: auto;
+      filter: drop-shadow(0 1px 2px rgba(255,255,255,0.35));
     }
 
     .georef-cross::before,
-    .georef-cross::after {
+    .georef-cross::after,
+    .georef-cross-ring {
       content: "";
       position: absolute;
       left: 50%;
       top: 50%;
-      background: currentColor;
-      box-shadow: 0 0 0 1px rgba(0,0,0,0.8), 0 0 4px rgba(255,255,255,0.85);
       transform: translate(-50%, -50%);
     }
 
@@ -596,6 +665,20 @@
       height: 28px;
     }
 
+    .georef-cross::before,
+    .georef-cross::after {
+      background: currentColor;
+      border-radius: 999px;
+    }
+
+    .georef-cross-ring {
+      width: 15px;
+      height: 15px;
+      border: 2px solid currentColor;
+      border-radius: 50%;
+      background: transparent;
+    }
+
     .georef-cross.is-map {
       color: #f0bc70;
     }
@@ -604,10 +687,10 @@
       position: absolute;
       left: 26px;
       top: 2px;
-      padding: 0 3px;
+      padding: 1px 4px;
       border-radius: 3px;
-      background: rgba(8, 13, 19, 0.82);
-      color: #fff;
+      background: rgba(255, 255, 255, 0.86);
+      color: #111820;
       font: 700 11px/1.2 system-ui, sans-serif;
       text-shadow: none;
       white-space: nowrap;
@@ -673,6 +756,16 @@
     .tiny {
       font-size: 11px;
       color: var(--muted);
+    }
+
+    .tiny.warning {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .warning-text {
+      color: var(--danger);
+      font-weight: 700;
     }
 
     details > summary {
@@ -763,9 +856,9 @@
     }
 
     .tile-opacity-input {
-      width: 54px;
+      width: 60px;
       min-width: 0;
-      padding-inline: 5px;
+      padding-inline: 5px 13px;
       text-align: right;
     }
 
@@ -1271,7 +1364,7 @@
     <button id="rightTab" class="collapse-tab" title="Collapse right panel"></button>
     <aside class="side left">
       <div class="brand">
-        <h1>GeoSketch <span class="version">v1.2.19</span></h1>
+        <h1>GeoSketch <span class="version">v1.3</span></h1>
         <button id="resetViewBtn" title="Zoom to all objects">⌖</button>
       </div>
       <label class="map-title-field">Map title
@@ -1364,7 +1457,7 @@
 
       <details id="referenceLayerSection" class="section">
         <summary><h2>Filter Vector Overlays</h2></summary>
-        <p class="tiny">Filter the Vector overlays (OpenFreeMap) layer, especially when using it over satellite imagery. Vector overlays are live/HTML-export only and do not render in PNG exports.</p>
+        <p class="tiny">Filter the Vector overlays (OpenFreeMap) layer, especially when using it over satellite imagery.</p>
         <div class="grid-2">
           <button id="referencePresetFull" title="Show the full OpenFreeMap vector overlay">Full map</button>
           <button id="referencePresetRoads" title="Show roads, places, and borders over other map layers">Roads + places</button>
@@ -1407,7 +1500,7 @@
             <button id="saveExcel" class="wide" title="Export object table to Excel">Export as Excel</button>
           </div>
           <div class="grid-2">
-            <button id="saveHtmlMap" class="wide" title="Export an interactive HTML copy of the map">Export HTML map</button>
+            <button id="saveHtmlMap" class="wide" title="Export an interactive HTML copy of the map with the currently visible drawing layers">Export HTML map</button>
           </div>
           <label>Load GeoJSON as layer/template
             <input id="loadLayerFile" type="file" accept=".geojson,.json,application/geo+json,application/json">
@@ -1543,9 +1636,9 @@
           <br><br>
           <strong>Map notes.</strong> Use the notes below the map title for author details, sources, caveats, and links. They are included in interactive HTML exports.
           <br><br>
-          <strong>Export areas.</strong> Use Files > Define export area to draw a rectangular PNG crop. The format selector can constrain new export areas to common ratios. Use Save visible map as PNG for the current viewport, or select an export area and use Save area as PNG for a crop.
+          <strong>Export areas.</strong> Use Files > Define export area to draw a rectangular PNG crop. The format selector can constrain new export areas to common ratios. Use Save visible map as PNG for the current viewport, or select an export area and use Save area as PNG for a crop. PNG exports need a raster background map or no background map; vector overlays can be exported as interactive HTML maps.
           <br><br>
-          <strong>Images.</strong> Use Add Object > Image to place a local image in the active drawing layer. Select it and use Edit shape to drag corners for resizing, the centre handle for moving, or the rotation handle for rotating. The image georeferencing panel uses editable control point rows: type original image X/Y pixels, type map coordinates, or pick either side from the map in any order before applying an affine warp. Control points are shown as small crosshairs labelled P1/M1, P2/M2, and P3/M3, and the manual warp controls can apply numeric rotation, scale, skew, and offset adjustments.
+          <strong>Images.</strong> Use Add Object > Image to place a local image in the active drawing layer. Select it and use Edit shape to drag corners for resizing, the centre handle for moving, or the rotation handle for rotating. The image georeferencing panel uses editable control point rows: type original image X/Y pixels, type map coordinates, or pick either side from the map in any order before applying an affine fit. Three complete pairs produce an exact affine fit; four or more produce a least-squares affine fit with residual errors. Control points are shown as small crosshairs labelled P1/M1, P2/M2, and so on, and the manual warp controls can apply numeric rotation, scale, skew, and offset adjustments.
           <br><br>
           <strong>Vector overlays.</strong> Enable Vector overlays (OpenFreeMap) in Background Map, then use Filter Vector Overlays to show or hide roads, rail, places, borders, water, chokepoints, airports, ports, and other vector details. These overlays are visible in the app and interactive HTML exports, but are not included in PNG exports.
           <br><br>
@@ -1566,6 +1659,7 @@
       <div id="mapTitleOverlay" class="map-title-overlay" hidden></div>
       <div id="horizontalScaleBar" class="map-scale-bar horizontal" hidden></div>
       <div id="verticalScaleBar" class="map-scale-bar vertical" hidden></div>
+      <div id="mapCenterCrosshair" class="map-center-crosshair no-export" aria-hidden="true"><span class="map-center-crosshair-ring"></span></div>
       <div id="mapStatusBar" class="map-status-bar no-export">
         <div id="cursorCoordinates" class="cursor-coordinates">Cursor: move over map</div>
         <label class="scale-control">Zoom
@@ -1595,6 +1689,12 @@
         <label id="labelControl">Label
           <textarea id="labelInput" rows="2" placeholder="Example: OP Alpha"></textarea>
         </label>
+        <label id="unitNameControl">Name
+          <input id="unitNameInput" placeholder="Example: Alpha Company">
+        </label>
+        <label id="higherFormationControl">Higher formation
+          <input id="higherFormationInput" placeholder="Example: 1st Battalion">
+        </label>
         <label id="showLabelControl" class="check-row"><input id="showLabel" type="checkbox"> <span id="showLabelText">Show label</span></label>
         <details id="labelStyleControls">
           <summary class="tiny">Edit label style</summary>
@@ -1617,16 +1717,10 @@
             <label>Line style<select id="labelBoxDash"><option value="">Solid</option><option value="8 8">Dashed</option><option value="2 8">Dotted</option><option value="12 6 2 6">Dash-dot</option></select></label>
             <label>Preset<select id="labelPosition"><option value="above">Above</option><option value="below">Below</option><option value="right">Right</option><option value="left">Left</option><option value="center">Center</option></select></label>
             <label>X offset<input id="labelOffsetX" type="number" min="-400" max="400" step="1" value="0"></label>
-            <label>Y offset north<input id="labelOffsetY" type="number" min="-400" max="400" step="1" value="12" title="Positive values move the label north/up; negative values move it south/down"></label>
+            <label>Y offset<input id="labelOffsetY" type="number" min="-400" max="400" step="1" value="12" title="Positive values move the label north/up; negative values move it south/down"></label>
             <label class="check-row"><input id="labelScaleWithIcon" type="checkbox" checked> Scale with icon size</label>
           </div>
         </details>
-        <label id="unitNameControl">Name
-          <input id="unitNameInput" placeholder="Example: Alpha Company">
-        </label>
-        <label id="higherFormationControl">Higher formation
-          <input id="higherFormationInput" placeholder="Example: 1st Battalion">
-        </label>
         <label>Notes
           <textarea id="notesInput" rows="3" placeholder="Example: Source, confidence, and assumptions"></textarea>
         </label>
@@ -1636,6 +1730,10 @@
             <button id="editToggle" title="Toggle edit point/shape editing mode">Edit points</button>
             <button id="moveToggle" title="Toggle drag mode">Move</button>
           </div>
+        </div>
+        <div id="styleControlsGroup" class="control-group">
+          <div class="control-group-title">Style</div>
+          <div id="styleControlsSlot"></div>
         </div>
         <div id="imageOpacitySlot"></div>
         <details id="imageWarpControls" class="compact-details">
@@ -1681,17 +1779,19 @@
             <button id="addLineEndPoint" title="Add a new vertex after the current last point of this line" disabled>Add End Point</button>
             <button id="deleteVertexBtn" class="danger wide" title="In Edit points mode, select a point to delete it" disabled>Delete Point</button>
           </div>
+          <div id="coordinateToggleSlot"></div>
         </details>
         <details id="imageGeorefControls" class="compact-details">
           <summary class="tiny">Image georeferencing</summary>
           <label id="imageKeepAspectControl" class="check-row"><input id="imageKeepAspect" type="checkbox" checked> Keep proportions while resizing</label>
-          <p class="tiny">Add three control point rows. Image points are original image pixels; map points accept the same coordinate formats as other GeoSketch inputs. Use the pick buttons in any order.</p>
+          <p class="tiny">Add at least three control point rows. Three points produce an exact affine fit; four or more points produce a least-squares affine fit with residual errors shown below.</p>
           <div class="grid-2">
             <button id="imageAddControlPoint" title="Add an empty image georeferencing control point row">Add point row</button>
-            <button id="imageApplyAffine" title="Warp the image from the first three control points" disabled>Apply affine warp</button>
+            <button id="imageApplyAffine" title="Warp the image from three or more complete control point pairs" disabled>Apply affine fit</button>
             <button id="imageClearControlPoints" title="Remove all image control points">Clear points</button>
             <button id="imageResetAffine" title="Remove the current image warp but keep the image object">Reset warp</button>
           </div>
+          <div id="imageGeorefFitSummary" class="georef-fit-summary tiny" hidden></div>
           <div id="imageControlPointList" class="georef-point-list tiny"></div>
         </details>
         <details id="measurementSection" class="compact-details">
@@ -1699,7 +1799,9 @@
           <label id="measurementBoxControl">Measurements
             <textarea id="measurementOutput" class="coords-box coords-output" readonly></textarea>
           </label>
-          <label id="measureToggleLabel" class="check-row"><input id="showMeasurements" type="checkbox"> <span id="measureToggleText">Show measurements</span></label>
+          <div id="measurementToggleSlot">
+            <label id="measureToggleLabel" class="check-row"><input id="showMeasurements" type="checkbox"> <span id="measureToggleText">Show measurements</span></label>
+          </div>
         </details>
         <div class="control-group">
           <div class="control-group-title">Copy</div>
@@ -1969,7 +2071,7 @@
   <script src="https://cdn.jsdelivr.net/npm/milsymbol@3/dist/milsymbol.js"></script>
   <script>
     const APP_NAME = "GeoSketch";
-    const APP_VERSION = "v1.2.19";
+    const APP_VERSION = "v1.3";
     const UNTITLED_FILENAME_BASE = "untitled_geosketch";
     const GEOSKETCH_URL = "https://jmkorhonen.github.io/geosketch/";
     const ATTRIBUTION_NOTE = "Background map attribution: OpenStreetMap contributors, CARTO, OpenTopoMap, SRTM, Esri, OpenMapTiles, and OpenFreeMap as applicable to visible layers. User-loaded data may have separate licenses.";
@@ -2615,6 +2717,19 @@
     L.DomEvent.disableScrollPropagation(el("mapStatusBar"));
 
     const patternDefs = new Map();
+    let mapCenterCrosshairTimer = null;
+
+    function setMapCenterCrosshairVisible(visible, delay = 0) {
+      const node = el("mapCenterCrosshair");
+      if (!node) return;
+      if (mapCenterCrosshairTimer) {
+        clearTimeout(mapCenterCrosshairTimer);
+        mapCenterCrosshairTimer = null;
+      }
+      const apply = () => node.classList.toggle("visible", Boolean(visible));
+      if (delay > 0) mapCenterCrosshairTimer = setTimeout(apply, delay);
+      else apply();
+    }
 
     map.on("mousemove", (event) => {
       state.lastMouseLatLng = event.latlng;
@@ -2625,6 +2740,8 @@
     });
 
     map.on("mouseout", () => updateCursorReadout(null));
+    map.on("dragstart drag", () => setMapCenterCrosshairVisible(true));
+    map.on("dragend", () => setMapCenterCrosshairVisible(false, 450));
 
     function showTemporaryMapText(text, at) {
       if (state.tempMeasure) measurements.removeLayer(state.tempMeasure);
@@ -3226,9 +3343,11 @@
         row.className = "tile-row";
         row.title = cfg.description || "";
         const opacity = backgroundLayerOpacity(layer, cfg);
+        const stackLabel = index === 0 ? "top" : index === tileConfigs.length - 1 ? "bottom" : "middle";
+        const pngWarning = cfg.kind === "maplibre" ? ` · <span class="warning-text">won't export in PNGs</span>` : "";
         row.innerHTML = `
           <input type="checkbox" ${map.hasLayer(layer) ? "checked" : ""} aria-label="${cfg.name}">
-          <span class="tile-meta"><strong>${cfg.name}</strong><span class="tiny">${escapeHtml(layerRoleLabel(cfg))} · ${index === 0 ? "top" : index === tileConfigs.length - 1 ? "bottom" : "middle"}</span></span>
+          <span class="tile-meta"><strong>${escapeHtml(cfg.name)}</strong><span class="tiny">${escapeHtml(layerRoleLabel(cfg))}${pngWarning} · ${stackLabel}</span></span>
           <input class="tile-opacity-input tiny" type="number" min="0" max="100" step="1" value="${Math.round(opacity * 100)}" aria-label="${cfg.name} opacity percent">
           <button title="Move background layer up">↑</button>
           <button title="Move background layer down">↓</button>
@@ -3244,6 +3363,7 @@
           setBackgroundLayerOpacity(layer, backgroundLayerOpacity(layer, cfg));
           applyTileLayerOrder();
           applyReferenceLayers();
+          updatePngExportButtons();
           scheduleSave();
         });
         range.addEventListener("input", () => {
@@ -4964,7 +5084,7 @@
     }
 
     function completeImageControlPoints(obj) {
-      return imageControlPoints(obj).filter((point) => point?.image && point?.map).slice(0, 3);
+      return imageControlPoints(obj).filter((point) => point?.image && point?.map);
     }
 
     function ensureImageControlPoint(obj, index) {
@@ -5058,7 +5178,7 @@
         zIndexOffset: 21000,
         icon: L.divIcon({
           className: "georef-cross-icon",
-          html: `<div class="georef-cross ${className}" title="${escapeHtml(title || label)}"><span class="georef-cross-label">${escapeHtml(label)}</span></div>`,
+          html: `<div class="georef-cross ${className}" title="${escapeHtml(title || label)}"><span class="georef-cross-ring"></span><span class="georef-cross-label">${escapeHtml(label)}</span></div>`,
           iconSize: [42, 42],
           iconAnchor: [21, 21]
         })
@@ -5103,14 +5223,30 @@
       el("imageKeepAspect").checked = imageKeepAspect(obj);
       const points = imageControlPoints(obj);
       const list = el("imageControlPointList");
+      const fit = imageGeorefFitStats(obj);
+      const fitSummary = el("imageGeorefFitSummary");
+      if (fitSummary) {
+        fitSummary.hidden = !fit;
+        fitSummary.innerHTML = fit
+          ? `<strong>${escapeHtml(fit.label)}</strong><br>RMS ${escapeHtml(formatDistance(fit.rmsMeters))} · Max ${escapeHtml(formatDistance(fit.maxMeters))} · ${fit.count} point${fit.count === 1 ? "" : "s"}`
+          : "";
+      }
       list.innerHTML = "";
       if (!points.length) {
         list.textContent = "No control point rows yet.";
       } else {
         const size = imageNaturalSize(obj.image);
+        const residualByIndex = new Map((fit?.residuals || []).map((residual) => [residual.index, residual]));
         points.forEach((point, index) => {
           const pixels = imagePointPixels(obj, point);
           const capture = state.imageGeorefPick?.objectId === obj.id && state.imageGeorefPick?.index === index ? state.imageGeorefPick.target : "";
+          const residual = residualByIndex.get(index);
+          const residualClass = residual && fit?.rmsMeters && residual.meters > fit.rmsMeters * 1.5 ? " warn" : "";
+          const residualText = residual
+            ? `Residual ${formatDistance(residual.meters)}${Number.isFinite(residual.bearing) ? `, bearing ${formatBearing(residual.bearing)}` : ""}`
+            : point.image && point.map
+              ? "Residual available after applying a warp."
+              : "Incomplete pair.";
           const row = document.createElement("div");
           row.className = `georef-point-row ${capture ? "is-capturing" : ""}`;
           row.innerHTML = `
@@ -5127,6 +5263,7 @@
               <label class="wide">Map coordinate
                 <input data-georef-field="map" data-index="${index}" value="${escapeHtml(formatGeorefMapInput(point))}" placeholder="Example: 60.1708, 24.9375">
               </label>
+              <div class="georef-residual${residualClass}">${escapeHtml(residualText)}</div>
               <button data-georef-action="delete" data-index="${index}" class="danger wide" title="Delete this control point row">Delete point</button>
             </div>
           `;
@@ -5144,7 +5281,7 @@
       const locked = Boolean(obj.locked);
       el("imageApplyAffine").disabled = locked || completeImageControlPoints(obj).length < 3;
       el("imageResetAffine").disabled = locked || !obj.image?.affine;
-      el("imageAddControlPoint").disabled = locked || points.length >= 3;
+      el("imageAddControlPoint").disabled = locked;
       el("imageClearControlPoints").disabled = locked || !points.length;
     }
 
@@ -5219,13 +5356,12 @@
       if (obj?.kind !== "image") return status("Select an image object first.");
       if (obj.locked) return status("Unlock the image before georeferencing it.");
       const points = imageControlPoints(obj);
-      if (points.length >= 3) return status("Three control point rows are already set. Delete or clear a row first.");
       pushUndo("image-control-point-row");
       points.push({ image: null, map: null });
       renderImageGeorefControls(obj);
       renderVertexSelection();
       scheduleSave();
-      status("Control point row added. Pick or type image and map locations in any order.");
+      status("Control point row added. Add three or more complete pairs for affine fitting.");
     }
 
     function startImageControlPointCapture(target, index) {
@@ -5286,8 +5422,8 @@
       if (imagePoint === undefined) return status("Enter numeric image X/Y pixel values.");
       pushUndo("image-control-point-edit", { coalesceMs: 1000 });
       ensureImageControlPoint(obj, index).image = imagePoint;
+      renderImageGeorefControls(obj);
       renderVertexSelection();
-      syncImageGeorefButtons(obj);
       scheduleSave();
       status(imagePoint ? `Image point ${index + 1} updated.` : `Image point ${index + 1} cleared.`);
     }
@@ -5301,8 +5437,8 @@
       const point = ensureImageControlPoint(obj, index);
       if (!text) {
         point.map = null;
+        renderImageGeorefControls(obj);
         renderVertexSelection();
-        syncImageGeorefButtons(obj);
         scheduleSave();
         return status(`Map point ${index + 1} cleared.`);
       }
@@ -5310,8 +5446,8 @@
       if (!latlng) return status("Could not parse map coordinate.");
       point.map = { lat: latlng.lat, lng: latlng.lng };
       input.value = formatLatLng(latlng);
+      renderImageGeorefControls(obj);
       renderVertexSelection();
-      syncImageGeorefButtons(obj);
       scheduleSave();
       status(`Map point ${index + 1} updated.`);
     }
@@ -5334,18 +5470,31 @@
       if (obj?.kind !== "image") return status("Select an image object first.");
       if (obj.locked) return status("Unlock the image before georeferencing it.");
       const points = completeImageControlPoints(obj);
-      if (points.length < 3) return status("Add three control points first.");
-      const matrix = solveAffine3(points, obj.image);
+      if (points.length < 3) return status("Add at least three complete control point pairs first.");
+      const matrix = solveAffine(points, obj.image);
       if (!matrix) return status("Could not solve affine warp. Check that image control points are not collinear.");
+      const residualStats = imageAffineResiduals(matrix, imageControlPoints(obj), obj.image);
       pushUndo("image-affine");
-      obj.image.affine = { type: "affine-3point", matrix, points: points.slice(0, 3) };
+      obj.image.affine = {
+        type: points.length > 3 ? "affine-least-squares" : "affine-3point",
+        matrix,
+        points: cloneImageControlPoints(imageControlPoints(obj)),
+        residuals: residualStats ? {
+          rmsMeters: residualStats.rmsMeters,
+          maxMeters: residualStats.maxMeters,
+          count: residualStats.count,
+          points: residualStats.residuals.map((residual) => ({ index: residual.index, meters: residual.meters, bearing: residual.bearing }))
+        } : null
+      };
       rebuildImageLayer(obj);
       renderImageGeorefControls(obj);
       renderVertexSelection();
       updateCoordinatePanel();
       updateMeasurementPanel();
       scheduleSave();
-      status("Image warped from three control points.");
+      status(points.length > 3
+        ? `Image warped from ${points.length} control points. RMS residual ${formatDistance(residualStats?.rmsMeters || 0)}.`
+        : "Image warped from three control points.");
     }
 
     function clearImageControlPoints() {
@@ -5531,6 +5680,16 @@
       setTimeout(() => map.invalidateSize(), 220);
     }
 
+    function arrangeObjectPaneControls() {
+      const styleSlot = el("styleControlsSlot");
+      if (styleSlot) {
+        ["imageOpacitySlot", "iconControls", "textStyleControls", "generalStyleSlot"].forEach((id) => {
+          const node = el(id);
+          if (node && node.parentElement !== styleSlot) styleSlot.appendChild(node);
+        });
+      }
+    }
+
     function moveStyleControlsForObject(obj) {
       const target = obj?.kind === "marker"
         ? el("pointIconStyleSlot")
@@ -5562,6 +5721,15 @@
       preview.innerHTML = `${pointMarkerSvg(kind, 24, color, fill, opacity, Boolean(el("objectShadow")?.checked), fillOpacity)}<span>${escapeHtml(pointIconName(kind))}</span>`;
     }
 
+    function moveMeasureToggleForObject(obj) {
+      const label = el("measureToggleLabel");
+      const coordinateSlot = el("coordinateToggleSlot");
+      const measurementSlot = el("measurementToggleSlot");
+      if (!label || !coordinateSlot || !measurementSlot) return;
+      const target = isPointLike(obj) || obj?.kind === "text" ? coordinateSlot : measurementSlot;
+      if (label.parentElement !== target) target.appendChild(label);
+    }
+
     function syncRemoveBuffersButton(obj = selectedObj()) {
       const button = el("removeBuffers");
       if (!button) return;
@@ -5587,6 +5755,8 @@
       const isExportArea = obj?.kind === "exportArea";
       const locked = Boolean(obj?.locked);
       moveStyleControlsForObject(obj);
+      moveMeasureToggleForObject(obj);
+      el("styleControlsGroup").hidden = !hasObj;
       el("iconControls").hidden = !pointLike;
       el("iconControls").querySelector("summary").textContent = isUnit ? "APP-6 unit symbol" : "Point icon";
       const iconKindControl = el("iconKind")?.closest("label");
@@ -5633,7 +5803,7 @@
       el("strokeColorText").textContent = isPoint ? "Icon line" : "Line color";
       el("fillColorText").textContent = isPoint ? "Icon fill" : "Fill color";
       el("strokeOpacityLabel").firstChild.textContent = isImage ? "Image opacity" : "Line opacity";
-      ["objectLayerControl", "labelControl", "unitNameControl", "higherFormationControl", "showLabelControl", "measureToggleLabel", "iconControls", "textStyleControls", "labelStyleControls", "strokeFillControls", "opacityControls", "objectShadowControl", "strokeOpacityLabel", "fillOpacityLabel", "lineControls", "fillPatternControl", "endpointControls", "imageGeorefControls", "imageWarpControls", "bufferSection"].forEach((id) => {
+      ["objectLayerControl", "labelControl", "unitNameControl", "higherFormationControl", "showLabelControl", "measureToggleLabel", "styleControlsGroup", "iconControls", "textStyleControls", "labelStyleControls", "strokeFillControls", "opacityControls", "objectShadowControl", "strokeOpacityLabel", "fillOpacityLabel", "lineControls", "fillPatternControl", "endpointControls", "imageGeorefControls", "imageWarpControls", "bufferSection"].forEach((id) => {
         el(id)?.classList.toggle("locked-disabled", locked);
       });
       ["editToggle", "moveToggle", "deleteSelected", "frontBtn", "backBtn", "editCoordinates", "addBuffer", "removeBuffers"].forEach((id) => {
@@ -6871,11 +7041,17 @@
     function updateExportAreaButton() {
       const button = el("saveExportArea");
       if (!button) return;
+      updateVisiblePngExportButton();
+      const blocked = pngExportBlockedReason();
       const areas = exportAreaObjects();
       const selected = selectedObj();
       const selectedArea = selected?.kind === "exportArea" ? selected : null;
       const target = areas.length === 1 ? areas[0] : selectedArea;
-      if (!areas.length) {
+      if (blocked) {
+        button.disabled = true;
+        button.textContent = target ? `Save ${objectName(target)} (${exportAreaSizeLabel(target)}) as PNG` : "Save area as PNG";
+        button.title = blocked;
+      } else if (!areas.length) {
         button.disabled = true;
         button.textContent = "Save area as PNG";
         button.title = "Draw an export area before exporting an area PNG.";
@@ -6893,6 +7069,19 @@
         button.title = `Export ${objectName(target)} as a PNG image.`;
       }
       renderExportAreaPicker(areas);
+    }
+
+    function updateVisiblePngExportButton() {
+      const button = el("saveScreenshot");
+      if (!button) return;
+      const blocked = pngExportBlockedReason();
+      button.disabled = Boolean(blocked);
+      button.title = blocked || "Export the current visible map as a PNG image.";
+    }
+
+    function updatePngExportButtons() {
+      updateVisiblePngExportButton();
+      updateExportAreaButton();
     }
 
     function renderExportAreaPicker(areas = exportAreaObjects()) {
@@ -8635,6 +8824,110 @@
       return { a: x.a, b: x.b, c: x.c, d: y.a, e: y.b, f: y.c };
     }
 
+    function solveLinear3(matrix, rhs) {
+      const a = matrix.map((row, index) => [...row.map(Number), Number(rhs[index])]);
+      for (let col = 0; col < 3; col++) {
+        let pivot = col;
+        for (let row = col + 1; row < 3; row++) {
+          if (Math.abs(a[row][col]) > Math.abs(a[pivot][col])) pivot = row;
+        }
+        if (Math.abs(a[pivot][col]) < 1e-12) return null;
+        if (pivot !== col) [a[col], a[pivot]] = [a[pivot], a[col]];
+        const div = a[col][col];
+        for (let j = col; j < 4; j++) a[col][j] /= div;
+        for (let row = 0; row < 3; row++) {
+          if (row === col) continue;
+          const factor = a[row][col];
+          for (let j = col; j < 4; j++) a[row][j] -= factor * a[col][j];
+        }
+      }
+      const out = [a[0][3], a[1][3], a[2][3]];
+      return out.every(Number.isFinite) ? out : null;
+    }
+
+    function solveAffineLeastSquares(controlPoints, image = {}) {
+      const points = (controlPoints || []).filter((point) => point?.image && point?.map);
+      if (points.length < 3) return null;
+      const size = imageNaturalSize(image);
+      const rows = points.map((point) => {
+        const srcX = clamp01(point.image.x ?? 0, 0) * size.width;
+        const srcY = clamp01(point.image.y ?? 0, 0) * size.height;
+        const dst = projectLatLngForAffine(point.map);
+        return { srcX, srcY, dstX: dst.x, dstY: dst.y };
+      });
+      const normal = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0]
+      ];
+      const rhsX = [0, 0, 0];
+      const rhsY = [0, 0, 0];
+      rows.forEach(({ srcX, srcY, dstX, dstY }) => {
+        const terms = [srcX, srcY, 1];
+        for (let i = 0; i < 3; i++) {
+          rhsX[i] += terms[i] * dstX;
+          rhsY[i] += terms[i] * dstY;
+          for (let j = 0; j < 3; j++) normal[i][j] += terms[i] * terms[j];
+        }
+      });
+      const x = solveLinear3(normal, rhsX);
+      const y = solveLinear3(normal, rhsY);
+      if (!x || !y) return null;
+      return { a: x[0], b: x[1], c: x[2], d: y[0], e: y[1], f: y[2] };
+    }
+
+    function solveAffine(controlPoints, image = {}) {
+      const points = (controlPoints || []).filter((point) => point?.image && point?.map);
+      if (points.length < 3) return null;
+      return points.length === 3 ? solveAffine3(points, image) : solveAffineLeastSquares(points, image);
+    }
+
+    function cloneImageControlPoints(points = []) {
+      return points.map((point) => ({
+        image: point.image ? { x: point.image.x, y: point.image.y } : null,
+        map: point.map ? { lat: point.map.lat, lng: point.map.lng } : null
+      }));
+    }
+
+    function imageAffineResiduals(matrix, controlPoints, image = {}) {
+      if (!matrix) return null;
+      const points = (controlPoints || []).map((point, index) => ({ point, index })).filter(({ point }) => point?.image && point?.map);
+      if (!points.length) return null;
+      const size = imageNaturalSize(image);
+      const residuals = points.map(({ point, index }) => {
+        const predictedProjected = transformAffinePoint(
+          matrix,
+          clamp01(point.image.x ?? 0, 0) * size.width,
+          clamp01(point.image.y ?? 0, 0) * size.height
+        );
+        const actualLatLng = L.latLng(point.map);
+        const predictedLatLng = unprojectAffinePoint(predictedProjected);
+        const meters = actualLatLng.distanceTo(predictedLatLng);
+        return {
+          index,
+          meters,
+          bearing: bearingDegrees(actualLatLng, predictedLatLng)
+        };
+      });
+      const sumSquares = residuals.reduce((sum, residual) => sum + residual.meters ** 2, 0);
+      return {
+        count: residuals.length,
+        residuals,
+        rmsMeters: Math.sqrt(sumSquares / residuals.length),
+        maxMeters: Math.max(...residuals.map((residual) => residual.meters))
+      };
+    }
+
+    function imageGeorefFitStats(obj) {
+      const matrix = obj?.image?.affine?.matrix;
+      const points = imageControlPoints(obj);
+      const completeCount = completeImageControlPoints(obj).length;
+      const stats = matrix && completeCount ? imageAffineResiduals(matrix, points, obj.image) : null;
+      if (!stats) return null;
+      const type = completeCount > 3 ? "Least-squares affine fit" : "3-point affine fit";
+      return { ...stats, label: type };
+    }
+
     async function addImageObjectFromFile(file) {
       if (!file) return;
       if (!file.type?.startsWith("image/")) return status("Choose an image file.");
@@ -8920,6 +9213,7 @@
 
     function shouldIgnorePngElement(element) {
       if (element.classList?.contains("center-dot")) return true;
+      if (element.classList?.contains("map-center-crosshair")) return true;
       const tag = String(element.tagName || "").toLowerCase();
       const svg = tag === "svg" ? element : element.closest?.("svg");
       if (!svg) return false;
@@ -9416,7 +9710,7 @@
 
     function pngExportBlockedReason() {
       if (visibleMapLibreLayers().length && !visibleRasterTileLayers().length) {
-        return "PNG export is disabled when only vector background maps are visible. Enable a raster background map, or export an interactive HTML map.";
+        return "Exporting vector overlays as images is not yet supported. Select one of supported background maps or no background map to export PNGs, or export as HTML map.";
       }
       return "";
     }
@@ -9520,10 +9814,22 @@
       }
     }
 
+    function visibleDrawingExportState(saved) {
+      const visibleLayerIds = new Set((saved.drawLayers || [])
+        .filter((layer) => layer.visible !== false)
+        .map((layer) => layer.id));
+      saved.drawLayers = (saved.drawLayers || []).filter((layer) => visibleLayerIds.has(layer.id));
+      saved.objects = (saved.objects || []).filter((obj) => obj.visible !== false && visibleLayerIds.has(obj.drawLayerId));
+      if (!visibleLayerIds.has(saved.activeLayerId)) {
+        saved.activeLayerId = saved.drawLayers[0]?.id || null;
+      }
+      return saved;
+    }
+
     function exportHtmlMap() {
       const filename = exportFilename("html");
       if (!filename) return status("HTML map export cancelled.");
-      const exportedState = saveStateObject();
+      const exportedState = visibleDrawingExportState(saveStateObject());
       const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -9571,8 +9877,11 @@
     .endpoint-arrow { width: 0; height: 0; border-top: 7px solid transparent; border-bottom: 7px solid transparent; border-left: 18px solid currentColor; }
     .endpoint-point { width: 11px; height: 11px; border-radius: 50%; background: currentColor; border: 2px solid #111820; }
     .endpoint-tick { width: 24px; height: 3px; border-radius: 2px; background: currentColor; }
+    .popup-section { margin-top: 6px; }
+    .popup-section summary { cursor: pointer; font-weight: 700; color: #111820; }
+    .popup-section[open] summary { margin-bottom: 4px; }
     .popup-note { max-width: 280px; white-space: pre-wrap; }
-    .popup-coords { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 11px; white-space: pre-wrap; }
+    .popup-coords { max-width: 320px; max-height: 220px; overflow: auto; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 11px; white-space: pre-wrap; }
     .leaflet-bottom { bottom: 0 !important; }
     .leaflet-control-attribution { font-size: 10px; line-height: 1.25; padding: 0 4px; }
   </style>
@@ -10284,11 +10593,26 @@
       return L.imageOverlay(imageSource(obj.image || {}), imageBoundsFromGeometry(obj.geometry || {}), { interactive: true, opacity: obj.style?.opacity ?? 0.75 });
     }
 
+    function popupTextBlock(title, className, text, options) {
+      const value = String(text || "");
+      if (!value) return "";
+      const opts = options || {};
+      const lines = value.split(/\\r\\n|\\r|\\n/);
+      const threshold = opts.threshold || 5;
+      const titleHtml = escapeHtml(title);
+      if (lines.length > threshold) {
+        const summary = title + " (" + lines.length + " lines)";
+        return '<details class="popup-section"><summary>' + escapeHtml(summary) + '</summary><div class="' + className + '">' + escapeHtml(value) + "</div></details>";
+      }
+      const heading = opts.heading === false ? "" : "<h2>" + titleHtml + "</h2>";
+      return heading + '<div class="' + className + '">' + escapeHtml(value) + "</div>";
+    }
+
     function objectPopup(obj) {
       const title = obj.label || obj.text || obj.kind || "Object";
       let html = "<strong>" + escapeHtml(title) + "</strong>";
-      if (obj.notes) html += '<div class="popup-note">' + escapeHtml(obj.notes) + "</div>";
-      html += '<h2>Coordinates</h2><div class="popup-coords">' + escapeHtml(objectCoordinateText(obj)) + "</div>";
+      html += popupTextBlock("Notes", "popup-note", obj.notes, { threshold: 5, heading: false });
+      html += popupTextBlock("Coordinates", "popup-coords", objectCoordinateText(obj), { threshold: 5 });
       return html;
     }
 
@@ -11474,6 +11798,7 @@
     map.on("zoomend moveend", updateExportAreaPixelUi);
     map.on("zoomend moveend", scheduleSave);
 
+    arrangeObjectPaneControls();
     renderTileControls();
     renderReferenceLayerControls();
     addDefaultDrawLayer();

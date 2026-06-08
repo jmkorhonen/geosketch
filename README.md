@@ -13,9 +13,7 @@ Live version: [https://jmkorhonen.github.io/geosketch/](https://jmkorhonen.githu
 
 GeoSketch is a lightweight browser tool for field-style sketching and visual analysis. It should be treated as a planning and OSINT visualisation aid rather than a survey-grade GIS package.
 
-Current release version: `v1.2`
-
-Current development build: `v1.2.19`
+Current release version: `v1.3`
 
 ## Requirements
 
@@ -98,7 +96,7 @@ GeoSketch supports:
 - **Circle**: range circles and circular areas.
 - **Text box**: free map annotations.
 - **Export area**: rectangular PNG crop guides with editable coordinates, labels, notes, and line/fill styling.
-- **Image**: imported image overlays stored as layer objects, with editable bounds and an initial 3-point affine georeferencing workflow for digitising maps or imagery.
+- **Image**: imported image overlays stored as layer objects, with editable bounds and 3+ point affine georeferencing for digitising maps or imagery.
 
 Objects can have labels, notes, measurements, styles, optional object shadows, buffers, visibility toggles, and layer assignment. New line, polygon, and circle drawing can snap to existing object points. Locked objects can still be copied or duplicated, but are protected from accidental editing.
 
@@ -157,14 +155,15 @@ Edit points mode lets you adjust line, polygon, circle, export-area, and image g
 
 Export areas are rectangular guides for PNG crops. They are managed from the Files section, then edited like other shapes after creation. A format selector can constrain newly drawn export areas to common ratios such as 1:1, 4:3, 16:9, or A4 portrait/landscape.
 
-Image objects are imported from local image files and stored inside GeoSketch project data as data URLs. This keeps the single-file/no-install workflow simple, but large images can make GeoJSON project files and browser autosaves large. The current image workflow supports rectangular placement plus 3-point affine georeferencing: add three control point rows, set the image and map sides in any order, then apply the affine warp. Image edit mode also supports proportional resizing, mouse rotation, numeric rotation, and small numeric warp adjustments for scale, skew, and projected offset. This is intended for practical digitising and visual alignment, not survey-grade rectification.
+Image objects are imported from local image files and stored inside GeoSketch project data as data URLs. This keeps the single-file/no-install workflow simple, but large images can make GeoJSON project files and browser autosaves large. The current image workflow supports rectangular placement plus affine georeferencing: add at least three control point rows, set the image and map sides in any order, then apply the affine fit. Three complete pairs produce an exact affine fit; four or more pairs produce a least-squares affine fit with per-point residuals plus RMS and maximum error. Image edit mode also supports proportional resizing, mouse rotation, numeric rotation, and small numeric warp adjustments for scale, skew, and projected offset. This is intended for practical digitising and visual alignment, not survey-grade rectification.
 
-For best results with 3-point affine georeferencing:
+For best results with affine georeferencing:
 
-- Use three control points that are spread across the image, preferably near stable features such as road junctions, corners, bridges, shorelines, or grid intersections.
-- Avoid placing all three control points on one line or tightly clustered in one part of the image.
+- Use at least three control points that are spread across the image, preferably near stable features such as road junctions, corners, bridges, shorelines, or grid intersections.
+- Avoid placing all control points on one line or tightly clustered in one part of the image.
 - Use rectangular resize and move handles to get the image roughly into place before collecting control points.
-- Image control point inputs use original image pixels, measured from the top-left corner of the source image. Map control point inputs accept the same decimal degrees, DMS, and MGRS formats as other coordinate fields. On-map control points are shown as crosshairs labelled `P1`, `P2`, `P3` for image points and `M1`, `M2`, `M3` for map points.
+- Image control point inputs use original image pixels, measured from the top-left corner of the source image. Map control point inputs accept the same decimal degrees, DMS, and MGRS formats as other coordinate fields. On-map control points are shown as crosshairs labelled `P1`, `P2`, `P3` and so on for image points, with matching `M1`, `M2`, `M3` map points.
+- With four or more complete pairs, inspect RMS and per-point residuals. Large residuals usually mean the source image is distorted, the points are mismatched, or a single affine transform is not enough for that map.
 - Keep the original image file reasonably small when possible; the image is embedded in the saved GeoJSON project.
 - Treat the result as a visual alignment aid. Affine georeferencing can translate, rotate, scale, and skew an image, but it cannot rubber-sheet a distorted paper map or oblique photograph.
 
@@ -230,15 +229,15 @@ Buffer distances in Excel exports are reported in metres for consistency with sa
 
 ### PNG Export
 
-Use **Save visible PNG** to export the current map viewport. Use **Define export area** and **Export area format** in the Files section to draw a rectangular crop guide, then use **Save [area name] (width x height px) as PNG** to export it. The displayed pixel size is the expected PNG output size after GeoSketch automatically fits the map to that export area. If more than one export area exists, select the area from the map, Layers list, or the Files section export-area drawer first; GeoSketch keeps the button disabled until the intended crop is explicit. Export area guide rectangles are not burned into the cropped PNG. Settings can add a "Created with GeoSketch" credit and export date to PNGs, and can hide PNG map attribution when a particular output needs a cleaner frame.
+Use **Save visible map as PNG** to export the current map viewport. Use **Define export area** and **Export area format** in the Files section to draw a rectangular crop guide, then use **Save [area name] (width x height px) as PNG** to export it. The displayed pixel size is the expected PNG output size after GeoSketch automatically fits the map to that export area. If more than one export area exists, select the area from the map, Layers list, or the Files section export-area drawer first; GeoSketch keeps the button disabled until the intended crop is explicit. Export area guide rectangles are not burned into the cropped PNG. Settings can add a "Created with GeoSketch" credit and export date to PNGs, and can hide PNG map attribution when a particular output needs a cleaner frame.
 
-PNG export can be used with raster background maps, or with no background map for an object-only export against the map backdrop. Raster layer opacity is preserved. Vector overlays such as OpenFreeMap are available for live viewing and interactive HTML export, but are not included in PNG export because browser-side WebGL capture is not reliable enough for release-quality map output.
+PNG export can be used with raster background maps, or with no background map for an object-only export against the map backdrop. Raster layer opacity is preserved. Vector overlays such as OpenFreeMap are available for live viewing and interactive HTML export, but PNG export buttons are disabled when vector overlays are the only visible background layer because browser-side WebGL capture is not reliable enough for release-quality map output.
 
 Browser security rules and tile provider CORS settings can affect PNG output.
 
 ### HTML Map
 
-Exports an interactive HTML map containing the current project state, including map title, map notes, links, layer controls, attribution, and projection notes. The exported map uses a collapsed slide-out information pane so the map itself remains unobstructed by default.
+Exports an interactive HTML map containing the currently visible drawing layers, map title, map notes, links, background-map controls, attribution, and projection notes. Hidden drawing layers and hidden objects are left out of the HTML export, which is useful for keeping work-in-progress layers private while still offering all configured background maps and vector overlays in the exported map. The exported map uses a collapsed slide-out information pane so the map itself remains unobstructed by default.
 
 The exported map still depends on external libraries and map tile providers unless those resources are separately mirrored or bundled.
 
@@ -262,12 +261,12 @@ This is a smoke test, not a full QA suite.
 
 ## Manual QA Checklist
 
-Use this checklist before publishing a development build with image/georeferencing changes:
+Use this checklist before publishing a release with image/georeferencing changes:
 
 - Load the built-in sample map and confirm existing point, unit, line, polygon, circle, text, buffer, measurement, and export-area objects still render.
 - Add a PNG, JPG, and WebP image object if test files are available.
 - Select an image, move it with the centre handle, resize it with proportional resizing on, then repeat with proportional resizing off.
-- Add three image control point rows, set image and map points in mixed order by both typing and picking, apply the affine warp, and confirm the image visibly moves/rotates/skews toward the selected map features.
+- Add at least four image control point rows, set image and map points in mixed order by both typing and picking, apply the affine fit, and confirm residuals plus RMS/max error appear.
 - Delete one control point row and confirm the remaining rows renumber and still apply once three complete pairs exist.
 - Save the project as GeoJSON, reload it, and confirm the image source, opacity, control points, and affine warp survive the round trip.
 - Refresh the browser and restore autosave to confirm the same image state survives autosave.
@@ -292,7 +291,7 @@ Avoid entering sensitive operational information into external search services o
 - Browser PNG export can be affected by CORS restrictions on map tiles.
 - Vector overlays use MapLibre GL through a Leaflet bridge; they add WebGL/CDN requirements and are intentionally excluded from PNG export.
 - Image objects are embedded as data URLs, so large images can make GeoJSON saves, autosaves, and HTML exports large.
-- Image georeferencing is currently 3-point affine only. It does not support many-point rubber-sheeting, local residual/error display, or survey-grade rectification.
+- Image georeferencing is currently affine only. It supports 3-point exact and 4+ point least-squares fits with residual/error display, but it does not support many-point rubber-sheeting or survey-grade rectification.
 - Affine-warped images should be manually checked in HTML and PNG exports before publication, especially when large source images are used.
 - GeoJSON exports include GeoSketch-specific styling metadata that other GIS tools may ignore.
 - APP-6 symbol support is intentionally practical and UI-driven, not a full doctrinal validation engine.
@@ -364,7 +363,7 @@ Other files in this workspace may belong to earlier experiments or adjacent tool
 - Started v1.2.3 development with selected-object coordinates and measurements collapsed by default in the right pane.
 - Started v1.2.4 development with selectable line/polygon points, coordinate-line highlighting, and Delete Point / Del / Backspace point deletion.
 - Started v1.2.5 development with stronger visible vertex handles, explicit line endpoint add controls, and restored "press Enter" drawing tooltips.
-- Reset development versioning to v1.2.8 and removed the experimental background image-layer prototype; image objects are the target for v1.3.
+- Reset development versioning to v1.2.8 and removed the experimental background image-layer prototype before moving image support into drawing-layer objects.
 - Started v1.2.9 development with editable numeric status controls, configurable horizontal/vertical scale bars, and a reset-settings button for display/export and new-object defaults.
 - Started v1.2.10 development with corrected scale-bar segment rendering, cleaner scale-bar labels, and bottom-right default placement for the vertical scale bar.
 - Started v1.2.11 development with imported image overlays as drawing-layer objects, including save/load support and mouse edit handles for moving/resizing image bounds.
@@ -376,3 +375,12 @@ Other files in this workspace may belong to earlier experiments or adjacent tool
 - Started v1.2.17 development with clearable map-search markers and north-positive label Y offset controls.
 - Started v1.2.18 development with improved snap-to-existing-point drawing, underlay-style selection highlights, and default-off object shadows for point icons, paths, and line endpoints.
 - Started v1.2.19 development with separate point icon fill opacity, safer remove-all-buffers confirmation, normal arrow map cursors, and clearer file-load failure messages.
+- Started v1.2.20 development with clearer number-input spacing, simplified label Y-offset wording, point coordinate display controls in the Coordinates pane, and a cleaner selected-object pane order.
+- Started v1.2.21 development with 4+ control point least-squares affine image georeferencing and residual/error display.
+- Started v1.2.22 development with a temporary centre crosshair shown while dragging the map view.
+- Started v1.2.23 development with cleaner target-style map and image-georeferencing crosshairs.
+- Started v1.2.24 development with HTML exports limited to visible drawing layers and clearer vector-overlay PNG export blocking.
+- Started v1.2.25 development with the vector PNG warning moved into the background-layer row and long exported-map popup notes/coordinates collapsed by default.
+- Started v1.2.26 development with slightly roomier compact numeric fields beside slider/spinner controls.
+- Started v1.2.27 development with wider status-bar number inputs and more spinner-side padding for compact numeric fields.
+- Released v1.3 with drawing-layer image objects, proportional resizing, mouse and numeric rotation, 3-point exact and 4+ point least-squares affine georeferencing with residual/error display, cleaner georeferencing markers, visible-map and area PNG export refinements, and HTML exports limited to visible drawing layers.
